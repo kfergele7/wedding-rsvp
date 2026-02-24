@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-wedding-bg font-sans text-wedding-text antialiased;
+    }
+}
+
+@layer components {
+    .site-shell {
+        @apply mx-auto w-full max-w-content px-6 md:px-10;
+    }
+
+    .section-gap {
+        @apply py-20 md:py-28;
+    }
+
+    .section-heading {
+        @apply font-heading text-4xl tracking-wide md:text-5xl;
+    }
+
+    .card-frame {
+        @apply border border-soft bg-white/70 p-8 shadow-soft md:p-10;
+    }
+
+    .button-primary {
+        @apply inline-flex items-center justify-center border border-white/30 bg-white/10 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-wedding-text;
+    }
+
+    .button-dark {
+        @apply inline-flex items-center justify-center border border-soft px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b];
+        background-color: var(--wedding-button-color, #22363a);
+    }
+
+    .cms-rich p + p {
+        @apply mt-4;
+    }
+
+    .cms-rich ul {
+        @apply my-3 list-disc pl-6;
+    }
+
+    .cms-rich a {
+        @apply underline;
+    }
+
+    .cms-rich a.cms-button-link {
+        @apply no-underline;
+    }
+
+    .cms-button-link {
+        @apply inline-flex items-center justify-center border border-soft px-5 py-2 text-xs font-medium uppercase tracking-[0.14em] text-white no-underline transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b];
+        background-color: var(--wedding-button-color, #22363a);
+    }
+}

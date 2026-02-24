@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Couple silhouette in a garden">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#33464a"/>
+      <stop offset="100%" stop-color="#1d2a2d"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f5d46"/>
+      <stop offset="100%" stop-color="#2a3f33"/>
+    </linearGradient>
+  </defs>
+  <rect width="1800" height="680" fill="url(#sky)"/>
+  <rect y="680" width="1800" height="420" fill="url(#grass)"/>
+  <circle cx="710" cy="470" r="66" fill="#b48a6b"/>
+  <rect x="640" y="535" width="160" height="300" rx="24" fill="#dfded8"/>
+  <rect x="880" y="500" width="190" height="340" rx="24" fill="#4a4d50"/>
+  <circle cx="970" cy="430" r="64" fill="#ad8568"/>
+  <ellipse cx="700" cy="395" rx="120" ry="48" fill="#9d7b59"/>
+  <path d="M520 760c120-70 240-60 360 0" stroke="#1f2f23" stroke-width="56" fill="none" stroke-linecap="round"/>
+  <path d="M840 760c130-72 260-72 390 0" stroke="#1f2f23" stroke-width="56" fill="none" stroke-linecap="round"/>
+</svg>

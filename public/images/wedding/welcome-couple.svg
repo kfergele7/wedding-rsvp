@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" role="img" aria-label="Editorial engagement portrait placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d8c9bc"/>
+      <stop offset="100%" stop-color="#b6a293"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="1200" fill="url(#bg)"/>
+  <rect x="120" y="710" width="760" height="390" rx="30" fill="#8f7a69"/>
+  <ellipse cx="370" cy="620" rx="170" ry="180" fill="#f1dfcf"/>
+  <ellipse cx="620" cy="480" rx="170" ry="190" fill="#ead6c5"/>
+  <circle cx="350" cy="410" r="90" fill="#9e795b"/>
+  <circle cx="650" cy="290" r="100" fill="#8c6950"/>
+  <rect x="250" y="770" width="500" height="120" rx="16" fill="#f4efe9" opacity="0.35"/>
+</svg>

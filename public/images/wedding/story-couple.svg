@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Soft monochrome portrait placeholder">
+  <defs>
+    <linearGradient id="tone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0ede8"/>
+      <stop offset="100%" stop-color="#cfc8bf"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#tone)"/>
+  <circle cx="760" cy="260" r="180" fill="#e0d8cf"/>
+  <path d="M320 850c40-190 190-330 390-330 200 0 350 140 390 330" fill="#b5aea6"/>
+  <ellipse cx="690" cy="470" rx="220" ry="210" fill="#d9d1c8"/>
+  <circle cx="710" cy="290" r="120" fill="#c5b8aa"/>
+  <circle cx="710" cy="260" r="100" fill="#8f857a" opacity="0.45"/>
+</svg>

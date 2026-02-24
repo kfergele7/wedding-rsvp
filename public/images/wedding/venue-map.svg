@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-label="Venue grounds illustration">
+  <defs>
+    <linearGradient id="mapbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0ece6"/>
+      <stop offset="100%" stop-color="#e2dbd2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#mapbg)"/>
+  <path d="M120 940c210-170 450-170 680-60" stroke="#c3b7a8" stroke-width="28" fill="none"/>
+  <path d="M200 220c250 90 430 70 700-60" stroke="#b4a896" stroke-width="18" fill="none"/>
+  <rect x="430" y="390" width="340" height="290" rx="18" fill="#ffffff" stroke="#7f735f" stroke-width="8"/>
+  <rect x="500" y="460" width="200" height="140" fill="#d6cab9"/>
+  <path d="M200 540h250" stroke="#bfb4a2" stroke-width="20"/>
+  <path d="M770 540h230" stroke="#bfb4a2" stroke-width="20"/>
+  <circle cx="320" cy="770" r="70" fill="#8ca186"/>
+  <circle cx="900" cy="760" r="82" fill="#879d7f"/>
+  <circle cx="980" cy="350" r="58" fill="#8b9f86"/>
+</svg>
