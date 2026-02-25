@@ -676,10 +676,19 @@
         <div v-if="section === 'content'" class="fixed bottom-0 left-0 right-0 z-50">
             <div class="w-full border-t border-soft bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:px-8">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-sm text-wedding-muted">
-                        <span class="uppercase tracking-[0.12em]">Last Saved:</span>
-                        <span class="ml-2">{{ lastSavedAt || 'Not yet saved' }}</span>
-                    </p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <p class="text-sm text-wedding-muted">
+                            <span class="uppercase tracking-[0.12em]">Last Saved:</span>
+                            <span class="ml-2">{{ lastSavedAt || 'Not yet saved' }}</span>
+                        </p>
+                        <span class="hidden h-5 w-px bg-soft md:inline-block"></span>
+                        <p class="text-sm">
+                            <span class="uppercase tracking-[0.12em] text-wedding-muted">Current Changes:</span>
+                            <span class="ml-2 font-medium" :class="hasUnsavedChanges ? 'text-red-700' : 'text-emerald-700'">
+                                {{ hasUnsavedChanges ? 'Unsaved' : 'Saved' }}
+                            </span>
+                        </p>
+                    </div>
                     <div class="flex flex-wrap items-center gap-3">
                         <p v-if="globalMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
                             {{ globalMessage }}
@@ -712,6 +721,8 @@ const logoutUrl = props.payload?.logoutUrl || '/admin/logout';
 const globalMessage = ref('');
 const globalError = ref('');
 const lastSavedAt = ref('');
+const lastSavedContentSnapshot = ref('');
+const lastSavedRsvpSnapshot = ref('');
 
 const stats = ref({
     total_households: 0,
@@ -782,6 +793,14 @@ const filteredParties = computed(() => {
 
         return partyName.includes(term) || partyCode.includes(term) || guestNames.includes(term);
     });
+});
+const hasUnsavedChanges = computed(() => {
+    if (!content.value) {
+        return false;
+    }
+
+    return serialize(content.value) !== lastSavedContentSnapshot.value
+        || serialize(rsvpSettings.value) !== lastSavedRsvpSnapshot.value;
 });
 const filteredRsvpRows = computed(() =>
     rsvpRows.value.filter((row) => {
@@ -878,6 +897,7 @@ async function loadContent() {
                     : [{ title: '', description: '' }],
             },
         };
+        captureSavedSnapshots();
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not load content.'));
     }
@@ -950,6 +970,7 @@ async function saveContent() {
             rsvpSettings.value = response.data.rsvp_settings;
         }
         lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
+        captureSavedSnapshots();
         setMessage(response.data?.message || 'Content updated.');
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not save content.'));
@@ -1337,9 +1358,26 @@ function formatDateTime(value) {
 
     return parsed.toLocaleString();
 }
+
+function captureSavedSnapshots() {
+    lastSavedContentSnapshot.value = serialize(content.value);
+    lastSavedRsvpSnapshot.value = serialize(rsvpSettings.value);
+}
+
+function serialize(value) {
+    try {
+        return JSON.stringify(value ?? {});
+    } catch (error) {
+        return '';
+    }
+}
 </script>
 
 <style scoped>
+.admin-ui label {
+    color: #1e1e1e;
+}
+
 .admin-btn {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
