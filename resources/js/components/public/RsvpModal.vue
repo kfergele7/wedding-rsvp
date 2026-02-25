@@ -150,6 +150,10 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    publicSlug: {
+        type: String,
+        default: '',
+    },
     rsvpSettingsPayload: {
         type: Object,
         default: () => ({}),
@@ -165,6 +169,12 @@ const rsvpSettings = ref({
 });
 const mealOptions = ref(rsvpSettings.value.meal_options);
 const mealChoicesEnabled = computed(() => rsvpSettings.value.meal_mode === 'options');
+const lookupEndpoint = computed(() => {
+    if (props.publicSlug) {
+        return `/w/${props.publicSlug}/rsvp/lookup`;
+    }
+    return '/rsvp/lookup';
+});
 const codeInput = ref((props.initialCode || '').toUpperCase());
 const party = ref(null);
 
@@ -240,7 +250,7 @@ async function lookupCode() {
     loadingLookup.value = true;
 
     try {
-        const response = await window.axios.post('/rsvp/lookup', {
+        const response = await window.axios.post(lookupEndpoint.value, {
             code: codeInput.value,
         });
 
@@ -297,7 +307,11 @@ async function saveRsvp() {
     savingRsvp.value = true;
 
     try {
-        const response = await window.axios.post(`/rsvp/${party.value.code}`, {
+        const saveEndpoint = props.publicSlug
+            ? `/w/${props.publicSlug}/rsvp/${party.value.code}`
+            : `/rsvp/${party.value.code}`;
+
+        const response = await window.axios.post(saveEndpoint, {
             status: form.status,
             attending_count: form.attending_count,
             meal_choices: mealChoicesEnabled.value && form.status === 'attending' ? form.meal_choices : [],

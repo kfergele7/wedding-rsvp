@@ -25,6 +25,7 @@
         <RsvpModal
             v-if="isRsvpModalOpen"
             :initial-code="rsvpInitialCode"
+            :public-slug="payload.publicSlug || ''"
             :rsvp-settings-payload="rsvpSettings"
             @close="closeRsvpModal"
         />

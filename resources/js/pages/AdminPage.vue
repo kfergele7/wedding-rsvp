@@ -7,10 +7,20 @@
                     <h1 class="font-heading text-4xl">Content & Guest Management</h1>
                 </div>
 
-                <form :action="logoutUrl" method="POST">
-                    <input type="hidden" name="_token" :value="csrfToken">
-                    <button class="admin-btn button-dark inline-flex px-5 py-3 text-xs uppercase tracking-[0.16em]" type="submit">Logout</button>
-                </form>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a
+                        v-if="accountUrl"
+                        :href="accountUrl"
+                        class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.14em]"
+                    >
+                        <span class="material-symbols-outlined btn-icon">person</span>
+                        My Account
+                    </a>
+                    <form :action="logoutUrl" method="POST">
+                        <input type="hidden" name="_token" :value="csrfToken">
+                        <button class="admin-btn button-dark inline-flex items-center gap-2 px-5 py-3 text-xs uppercase tracking-[0.16em]" type="submit"><span class="material-symbols-outlined btn-icon">logout</span>Logout</button>
+                    </form>
+                </div>
             </div>
 
             <nav class="site-shell flex flex-wrap gap-2 pb-6">
@@ -18,9 +28,10 @@
                     v-for="item in navItems"
                     :key="item.key"
                     :href="item.href"
-                    class="admin-btn border px-4 py-2 text-xs uppercase tracking-[0.15em]"
+                    class="admin-btn inline-flex items-center gap-2 border px-4 py-2 text-xs uppercase tracking-[0.15em]"
                     :class="section === item.key ? 'border-wedding-band bg-wedding-band text-white' : 'border-soft bg-white'"
                 >
+                    <span class="material-symbols-outlined btn-icon">{{ item.icon }}</span>
                     {{ item.label }}
                 </a>
             </nav>
@@ -36,12 +47,17 @@
 
             <section v-if="section === 'content'" class="space-y-8 pb-32">
                 <article class="card-frame bg-white">
-                    <h2 class="font-heading text-3xl">Content</h2>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="font-heading text-3xl">Content</h2>
+                    </div>
                     <p class="mt-2 text-wedding-muted">Update text, imagery, and colors shown on your single-page wedding website.</p>
 
-                    <div v-if="content" class="mt-8 space-y-10">
-                        <div class="border border-soft bg-wedding-bg/50 p-5">
-                            <h3 class="font-heading text-3xl">Theme Colors</h3>
+                    <div v-if="content" class="mt-8 space-y-6">
+                        <div class="content-section-block content-section-even">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">1</span>
+                                <span class="font-heading text-3xl">Theme Colors</span>
+                            </h3>
                             <p class="mt-2 text-sm text-wedding-muted">Primary section color applies to The Big Day and Ready to Celebrate sections. Button color applies to all dark buttons (hero button excluded).</p>
                             <div class="mt-4 grid gap-4 md:grid-cols-2">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Primary Section Color
@@ -60,10 +76,14 @@
                             <p class="mt-3 text-xs text-wedding-muted">Use dark colors to maintain white text contrast.</p>
                         </div>
 
-                        <div class="w-full py-10">
+                        <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <h3 class="font-heading text-3xl">Hero</h3>
+                        <div class="content-section-block content-section-odd">
+                        <h3 class="section-heading-with-badge">
+                            <span class="section-step-badge">2</span>
+                            <span class="font-heading text-3xl">Hero</span>
+                        </h3>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Couple Names
                                 <input v-model="content.hero.names" class="mt-2 w-full border border-soft px-4 py-3">
@@ -113,11 +133,16 @@
                                 >
                             </div>
                         </div>
+                        </div>
 
-                        <div class="w-full py-10">
+                        <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <h3 class="font-heading text-3xl">Welcome</h3>
+                        <div class="content-section-block content-section-even">
+                        <h3 class="section-heading-with-badge">
+                            <span class="section-step-badge">3</span>
+                            <span class="font-heading text-3xl">Welcome</span>
+                        </h3>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Heading
                                 <input v-model="content.welcome.heading" class="mt-2 w-full border border-soft px-4 py-3">
@@ -157,11 +182,16 @@
                                 >
                             </div>
                         </div>
+                        </div>
 
-                        <div class="w-full py-10">
+                        <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <h3 class="font-heading text-3xl">Our Story</h3>
+                        <div class="content-section-block content-section-odd">
+                        <h3 class="section-heading-with-badge">
+                            <span class="section-step-badge">4</span>
+                            <span class="font-heading text-3xl">Our Story</span>
+                        </h3>
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Heading
                             <input v-model="content.story.heading" class="mt-2 w-full border border-soft px-4 py-3">
                         </label>
@@ -200,14 +230,18 @@
                                 >
                             </div>
                         </div>
+                        </div>
 
-                        <div class="w-full py-10">
+                        <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="mt-2">
+                        <div class="content-section-block content-section-even mt-2">
                             <div class="mb-3 flex items-center justify-between">
-                                <h3 class="font-heading text-3xl">Timeline</h3>
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">5</span>
+                                    <span class="font-heading text-3xl">Timeline</span>
+                                </h3>
                                 <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addTimelineItem">Add Item</button>
                             </div>
 
@@ -232,10 +266,14 @@
                             </div>
                         </div>
 
-                        <div class="w-full py-10">
+                        <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <h3 class="font-heading text-3xl">Venue, Travel, and FAQ</h3>
+                        <div class="content-section-block content-section-odd">
+                        <h3 class="section-heading-with-badge">
+                            <span class="section-step-badge">6</span>
+                            <span class="font-heading text-3xl">Venue, Travel, and FAQ</span>
+                        </h3>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Name
                                 <input v-model="content.details.venue.name" class="mt-2 w-full border border-soft px-4 py-3">
@@ -291,9 +329,17 @@
                                 <input v-model="content.cta.buttonLabel" class="mt-2 w-full border border-soft px-4 py-3">
                             </label>
                         </div>
+                        </div>
 
-                        <div class="border border-soft p-4">
-                            <h3 class="font-heading text-3xl">Menu & RSVP Settings</h3>
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div class="content-section-block content-section-even">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">7</span>
+                                <span class="font-heading text-3xl">Menu & RSVP Settings</span>
+                            </h3>
                             <p class="mt-2 text-sm text-wedding-muted">This controls the menu section shown above FAQs and whether RSVP asks guests for meal selections.</p>
 
                             <div class="mt-4 grid gap-4 md:grid-cols-2">
@@ -380,9 +426,16 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div class="content-section-block content-section-odd">
                             <div class="mb-3 flex items-center justify-between">
-                                <h3 class="font-heading text-3xl">FAQ Items</h3>
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">8</span>
+                                    <span class="font-heading text-3xl">FAQ Items</span>
+                                </h3>
                                 <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addFaqItem">Add FAQ</button>
                             </div>
 
@@ -408,7 +461,7 @@
                     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <h2 class="font-heading text-3xl">Households</h2>
                         <div class="flex flex-wrap gap-2">
-                            <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" href="/admin/api/parties/export">Export CSV</a>
+                            <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" :href="partiesExportUrl">Export CSV</a>
                             <label class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]">
                                 Import CSV
                                 <input type="file" class="hidden" accept=".csv" @change="importParties">
@@ -561,7 +614,7 @@
             <section v-if="section === 'rsvps'" class="card-frame bg-white">
                 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <h2 class="font-heading text-3xl">RSVP Responses</h2>
-                    <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" href="/admin/api/rsvps/export">Export RSVP CSV</a>
+                    <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" :href="rsvpsExportUrl">Export RSVP CSV</a>
                 </div>
 
                 <div class="mb-4 grid gap-3 md:grid-cols-3">
@@ -696,7 +749,17 @@
                         <p v-if="globalError" class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
                             {{ globalError }}
                         </p>
-                        <button class="admin-btn button-dark" type="button" @click="saveContent">Save Content</button>
+                        <a
+                            v-if="previewUrl"
+                            :href="previewUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="admin-btn inline-flex items-center justify-center gap-2 border border-soft bg-white px-8 py-4 text-xs uppercase tracking-[0.2em]"
+                        >
+                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                            Open Public Preview
+                        </a>
+                        <button class="admin-btn button-dark inline-flex items-center gap-2" type="button" @click="saveContent"><span class="material-symbols-outlined btn-icon">save</span>Save Content</button>
                     </div>
                 </div>
             </div>
@@ -717,7 +780,11 @@ const props = defineProps({
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 const section = ref(props.payload?.adminSection || 'dashboard');
-const logoutUrl = props.payload?.logoutUrl || '/admin/logout';
+const logoutUrl = props.payload?.logoutUrl || '/logout';
+const accountUrl = props.payload?.accountUrl || '';
+const adminBaseUrl = props.payload?.adminBaseUrl || '/admin';
+const apiBaseUrl = props.payload?.adminApiBaseUrl || '/admin/api';
+const previewUrl = props.payload?.previewUrl || '';
 const globalMessage = ref('');
 const globalError = ref('');
 const lastSavedAt = ref('');
@@ -840,11 +907,13 @@ const dashboardCards = computed(() => [
 ]);
 
 const navItems = [
-    { key: 'dashboard', label: 'Dashboard', href: '/admin' },
-    { key: 'parties', label: 'Households', href: '/admin/parties' },
-    { key: 'rsvps', label: 'RSVPs', href: '/admin/rsvps' },
-    { key: 'content', label: 'Content', href: '/admin/content' },
+    { key: 'dashboard', label: 'Dashboard', href: adminBaseUrl, icon: 'dashboard' },
+    { key: 'parties', label: 'Households', href: `${adminBaseUrl}/parties`, icon: 'groups' },
+    { key: 'rsvps', label: 'RSVPs', href: `${adminBaseUrl}/rsvps`, icon: 'event_note' },
+    { key: 'content', label: 'Content', href: `${adminBaseUrl}/content`, icon: 'edit_note' },
 ];
+const partiesExportUrl = `${apiBaseUrl}/parties/export`;
+const rsvpsExportUrl = `${apiBaseUrl}/rsvps/export`;
 
 onMounted(async () => {
     await Promise.all([loadStats(), loadParties(), loadRsvps(), loadContent()]);
@@ -860,7 +929,7 @@ onMounted(async () => {
 
 async function loadStats() {
     try {
-        const response = await window.axios.get('/admin/api/dashboard');
+        const response = await window.axios.get(`${apiBaseUrl}/dashboard`);
         stats.value = response.data;
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not load dashboard stats.'));
@@ -869,7 +938,7 @@ async function loadStats() {
 
 async function loadContent() {
     try {
-        const response = await window.axios.get('/admin/api/content');
+        const response = await window.axios.get(`${apiBaseUrl}/content`);
         content.value = response.data.content;
         ensureImageFocusDefaults();
         lastSavedAt.value = formatDateTime(response.data.last_saved_at);
@@ -905,7 +974,7 @@ async function loadContent() {
 
 async function loadParties() {
     try {
-        const response = await window.axios.get('/admin/api/parties');
+        const response = await window.axios.get(`${apiBaseUrl}/parties`);
         parties.value = response.data.parties;
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not load households.'));
@@ -914,7 +983,7 @@ async function loadParties() {
 
 async function loadRsvps() {
     try {
-        const response = await window.axios.get('/admin/api/rsvps');
+        const response = await window.axios.get(`${apiBaseUrl}/rsvps`);
         rsvpRows.value = response.data.rsvps;
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not load RSVP responses.'));
@@ -958,7 +1027,7 @@ async function saveContent() {
     }
 
     try {
-        const response = await window.axios.put('/admin/api/content', {
+        const response = await window.axios.put(`${apiBaseUrl}/content`, {
             content: content.value,
             rsvp_settings: rsvpSettings.value,
         });
@@ -1047,7 +1116,7 @@ async function uploadContentImage(event, field) {
     formData.append('image_file', file);
 
     try {
-        const response = await window.axios.post('/admin/api/content/image', formData, {
+        const response = await window.axios.post(`${apiBaseUrl}/content/image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -1082,7 +1151,7 @@ async function createParty() {
     }
 
     try {
-        await window.axios.post('/admin/api/parties', newParty);
+        await window.axios.post(`${apiBaseUrl}/parties`, newParty);
         newParty.display_name = '';
         newParty.max_guests = 2;
         newParty.notes = '';
@@ -1123,7 +1192,7 @@ async function updateParty() {
     }
 
     try {
-        await window.axios.put(`/admin/api/parties/${selectedParty.value.id}`, selectedParty.value);
+        await window.axios.put(`${apiBaseUrl}/parties/${selectedParty.value.id}`, selectedParty.value);
         await loadParties();
         await loadStats();
         setMessage('Household updated successfully.');
@@ -1135,7 +1204,7 @@ async function updateParty() {
 async function generateCodeForCreate(showMessage = true) {
     clearError();
     try {
-        const response = await window.axios.get('/admin/api/parties/generate-code');
+        const response = await window.axios.get(`${apiBaseUrl}/parties/generate-code`);
         newParty.code = response.data.code;
         if (showMessage) {
             setMessage('Unique 4-letter code generated.');
@@ -1153,7 +1222,7 @@ async function generateCodeForSelectedParty() {
     }
 
     try {
-        const response = await window.axios.get('/admin/api/parties/generate-code');
+        const response = await window.axios.get(`${apiBaseUrl}/parties/generate-code`);
         selectedParty.value.code = response.data.code;
         setMessage('Unique 4-letter code generated.');
     } catch (error) {
@@ -1173,7 +1242,7 @@ async function deleteParty() {
     }
 
     try {
-        await window.axios.delete(`/admin/api/parties/${selectedParty.value.id}`);
+        await window.axios.delete(`${apiBaseUrl}/parties/${selectedParty.value.id}`);
         selectedPartyId.value = null;
         await Promise.all([loadParties(), loadStats(), loadRsvps()]);
         if (parties.value.length > 0) {
@@ -1198,7 +1267,7 @@ async function addGuest() {
     }
 
     try {
-        await window.axios.post(`/admin/api/parties/${selectedParty.value.id}/guests`, newGuest);
+        await window.axios.post(`${apiBaseUrl}/parties/${selectedParty.value.id}/guests`, newGuest);
         newGuest.first_name = '';
         newGuest.last_name = '';
         newGuest.is_child = false;
@@ -1217,7 +1286,7 @@ async function updateGuest(guest) {
     }
 
     try {
-        await window.axios.put(`/admin/api/guests/${guest.id}`, guest);
+        await window.axios.put(`${apiBaseUrl}/guests/${guest.id}`, guest);
         setMessage('Guest updated successfully.');
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not update guest.'));
@@ -1231,7 +1300,7 @@ async function deleteGuest(guest) {
     }
 
     try {
-        await window.axios.delete(`/admin/api/guests/${guest.id}`);
+        await window.axios.delete(`${apiBaseUrl}/guests/${guest.id}`);
         await Promise.all([loadParties(), loadStats()]);
         setMessage('Guest removed successfully.');
     } catch (error) {
@@ -1266,7 +1335,7 @@ async function saveAdminRsvp() {
     }
 
     try {
-        await window.axios.put(`/admin/api/rsvps/${editingRsvp.value.party_id}`, rsvpForm);
+        await window.axios.put(`${apiBaseUrl}/rsvps/${editingRsvp.value.party_id}`, rsvpForm);
         await Promise.all([loadRsvps(), loadStats(), loadParties()]);
         closeRsvpModal();
         setMessage('RSVP updated successfully.');
@@ -1292,7 +1361,7 @@ async function importParties(event) {
     formData.append('csv_file', file);
 
     try {
-        const response = await window.axios.post('/admin/api/parties/import', formData, {
+        const response = await window.axios.post(`${apiBaseUrl}/parties/import`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -1398,5 +1467,61 @@ function serialize(value) {
     border-color: #912018 !important;
     background-color: #fef2f2 !important;
     color: #912018 !important;
+}
+
+.content-section-block {
+    border: 1px solid #22363a;
+    padding: 1.25rem;
+}
+
+.content-section-block label {
+    line-height: 1.35;
+}
+
+.content-section-block label > input,
+.content-section-block label > select,
+.content-section-block label > textarea,
+.content-section-block label > .flex,
+.content-section-block label > .grid,
+.content-section-block label > .cms-rich,
+.content-section-block label > .admin-rich-editor {
+    margin-top: 0.65rem !important;
+}
+
+.content-section-block > label:not(:first-child) {
+    margin-top: 0.9rem;
+}
+
+.content-section-block .grid > label {
+    margin-top: 0.55rem;
+}
+
+.content-section-even {
+    background: #f9f6f1;
+}
+
+.content-section-odd {
+    background: #ffffff;
+}
+
+.section-heading-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+}
+
+.section-step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 9999px;
+    background: #22363a;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
 }
 </style>

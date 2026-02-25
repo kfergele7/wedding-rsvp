@@ -18,14 +18,17 @@ class PartyController extends Controller
 {
     public function generateCode(): JsonResponse
     {
+        $siteId = $this->currentSiteId();
+
         return response()->json([
-            'code' => Party::generateCode(4),
+            'code' => Party::generateCode($siteId, 4),
         ]);
     }
 
     public function index(): JsonResponse
     {
         $parties = Party::query()
+            ->forSite($this->currentSiteId())
             ->with(['guests', 'rsvp'])
             ->orderBy('display_name')
             ->get();
@@ -38,11 +41,13 @@ class PartyController extends Controller
     public function store(StorePartyRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $siteId = $this->currentSiteId();
         $code = isset($data['code']) && $data['code'] !== ''
             ? strtoupper(trim($data['code']))
-            : Party::generateCode(4);
+            : Party::generateCode($siteId, 4);
 
         $party = Party::query()->create([
+            'site_id' => $siteId,
             'display_name' => $data['display_name'],
             'code' => $code,
             'max_guests' => $data['max_guests'],
@@ -92,7 +97,10 @@ class PartyController extends Controller
 
     public function storeGuest(StoreGuestRequest $request, Party $party): JsonResponse
     {
-        $guest = $party->guests()->create($request->validated());
+        $guest = $party->guests()->create([
+            ...$request->validated(),
+            'site_id' => $party->site_id,
+        ]);
 
         return response()->json([
             'message' => 'Guest added.',
@@ -120,6 +128,7 @@ class PartyController extends Controller
     public function import(ImportPartiesRequest $request): JsonResponse
     {
         $rows = array_map('str_getcsv', file($request->file('csv_file')->getRealPath()));
+        $siteId = $this->currentSiteId();
 
         if (count($rows) < 2) {
             return response()->json(['message' => 'CSV must include a header row and at least one data row.'], 422);
@@ -137,7 +146,7 @@ class PartyController extends Controller
         $createdParties = 0;
         $createdGuests = 0;
 
-        DB::transaction(function () use ($rows, $headers, &$createdParties, &$createdGuests) {
+        DB::transaction(function () use ($siteId, $rows, $headers, &$createdParties, &$createdGuests) {
             foreach (array_slice($rows, 1) as $row) {
                 if (count(array_filter($row, fn ($value) => trim((string) $value) !== '')) === 0) {
                     continue;
@@ -150,11 +159,12 @@ class PartyController extends Controller
 
                 $code = $payload['code'] !== ''
                     ? strtoupper($payload['code'])
-                    : Party::generateCode(4);
+                    : Party::generateCode($siteId, 4);
 
                 $party = Party::query()->firstOrCreate(
-                    ['code' => $code],
+                    ['site_id' => $siteId, 'code' => $code],
                     [
+                        'site_id' => $siteId,
                         'display_name' => $payload['party_display_name'],
                         'max_guests' => max(1, (int) ($payload['max_guests'] ?: 1)),
                         'notes' => $payload['notes'] ?: null,
@@ -167,6 +177,7 @@ class PartyController extends Controller
 
                 if (($payload['first_name'] ?? '') !== '' && ($payload['last_name'] ?? '') !== '') {
                     $party->guests()->create([
+                        'site_id' => $siteId,
                         'first_name' => $payload['first_name'],
                         'last_name' => $payload['last_name'],
                         'is_child' => in_array(strtolower((string) ($payload['is_child'] ?? '')), ['1', 'true', 'yes', 'y'], true),
@@ -196,7 +207,11 @@ class PartyController extends Controller
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['party_display_name', 'code', 'max_guests', 'notes', 'first_name', 'last_name', 'is_child']);
 
-            Party::query()->with('guests')->orderBy('display_name')->chunk(200, function ($parties) use ($handle) {
+            Party::query()
+                ->forSite($this->currentSiteId())
+                ->with('guests')
+                ->orderBy('display_name')
+                ->chunk(200, function ($parties) use ($handle) {
                 foreach ($parties as $party) {
                     if ($party->guests->isEmpty()) {
                         fputcsv($handle, [$party->display_name, $party->code, $party->max_guests, $party->notes, '', '', '']);
@@ -215,7 +230,7 @@ class PartyController extends Controller
                         ]);
                     }
                 }
-            });
+                });
 
             fclose($handle);
         }, 200, $headers);

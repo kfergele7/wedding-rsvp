@@ -47,9 +47,60 @@ npm run dev
 ```
 
 7. Open:
-- Public site: `http://127.0.0.1:8000`
+- Marketing site: `http://127.0.0.1:8000`
+- Demo wedding page: `http://127.0.0.1:8000/demo`
 - RSVP: `http://127.0.0.1:8000/rsvp`
 - Admin login: `http://127.0.0.1:8000/admin/login`
+
+## Local Email Testing
+Use local-safe mail capture for verification/password reset flows.
+
+### Preferred: Mailpit (SMTP capture)
+1. Start Mailpit (example):
+```bash
+mailpit
+```
+2. Ensure local `.env` uses:
+```env
+APP_URL=http://127.0.0.1:8000
+QUEUE_CONNECTION=sync
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+3. Open Mailpit inbox:
+- `http://127.0.0.1:8025`
+
+### Fallback: Log Mailer
+If Mailpit is not running, switch to:
+```env
+MAIL_MAILER=log
+```
+Emails will be written to:
+- `storage/logs/laravel.log`
+
+### Local test helper route (local only)
+Authenticated users can trigger test emails:
+- Verification: `GET /dev/test-email`
+- Password reset: `GET /dev/test-email?type=reset`
+
+This route is only registered when `APP_ENV=local`.
+
+### Troubleshooting
+- Clear config cache:
+```bash
+php artisan config:clear
+```
+- Confirm queue is synchronous locally:
+```env
+QUEUE_CONNECTION=sync
+```
+- Restart local servers after `.env` changes (`php artisan serve`, `npm run dev`).
 
 ## Guest RSVP Flow
 - Guests use an invitation code (3-10 letters, case-insensitive).
@@ -132,11 +183,17 @@ You can replace with `.jpg/.png/.webp`; then update corresponding image paths in
 
 ## Important Routes
 ### Public
-- `GET /`
+- `GET /` (marketing)
+- `GET /demo` (demo wedding page)
 - `GET /rsvp`
 - `GET /rsvp/{code?}`
 - `POST /rsvp/lookup`
 - `POST /rsvp/{code}`
+- `GET /pricing`
+- `GET /features`
+- `GET /w/{public_slug}`
+- `POST /w/{public_slug}/rsvp/lookup`
+- `POST /w/{public_slug}/rsvp/{code}`
 
 ### Admin
 - `GET /admin/login`

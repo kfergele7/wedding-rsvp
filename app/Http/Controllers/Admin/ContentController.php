@@ -12,7 +12,10 @@ class ContentController extends Controller
 {
     public function show(): JsonResponse
     {
-        $contentSetting = SiteSetting::query()->where('key', 'homepage_content')->first();
+        $contentSetting = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'homepage_content')
+            ->first();
 
         return response()->json([
             'content' => $this->resolvedContent(),
@@ -54,11 +57,11 @@ class ContentController extends Controller
         }
 
         $contentSetting = SiteSetting::query()->updateOrCreate(
-            ['key' => 'homepage_content'],
+            ['site_id' => $this->currentSiteId(), 'key' => 'homepage_content'],
             ['value' => $content]
         );
         SiteSetting::query()->updateOrCreate(
-            ['key' => 'rsvp_settings'],
+            ['site_id' => $this->currentSiteId(), 'key' => 'rsvp_settings'],
             ['value' => $rsvpSettings]
         );
 
@@ -95,7 +98,7 @@ class ContentController extends Controller
         data_set($content, $field, $relativePath);
 
         SiteSetting::query()->updateOrCreate(
-            ['key' => 'homepage_content'],
+            ['site_id' => $this->currentSiteId(), 'key' => 'homepage_content'],
             ['value' => $content]
         );
 
@@ -109,7 +112,10 @@ class ContentController extends Controller
     private function resolvedContent(): array
     {
         $fallback = config('wedding.homepage_content', []);
-        $saved = SiteSetting::query()->where('key', 'homepage_content')->first();
+        $saved = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'homepage_content')
+            ->first();
 
         if (! $saved || ! is_array($saved->value)) {
             return $fallback;
@@ -121,7 +127,10 @@ class ContentController extends Controller
     private function resolvedRsvpSettings(): array
     {
         $fallback = config('wedding.rsvp_settings', []);
-        $saved = SiteSetting::query()->where('key', 'rsvp_settings')->first();
+        $saved = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'rsvp_settings')
+            ->first();
 
         if (! $saved || ! is_array($saved->value)) {
             return $fallback;

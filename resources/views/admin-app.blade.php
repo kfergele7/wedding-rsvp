@@ -11,7 +11,11 @@
     @php
         $adminPayload = array_merge($payload ?? [], [
             'adminSection' => $page ?? 'dashboard',
-            'logoutUrl' => route('admin.logout'),
+            'logoutUrl' => ($payload['logoutUrl'] ?? route('admin.logout')),
+            'accountUrl' => ($payload['accountUrl'] ?? null),
+            'adminBaseUrl' => ($payload['adminBaseUrl'] ?? '/admin'),
+            'adminApiBaseUrl' => ($payload['adminApiBaseUrl'] ?? '/admin/api'),
+            'previewUrl' => ($payload['previewUrl'] ?? null),
         ]);
     @endphp
 

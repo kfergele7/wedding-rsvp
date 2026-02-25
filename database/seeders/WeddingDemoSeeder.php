@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Account;
 use App\Models\Party;
 use App\Models\Rsvp;
+use App\Models\Site;
 use App\Models\SiteSetting;
 use Illuminate\Database\Seeder;
 
@@ -11,12 +13,27 @@ class WeddingDemoSeeder extends Seeder
 {
     public function run(): void
     {
+        $account = Account::query()->first()
+            ?? Account::query()->create([
+                'name' => 'Default Account',
+                'slug' => 'default-account',
+                'status' => Account::STATUS_ACTIVE,
+            ]);
+
+        $site = Site::query()->orderBy('id')->first()
+            ?? Site::query()->create([
+                'account_id' => $account->id,
+                'title' => 'Default Wedding Site',
+                'public_slug' => 'default-wedding-site',
+                'is_published' => true,
+            ]);
+
         SiteSetting::query()->firstOrCreate(
-            ['key' => 'homepage_content'],
+            ['site_id' => $site->id, 'key' => 'homepage_content'],
             ['value' => config('wedding.homepage_content')]
         );
         SiteSetting::query()->firstOrCreate(
-            ['key' => 'rsvp_settings'],
+            ['site_id' => $site->id, 'key' => 'rsvp_settings'],
             ['value' => config('wedding.rsvp_settings')]
         );
 
@@ -74,8 +91,9 @@ class WeddingDemoSeeder extends Seeder
 
         foreach ($parties as $entry) {
             $party = Party::query()->updateOrCreate(
-                ['display_name' => $entry['display_name']],
+                ['site_id' => $site->id, 'display_name' => $entry['display_name']],
                 [
+                    'site_id' => $site->id,
                     'code' => $entry['code'],
                     'display_name' => $entry['display_name'],
                     'max_guests' => $entry['max_guests'],
@@ -86,6 +104,7 @@ class WeddingDemoSeeder extends Seeder
             foreach ($entry['guests'] as $guest) {
                 $party->guests()->updateOrCreate(
                     [
+                        'site_id' => $site->id,
                         'first_name' => $guest['first_name'],
                         'last_name' => $guest['last_name'],
                     ],
@@ -95,8 +114,8 @@ class WeddingDemoSeeder extends Seeder
 
             if ($entry['rsvp']) {
                 $party->rsvp()->updateOrCreate(
-                    ['party_id' => $party->id],
-                    $entry['rsvp']
+                    ['party_id' => $party->id, 'site_id' => $site->id],
+                    ['site_id' => $site->id, ...$entry['rsvp']]
                 );
             }
         }

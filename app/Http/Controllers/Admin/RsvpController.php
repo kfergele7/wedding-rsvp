@@ -12,7 +12,11 @@ class RsvpController extends Controller
 {
     public function index(): JsonResponse
     {
-        $parties = Party::query()->with(['rsvp', 'guests'])->orderBy('display_name')->get();
+        $parties = Party::query()
+            ->forSite($this->currentSiteId())
+            ->with(['rsvp', 'guests'])
+            ->orderBy('display_name')
+            ->get();
 
         $rows = $parties->map(function (Party $party) {
             return [
@@ -53,8 +57,9 @@ class RsvpController extends Controller
         }
 
         $party->rsvp()->updateOrCreate(
-            ['party_id' => $party->id],
+            ['party_id' => $party->id, 'site_id' => $party->site_id],
             [
+                'site_id' => $party->site_id,
                 'status' => $data['status'],
                 'attending_count' => $attendingCount,
                 'meal_choices' => $data['meal_choices'] ?? [],
@@ -79,7 +84,11 @@ class RsvpController extends Controller
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['party_name', 'code', 'status', 'attending_count', 'dietary_restrictions', 'message', 'meal_choices']);
 
-            Party::query()->with('rsvp')->orderBy('display_name')->chunk(200, function ($parties) use ($handle) {
+            Party::query()
+                ->forSite($this->currentSiteId())
+                ->with('rsvp')
+                ->orderBy('display_name')
+                ->chunk(200, function ($parties) use ($handle) {
                 foreach ($parties as $party) {
                     $rsvp = $party->rsvp;
 
@@ -93,7 +102,7 @@ class RsvpController extends Controller
                         $rsvp ? json_encode($rsvp->meal_choices ?? []) : '',
                     ]);
                 }
-            });
+                });
 
             fclose($handle);
         }, 200, $headers);

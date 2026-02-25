@@ -69,8 +69,9 @@ class RsvpController extends Controller
         }
 
         $party->rsvp()->updateOrCreate(
-            ['party_id' => $party->id],
+            ['party_id' => $party->id, 'site_id' => $party->site_id],
             [
+                'site_id' => $party->site_id,
                 'status' => $data['status'],
                 'attending_count' => $attendingCount,
                 'meal_choices' => $data['meal_choices'] ?? [],
@@ -90,7 +91,10 @@ class RsvpController extends Controller
     private function rsvpSettings(): array
     {
         $fallback = config('wedding.rsvp_settings', []);
-        $saved = SiteSetting::query()->where('key', 'rsvp_settings')->first();
+        $saved = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'rsvp_settings')
+            ->first();
 
         if (! $saved || ! is_array($saved->value)) {
             return $fallback;
@@ -104,6 +108,7 @@ class RsvpController extends Controller
         $normalizedCode = strtoupper(trim($code));
 
         return Party::query()
+            ->forSite($this->currentSiteId())
             ->with(['guests', 'rsvp'])
             ->whereRaw('UPPER(code) = ?', [$normalizedCode])
             ->first();
