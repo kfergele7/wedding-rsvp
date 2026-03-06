@@ -1322,7 +1322,7 @@ async function saveContent() {
         }
         lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
         captureSavedSnapshots();
-        setMessage(response.data?.message || 'Content updated.');
+        setMessage('Content Saved, make sure to refresh your preview page to see changes made', 7000);
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not save content.'));
     }
@@ -1913,12 +1913,12 @@ function moveInArray(list, fromIndex, toIndex) {
     list.splice(toIndex, 0, moved);
 }
 
-function setMessage(message) {
+function setMessage(message, durationMs = 3000) {
     globalMessage.value = message;
     clearError();
     window.setTimeout(() => {
         globalMessage.value = '';
-    }, 3000);
+    }, durationMs);
 }
 
 function setError(message) {

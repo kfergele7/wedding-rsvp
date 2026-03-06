@@ -156,6 +156,8 @@ QUEUE_CONNECTION=sync
 ## Content Save Behaviour
 - Content list sections (timeline items, FAQs, menu courses/items) are persisted with list replacement semantics.
 - Deleting items in the content editor and clicking `Save Content` now keeps those deletions on reload (no fallback re-population of removed list entries).
+- Save confirmation text is explicit: `Content Saved, make sure to refresh your preview page to see changes made` and remains visible longer for readability.
+- Story section layout now renders image-left and story-right on desktop.
 
 ## CSV Import Format
 Upload in Admin > Households.

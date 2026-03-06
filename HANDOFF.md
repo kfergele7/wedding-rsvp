@@ -11,6 +11,7 @@ This section is updated by `bash scripts/handoff.sh`. Do not edit manually.
 
 <!-- AUTO-GENERATED:START -->
 ### What changed today
+- 20aba3a Fix content list deletion persistence and document preview/menu rules
 - ad15fa0 Add cross-machine handoff workflow and tighten preview/menu UX
 - 657be08 Polish content admin spacing, labels, and section layout
 - 78769e5 Polish admin content layout, labels, and drag controls
@@ -19,28 +20,27 @@ This section is updated by `bash scripts/handoff.sh`. Do not edit manually.
 
 ### Current branch + last commit hash
 - Branch: `main`
-- Last commit: `ad15fa0` - Add cross-machine handoff workflow and tighten preview/menu UX
+- Last commit: `20aba3a` - Fix content list deletion persistence and document preview/menu rules
 
 ### Working tree status
 - Status: `dirty`
 
 ### Changed files
 -  M CODEX_CONTEXT.md
--  M HANDOFF.md
 -  M README.md
--  M app/Http/Controllers/Admin/ContentController.php
--  M resources/js/components/public/DetailsSection.vue
+-  M resources/js/components/public/StorySection.vue
+-  M resources/js/pages/AdminPage.vue
 - ?? public/images/wedding/uploads/details-image-20260306211019.jpg
 - ?? public/images/wedding/uploads/hero-image-20260306205444.jpg
 - ?? public/images/wedding/uploads/story-image-20260306210814.jpg
 - ?? public/images/wedding/uploads/story-image-20260306210825.jpg
 - ?? public/images/wedding/uploads/welcome-image-20260306205836.jpg
-- ?? tests/Feature/ContentListReplacementTest.php
 
 ### Diffstat
-` 5 files changed, 55 insertions(+), 9 deletions(-)`
+` 4 files changed, 11 insertions(+), 7 deletions(-)`
 
 ### Recent commits (last 10)
+- 20aba3a Fix content list deletion persistence and document preview/menu rules
 - ad15fa0 Add cross-machine handoff workflow and tighten preview/menu UX
 - 657be08 Polish content admin spacing, labels, and section layout
 - 78769e5 Polish admin content layout, labels, and drag controls
