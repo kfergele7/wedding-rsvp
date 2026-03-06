@@ -1,5 +1,31 @@
 <template>
     <div :style="themeVars">
+        <div v-if="previewBanner" ref="previewBannerRef" class="fixed inset-x-0 top-0 z-50 border-b border-[#466369] bg-[#F2ECE3]">
+            <div class="site-shell flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[#22363a]">{{ previewBanner.title }}</p>
+                    <p class="mt-1 text-sm text-[#22363a]">{{ previewBanner.message }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a
+                        v-if="previewBanner.accountUrl"
+                        :href="previewBanner.accountUrl"
+                        class="button-primary preview-account-button px-4 py-2"
+                    >
+                        {{ previewBanner.accountLabel || 'Account' }}
+                    </a>
+                    <a
+                        v-if="previewBanner.mode === 'customer'"
+                        :href="previewBanner.subscribeUrl || '/app'"
+                        class="button-dark px-4 py-2"
+                    >
+                        {{ previewBanner.subscribeLabel || 'Subscribe now' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div v-if="previewBanner" :style="{ height: `${previewBannerHeight}px` }"></div>
+
         <HeroSection :content="content.hero" @open-rsvp="openRsvpModal" />
 
         <main>
@@ -38,7 +64,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import HeroSection from '../components/public/HeroSection.vue';
 import WelcomeSection from '../components/public/WelcomeSection.vue';
 import TimelineSection from '../components/public/TimelineSection.vue';
@@ -165,6 +191,9 @@ const content = computed(() => {
 });
 
 const sectionVisibility = computed(() => content.value.section_visibility || fallbackContent.section_visibility);
+const previewBanner = computed(() => props.payload?.previewBanner || null);
+const previewBannerRef = ref(null);
+const previewBannerHeight = ref(0);
 
 const themeVars = computed(() => ({
     '--wedding-button-color': content.value.theme.button_color || fallbackContent.theme.button_color,
@@ -172,6 +201,24 @@ const themeVars = computed(() => ({
 const isRsvpModalOpen = ref(Boolean(props.payload?.openRsvpModal));
 const rsvpInitialCode = ref(props.payload?.rsvpCode || '');
 const currentYear = new Date().getFullYear();
+
+function updatePreviewBannerHeight() {
+    previewBannerHeight.value = previewBannerRef.value?.offsetHeight || 0;
+}
+
+onMounted(() => {
+    updatePreviewBannerHeight();
+    window.addEventListener('resize', updatePreviewBannerHeight);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updatePreviewBannerHeight);
+});
+
+watch(previewBanner, async () => {
+    await nextTick();
+    updatePreviewBannerHeight();
+});
 
 const fallbackRsvpSettings = {
     meal_mode: 'options',

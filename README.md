@@ -52,17 +52,36 @@ npm run dev
 - RSVP: `http://127.0.0.1:8000/rsvp`
 - Admin login: `http://127.0.0.1:8000/admin/login`
 
-## Local Email Testing
-Use local-safe mail capture for verification/password reset flows.
-
-### Preferred: Mailpit (SMTP capture)
-1. Start Mailpit (example):
+## Working across Mac + Windows
+- Use Git as the source of truth for cross-machine continuity.
+- End of session: commit, push, then run:
 ```bash
-mailpit
+npm run handoff
 ```
-2. Ensure local `.env` uses:
+- Start of session on the other machine:
+```bash
+git pull --rebase
+bash scripts/start.sh
+```
+- Use Codex worktrees for parallel tasks and cleaner diffs.
+- Windows WSL path example:
+  - `\\wsl$\Ubuntu\home\<user>\code\wedding-rsvp`
+
+## Local Email Testing
+Use local-safe email handling for verification and password reset flows.
+
+### Default local setup: log mailer (zero setup)
+In local `.env`, use:
 ```env
-APP_URL=http://127.0.0.1:8000
+QUEUE_CONNECTION=sync
+MAIL_MAILER=log
+```
+With `MAIL_MAILER=log`, emails are written to:
+- `storage/logs/laravel.log`
+
+### Optional: Mailpit (SMTP capture)
+If you want an inbox UI, run Mailpit and use:
+```env
 QUEUE_CONNECTION=sync
 MAIL_MAILER=smtp
 MAIL_HOST=127.0.0.1
@@ -70,37 +89,20 @@ MAIL_PORT=1025
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
 ```
-3. Open Mailpit inbox:
-- `http://127.0.0.1:8025`
+Mailpit:
+- SMTP: `127.0.0.1:1025`
+- UI: `http://127.0.0.1:8025`
 
-### Fallback: Log Mailer
-If Mailpit is not running, switch to:
-```env
-MAIL_MAILER=log
-```
-Emails will be written to:
-- `storage/logs/laravel.log`
-
-### Local test helper route (local only)
-Authenticated users can trigger test emails:
-- Verification: `GET /dev/test-email`
-- Password reset: `GET /dev/test-email?type=reset`
-
-This route is only registered when `APP_ENV=local`.
-
-### Troubleshooting
-- Clear config cache:
+### After changing `.env`
+Run:
 ```bash
-php artisan config:clear
+php artisan optimize:clear
 ```
-- Confirm queue is synchronous locally:
+Keep local queue synchronous so verification emails send immediately:
 ```env
 QUEUE_CONNECTION=sync
 ```
-- Restart local servers after `.env` changes (`php artisan serve`, `npm run dev`).
 
 ## Guest RSVP Flow
 - Guests use an invitation code (3-10 letters, case-insensitive).
@@ -131,6 +133,24 @@ QUEUE_CONNECTION=sync
 - RSVP management + manual updates
 - Content management for homepage sections
 - CSV import/export for households and RSVPs
+
+## Preview And Publishing Rules
+- Public URL format is `GET /w/{public_slug}`.
+- If a site is unpublished:
+  - Owner account users can preview the full site while logged in.
+  - Staff users can preview any unpublished site while logged in.
+  - Everyone else sees `Coming Soon`.
+- Unpublished RSVP endpoints (`/w/{public_slug}/rsvp/*`) are blocked for non-auth users and non-owner/non-staff users.
+- Published sites are still gated by billing status (`active`/`gifted` etc.) for public availability.
+
+## Menu Mode Rules (Content Area)
+- Default mode is `Set menu for all guests`.
+- In `set_menu` mode:
+  - Each course should have one menu item.
+  - Additional per-course options cannot be added.
+- In `Guests choose meal options` mode:
+  - Multiple options per course can be added.
+- If you try switching back to `set_menu` while any course has more than one item, the UI blocks the switch and shows a warning to remove extra items first.
 
 ## CSV Import Format
 Upload in Admin > Households.

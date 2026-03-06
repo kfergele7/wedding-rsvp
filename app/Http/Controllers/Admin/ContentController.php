@@ -32,9 +32,9 @@ class ContentController extends Controller
         $content = array_replace_recursive($existingContent, $incomingContent);
         $incomingRsvpSettings = (array) $request->input('rsvp_settings', []);
         $rsvpSettings = array_replace_recursive($this->resolvedRsvpSettings(), $incomingRsvpSettings);
-        $rsvpSettings['meal_mode'] = in_array(($rsvpSettings['meal_mode'] ?? 'options'), ['options', 'set_menu'], true)
+        $rsvpSettings['meal_mode'] = in_array(($rsvpSettings['meal_mode'] ?? 'set_menu'), ['options', 'set_menu'], true)
             ? $rsvpSettings['meal_mode']
-            : 'options';
+            : 'set_menu';
         $rsvpSettings['menu_courses'] = $this->normalizeCourseSections($rsvpSettings['menu_courses'] ?? []);
         $rsvpSettings['meal_options'] = collect($rsvpSettings['meal_options'] ?? [])
             ->map(fn ($option) => trim((string) $option))

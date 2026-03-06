@@ -2,7 +2,7 @@
 
 return [
     'rsvp_settings' => [
-        'meal_mode' => 'options',
+        'meal_mode' => 'set_menu',
         'menu_heading' => 'Wedding Menu',
         'menu_intro' => 'We cannot wait to share a beautiful meal with you.',
         'set_menu_description' => 'A chef-curated set menu will be served for all attending guests.',
@@ -27,14 +27,6 @@ return [
                     [
                         'title' => 'Seabass',
                         'description' => 'Pan seared seabass served on a bed of whipped mash with tender-stem broccoli and a white wine cream sauce.',
-                    ],
-                    [
-                        'title' => 'Beef Fillet',
-                        'description' => 'Grass-fed beef fillet, dauphinoise potatoes, seasonal greens, and red wine jus.',
-                    ],
-                    [
-                        'title' => 'Wild Mushroom Risotto',
-                        'description' => 'Creamy arborio risotto with wild mushrooms, parmesan, and truffle oil.',
                     ],
                 ],
             ],

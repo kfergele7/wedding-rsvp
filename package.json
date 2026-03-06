@@ -3,7 +3,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "handoff": "bash scripts/handoff.sh",
+        "start:dev": "echo \"Start Laravel in another terminal: php artisan serve\" && vite"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",

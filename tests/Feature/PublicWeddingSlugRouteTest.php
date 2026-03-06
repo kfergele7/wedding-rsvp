@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Account;
+use App\Models\Party;
 use App\Models\Site;
 use App\Models\SiteSetting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,6 +32,86 @@ class PublicWeddingSlugRouteTest extends TestCase
         $this->get('/w/'.$site->public_slug)
             ->assertOk()
             ->assertSee('Coming Soon');
+    }
+
+    public function test_unpublished_site_owner_can_preview_public_slug(): void
+    {
+        $site = $this->makeSite('owner-preview-account', 'owner-preview-site', false, 'Owner Preview Couple');
+        $owner = $this->makeUserForAccount($site->account_id, 'owner-preview@example.test');
+
+        $this->actingAs($owner)
+            ->get('/w/'.$site->public_slug)
+            ->assertOk()
+            ->assertSee('Owner Preview Couple')
+            ->assertSee('Preview mode')
+            ->assertDontSee('Coming Soon');
+    }
+
+    public function test_unpublished_site_shows_coming_soon_for_other_logged_in_accounts(): void
+    {
+        $site = $this->makeSite('draft-account-2', 'draft-wedding-2', false, 'Private Couple');
+        $otherAccount = Account::query()->create([
+            'name' => 'Other Account',
+            'slug' => 'other-account',
+            'status' => Account::STATUS_ACTIVE,
+        ]);
+        $otherUser = $this->makeUserForAccount($otherAccount->id, 'other-user@example.test');
+
+        $this->actingAs($otherUser)
+            ->get('/w/'.$site->public_slug)
+            ->assertOk()
+            ->assertSee('Coming Soon')
+            ->assertDontSee('Private Couple');
+    }
+
+    public function test_unpublished_site_rsvp_lookup_requires_same_account_user(): void
+    {
+        $site = $this->makeSite('draft-rsvp-account', 'draft-rsvp-site', false, 'Draft RSVP Couple');
+        $owner = $this->makeUserForAccount($site->account_id, 'draft-owner@example.test');
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Draft Household',
+            'code' => 'DRFTA',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'DRFTA'])
+            ->assertNotFound();
+
+        $this->actingAs($owner)
+            ->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'DRFTA'])
+            ->assertOk()
+            ->assertJsonPath('party.display_name', 'Draft Household');
+    }
+
+    public function test_staff_user_can_preview_any_unpublished_site_and_use_rsvp_lookup(): void
+    {
+        $site = $this->makeSite('staff-preview-account', 'staff-preview-site', false, 'Staff Preview Couple');
+        $staff = User::factory()->create([
+            'account_id' => null,
+            'email' => 'staff-preview@example.test',
+        ]);
+        $staff->forceFill(['is_staff' => true])->save();
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Staff Household',
+            'code' => 'STAFF',
+            'max_guests' => 2,
+        ]);
+
+        $this->actingAs($staff)
+            ->get('/w/'.$site->public_slug)
+            ->assertOk()
+            ->assertSee('Staff Preview Couple')
+            ->assertSee('Staff preview mode')
+            ->assertDontSee('Coming Soon');
+
+        $this->actingAs($staff)
+            ->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'STAFF'])
+            ->assertOk()
+            ->assertJsonPath('party.display_name', 'Staff Household');
     }
 
     private function makeSite(string $accountSlug, string $siteSlug, bool $published, string $names): Site
@@ -63,5 +145,15 @@ class PublicWeddingSlugRouteTest extends TestCase
         ]);
 
         return $site;
+    }
+
+    private function makeUserForAccount(int $accountId, string $email): User
+    {
+        return User::factory()->create([
+            'account_id' => $accountId,
+            'role' => 'owner',
+            'email' => $email,
+            'email_verified_at' => now(),
+        ]);
     }
 }

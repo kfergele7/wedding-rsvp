@@ -24,6 +24,7 @@ use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\RsvpController;
 use App\Http\Controllers\Staff\AccountController as StaffAccountController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,25 @@ Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing
 Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
 
 if (app()->environment('local')) {
+    Route::get('/dev/verify-email/{email}', function (string $email) {
+        if (! app()->environment('local')) {
+            abort(404);
+        }
+
+        $user = User::query()->where('email', $email)->first();
+
+        if (! $user) {
+            return redirect()->back()->with('status', 'No user found for that email.');
+        }
+
+        $user->forceFill([
+            'email_verified_at' => now(),
+        ])->save();
+
+        return redirect()->intended(route('customer.dashboard', absolute: false))
+            ->with('status', 'Email verified successfully (local shortcut).');
+    })->name('dev.verify-email');
+
     Route::middleware('auth')->get('/dev/test-email', function (Request $request) {
         $user = $request->user();
         $type = $request->query('type', 'verify');

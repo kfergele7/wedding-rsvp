@@ -8,11 +8,14 @@ use App\Models\Party;
 use App\Models\Rsvp;
 use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RsvpController extends Controller
 {
     public function lookup(RsvpLookupRequest $request): JsonResponse
     {
+        $this->ensureRsvpIsAccessible($request);
+
         $party = $this->findParty($request->validated('code'));
         $rsvpSettings = $this->rsvpSettings();
 
@@ -32,6 +35,8 @@ class RsvpController extends Controller
 
     public function save(SaveRsvpRequest $request, string $code): JsonResponse
     {
+        $this->ensureRsvpIsAccessible($request);
+
         $party = $this->findParty($code);
 
         if (! $party) {
@@ -186,5 +191,26 @@ class RsvpController extends Controller
             ->filter(fn ($option) => $option !== '')
             ->values()
             ->all();
+    }
+
+    private function ensureRsvpIsAccessible(Request $request): void
+    {
+        if ($this->currentSite()->is_published) {
+            return;
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            abort(404);
+        }
+
+        if ((bool) $user->is_staff) {
+            return;
+        }
+
+        if ((int) $user->account_id !== (int) $this->currentSite()->account_id) {
+            abort(404);
+        }
     }
 }

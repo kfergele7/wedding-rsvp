@@ -413,8 +413,8 @@
                                 </label>
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Select your RSVP Meal Type
                                     <select v-model="rsvpSettings.meal_mode" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                                        <option value="options">Guests choose meal options</option>
                                         <option value="set_menu">Set menu for all guests</option>
+                                        <option value="options">Guests choose meal options</option>
                                     </select>
                                 </label>
                             </div>
@@ -480,7 +480,12 @@
 
                                     <div class="mb-4 mt-5 flex items-center justify-between">
                                         <h4 class="font-heading text-xl">{{ course.name || `Course ${courseIndex + 1}` }}</h4>
-                                        <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="addMenuCourseItem(courseIndex)">
+                                        <button
+                                            type="button"
+                                            class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                            :disabled="!canAddMenuOptions"
+                                            @click="addMenuCourseItem(courseIndex)"
+                                        >
                                             <span class="material-symbols-outlined btn-icon">add</span>
                                             Add {{ course.name || 'Course' }}
                                         </button>
@@ -507,6 +512,10 @@
                                     </p>
                                 </div>
                             </div>
+
+                            <p v-if="!canAddMenuOptions" class="mt-4 text-xs text-wedding-muted">
+                                Set menu allows one option per course. Switch to "Guests choose meal options" to add extra options within a course.
+                            </p>
 
                             <div v-if="rsvpSettings.meal_mode === 'set_menu'" class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Set Menu Description</label>
@@ -970,7 +979,7 @@
                             class="admin-btn inline-flex items-center justify-center gap-2 border px-8 py-4 text-xs uppercase tracking-[0.2em]"
                         >
                             <span class="material-symbols-outlined btn-icon">visibility</span>
-                            Open Public Preview
+                            Open Preview
                         </a>
                         <button class="admin-btn button-dark admin-btn-success inline-flex items-center gap-2" type="button" @click="saveContent"><span class="material-symbols-outlined btn-icon">save</span>Save Content</button>
                     </div>
@@ -981,7 +990,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import RichTextEditor from '../components/admin/RichTextEditor.vue';
 
 const props = defineProps({
@@ -1037,7 +1046,7 @@ const defaultMenuCourses = [
 ];
 
 const rsvpSettings = ref({
-    meal_mode: 'options',
+    meal_mode: 'set_menu',
     menu_heading: 'Wedding Menu',
     menu_intro: 'We cannot wait to share a beautiful meal with you.',
     set_menu_description: 'A chef-curated set menu will be served for all attending guests.',
@@ -1106,6 +1115,7 @@ const hasUnsavedChanges = computed(() => {
 });
 const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
 const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
+const canAddMenuOptions = computed(() => rsvpSettings.value?.meal_mode === 'options');
 const filteredRsvpRows = computed(() =>
     rsvpRows.value.filter((row) => {
         const searchTerm = rsvpSearchTerm.value.trim().toLowerCase();
@@ -1164,6 +1174,23 @@ onMounted(async () => {
     }
 });
 
+watch(
+    () => rsvpSettings.value?.meal_mode,
+    (nextMode, previousMode) => {
+        if (!nextMode || !previousMode || nextMode === previousMode) {
+            return;
+        }
+
+        if (nextMode === 'set_menu' && hasMultipleOptionsPerCourse()) {
+            rsvpSettings.value.meal_mode = 'options';
+            openNoticeModal(
+                'Cannot switch to set menu yet',
+                'Set menu allows only one menu option per course. Please delete additional menu items first.'
+            );
+        }
+    }
+);
+
 async function loadStats() {
     try {
         const response = await window.axios.get(`${apiBaseUrl}/dashboard`);
@@ -1181,7 +1208,7 @@ async function loadContent() {
         ensureSectionVisibilityDefaults();
         lastSavedAt.value = formatDateTime(response.data.last_saved_at);
         const legacyMealChoicesEnabled = response.data.rsvp_settings?.meal_choices_enabled;
-        const defaultMealMode = legacyMealChoicesEnabled === false ? 'set_menu' : 'options';
+        const defaultMealMode = legacyMealChoicesEnabled === true ? 'options' : 'set_menu';
         rsvpSettings.value = {
             meal_mode: response.data.rsvp_settings?.meal_mode || defaultMealMode,
             menu_heading: response.data.rsvp_settings?.menu_heading || 'Wedding Menu',
@@ -1330,6 +1357,14 @@ async function removeMenuCourse(courseIndex) {
 }
 
 function addMenuCourseItem(courseIndex) {
+    if (!canAddMenuOptions.value) {
+        openNoticeModal(
+            'Set menu active',
+            'Switch to "Guests choose meal options" to add multiple options within a course.'
+        );
+        return;
+    }
+
     if (!Array.isArray(rsvpSettings.value.menu_courses)) {
         rsvpSettings.value.menu_courses = [];
     }
@@ -1499,6 +1534,15 @@ function normalizeCourseItems(items) {
         title: (item?.title || '').toString(),
         description: (item?.description || '').toString(),
     }));
+}
+
+function hasMultipleOptionsPerCourse() {
+    const courses = rsvpSettings.value?.menu_courses;
+    if (!Array.isArray(courses)) {
+        return false;
+    }
+
+    return courses.some((course) => Array.isArray(course?.items) && course.items.length > 1);
 }
 
 async function uploadContentImage(event, field) {

@@ -72,6 +72,12 @@
         background-color: var(--wedding-primary-green);
     }
 
+    .preview-account-button:hover {
+        border-color: var(--wedding-black) !important;
+        background-color: var(--wedding-black) !important;
+        color: var(--wedding-white) !important;
+    }
+
     .cms-rich p + p {
         @apply mt-4;
     }
