@@ -63,11 +63,46 @@
     @if ($activeTab === 'overview')
     <section class="mt-8 grid gap-5 md:grid-cols-2">
         <article class="card-frame bg-white">
+            @php
+                $publicUrl = url('/w/'.$siteSlug);
+            @endphp
             <h2 class="font-heading text-3xl">Site</h2>
             <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Title</p>
-            <p class="mt-1 text-lg">{{ $siteTitle }}</p>
+            <form method="POST" action="{{ route('customer.site.settings.update') }}" class="mt-2">
+                @csrf
+                @method('PUT')
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="text" name="title" value="{{ old('title', $siteTitle) }}" required class="w-full max-w-md border border-soft bg-white px-4 py-3 text-base">
+                    <button type="submit" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                        <span class="material-symbols-outlined btn-icon">save</span>
+                        Save Title
+                    </button>
+                </div>
+            </form>
             <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Public URL</p>
-            <p class="mt-1 text-lg">{{ url('/w/'.$siteSlug) }}</p>
+            <p class="mt-1 text-lg">
+                <a href="{{ $publicUrl }}" target="_blank" rel="noopener noreferrer" class="text-wedding-band underline decoration-wedding-band/50 underline-offset-4 hover:decoration-wedding-band">
+                    {{ $publicUrl }}
+                </a>
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <a href="{{ $publicUrl }}" target="_blank" rel="noopener noreferrer" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                    <span class="material-symbols-outlined btn-icon">visibility</span>
+                    Preview Site
+                </a>
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-copy-link="{{ $publicUrl }}">
+                    <span class="material-symbols-outlined btn-icon">content_copy</span>
+                    Copy Link
+                </button>
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-share-link="{{ $publicUrl }}">
+                    <span class="material-symbols-outlined btn-icon">share</span>
+                    Share
+                </button>
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-open-qr="{{ $publicUrl }}" data-site-slug="{{ $siteSlug }}">
+                    <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+                    QR Code
+                </button>
+            </div>
             <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Site Visibility</p>
             <p class="mt-1 text-lg">{{ $sitePublished ? 'Published' : 'Draft' }}</p>
 
@@ -202,5 +237,155 @@
     </section>
     @endif
 </main>
+
+<div id="qrModal" class="fixed inset-0 z-[80] hidden bg-black/50 p-4 md:p-8">
+    <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-white p-6 shadow-soft md:mt-16">
+        <div class="flex items-start justify-between gap-3">
+            <h3 class="font-heading text-3xl">Share QR Code</h3>
+            <button type="button" id="qrCloseBtn" class="admin-btn inline-flex items-center justify-center border border-red-400 bg-white px-3 py-2 text-xs uppercase tracking-[0.12em] text-red-700 transition hover:bg-red-50">X Close</button>
+        </div>
+        <p class="mt-2 text-sm text-wedding-muted">Download, share digitally, or print your invitation QR code.</p>
+
+        <div class="mt-5 flex justify-center">
+            <img id="qrImage" src="" alt="Public URL QR code" class="h-72 w-72 border border-soft object-contain">
+        </div>
+
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+            <a id="qrDownloadBtn" href="#" download class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                <span class="material-symbols-outlined btn-icon">download</span>
+                Download
+            </a>
+            <button type="button" id="qrShareBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                <span class="material-symbols-outlined btn-icon">share</span>
+                Share Image
+            </button>
+            <button type="button" id="qrPrintBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                <span class="material-symbols-outlined btn-icon">print</span>
+                Print
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const copyButtons = document.querySelectorAll('[data-copy-link]');
+        const shareButtons = document.querySelectorAll('[data-share-link]');
+        const qrButtons = document.querySelectorAll('[data-open-qr]');
+
+        const qrModal = document.getElementById('qrModal');
+        const qrImage = document.getElementById('qrImage');
+        const qrDownloadBtn = document.getElementById('qrDownloadBtn');
+        const qrShareBtn = document.getElementById('qrShareBtn');
+        const qrPrintBtn = document.getElementById('qrPrintBtn');
+        const qrCloseBtn = document.getElementById('qrCloseBtn');
+
+        let activeQrUrl = '';
+        let activeQrImageUrl = '';
+
+        async function copyToClipboard(url) {
+            try {
+                await navigator.clipboard.writeText(url);
+                window.alert('Link copied to clipboard.');
+            } catch (error) {
+                window.prompt('Copy this link:', url);
+            }
+        }
+
+        copyButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                const url = button.getAttribute('data-copy-link');
+                if (!url) return;
+                await copyToClipboard(url);
+            });
+        });
+
+        shareButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                const url = button.getAttribute('data-share-link');
+                if (!url) return;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title: 'Wedding Website', url });
+                        return;
+                    } catch (error) {
+                        // fall through to clipboard
+                    }
+                }
+
+                await copyToClipboard(url);
+            });
+        });
+
+        function closeQrModal() {
+            qrModal?.classList.add('hidden');
+        }
+
+        function openQrModal(publicUrl, siteSlug) {
+            if (!qrModal || !qrImage || !qrDownloadBtn) return;
+
+            activeQrUrl = publicUrl;
+            activeQrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&format=png&data=${encodeURIComponent(publicUrl)}`;
+            qrImage.src = activeQrImageUrl;
+            qrDownloadBtn.href = activeQrImageUrl;
+            qrDownloadBtn.setAttribute('download', `${siteSlug || 'wedding'}-qr.png`);
+            qrModal.classList.remove('hidden');
+        }
+
+        qrButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const url = button.getAttribute('data-open-qr');
+                const siteSlug = button.getAttribute('data-site-slug') || 'wedding';
+                if (!url) return;
+                openQrModal(url, siteSlug);
+            });
+        });
+
+        qrCloseBtn?.addEventListener('click', closeQrModal);
+        qrModal?.addEventListener('click', (event) => {
+            if (event.target === qrModal) {
+                closeQrModal();
+            }
+        });
+
+        qrShareBtn?.addEventListener('click', async () => {
+            if (!activeQrImageUrl) return;
+
+            if (navigator.share && navigator.canShare) {
+                try {
+                    const response = await fetch(activeQrImageUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], 'wedding-qr.png', { type: 'image/png' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({ title: 'Wedding QR Code', text: activeQrUrl, files: [file] });
+                        return;
+                    }
+                } catch (error) {
+                    // fallback below
+                }
+            }
+
+            await copyToClipboard(activeQrUrl);
+        });
+
+        qrPrintBtn?.addEventListener('click', () => {
+            if (!activeQrImageUrl) return;
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+            printWindow.document.write(`
+                <html>
+                <head><title>Print QR Code</title></head>
+                <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+                    <img src="${activeQrImageUrl}" alt="Wedding QR Code" style="width:420px;height:420px;object-fit:contain;" />
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        });
+    })();
+</script>
 </body>
 </html>

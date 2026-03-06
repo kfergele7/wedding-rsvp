@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Customer\AdminController as CustomerAdminController;
 use App\Http\Controllers\Customer\AccountSettingsController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\SiteSettingsController;
 use App\Http\Controllers\Customer\SitePublishingController;
 use App\Http\Controllers\Marketing\MarketingController;
 use App\Http\Controllers\PublicSiteController;
@@ -112,6 +113,7 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::get('/app/admin/api/rsvps/export', [AdminRsvpController::class, 'export'])->name('customer.admin.api.rsvps.export');
 
         Route::put('/app/site/publish', [SitePublishingController::class, 'update'])->name('customer.site.publish');
+        Route::put('/app/site/settings', [SiteSettingsController::class, 'update'])->name('customer.site.settings.update');
         Route::post('/app/billing/checkout', [BillingController::class, 'startCheckout'])->name('billing.checkout.start');
         Route::get('/app/billing/checkout/success', [BillingController::class, 'checkoutSuccess'])->name('billing.checkout.success');
         Route::get('/app/billing/checkout/cancel', [BillingController::class, 'checkoutCancel'])->name('billing.checkout.cancel');
@@ -129,6 +131,8 @@ Route::middleware('tenant.resolve')->group(function () {
             Route::get('/accounts', [StaffAccountController::class, 'index'])->name('accounts.index');
             Route::get('/accounts/{account}', [StaffAccountController::class, 'show'])->name('accounts.show');
             Route::put('/accounts/{account}', [StaffAccountController::class, 'update'])->name('accounts.update');
+            Route::put('/accounts/{account}/sites/{site}', [StaffAccountController::class, 'updateSite'])->name('accounts.sites.update');
+            Route::get('/accounts/{account}/sites/{site}/launch-admin', [StaffAccountController::class, 'launchSiteAdmin'])->name('accounts.sites.launch-admin');
         });
 
     Route::get('/w/{public_slug}', [PublicSiteController::class, 'showBySlug'])->name('wedding.public');

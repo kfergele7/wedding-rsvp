@@ -32,6 +32,18 @@ class ResolveTenantContext
             }
         }
 
+        if (! $site && $request->user()?->is_staff) {
+            $staffSiteId = (int) $request->session()->get('staff_site_id');
+            $staffAccountId = (int) $request->session()->get('staff_account_id');
+
+            if ($staffSiteId > 0 && $staffAccountId > 0) {
+                $site = Site::query()
+                    ->where('id', $staffSiteId)
+                    ->where('account_id', $staffAccountId)
+                    ->first();
+            }
+        }
+
         if (! $site && $request->session()->get('admin_authenticated')) {
             $adminSiteId = (int) $request->session()->get('admin_site_id');
 

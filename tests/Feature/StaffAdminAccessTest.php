@@ -91,6 +91,97 @@ class StaffAdminAccessTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_staff_user_can_update_site_slug_for_account(): void
+    {
+        $account = Account::query()->create([
+            'name' => 'Slug Account',
+            'slug' => 'slug-account',
+            'status' => Account::STATUS_ACTIVE,
+            'access_status' => 'active',
+        ]);
+
+        $site = Site::query()->create([
+            'account_id' => $account->id,
+            'title' => 'Wedding Site',
+            'public_slug' => 'w-old12',
+            'is_published' => true,
+        ]);
+
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.accounts.sites.update', [$account, $site]), [
+                'public_slug' => 'w-new34',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('sites', [
+            'id' => $site->id,
+            'public_slug' => 'w-new34',
+        ]);
+
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'staff_user_id' => $staff->id,
+            'account_id' => $account->id,
+            'action' => 'staff.site.slug.updated',
+        ]);
+    }
+
+    public function test_staff_user_cannot_update_slug_for_site_outside_account_route_pairing(): void
+    {
+        $accountA = Account::query()->create([
+            'name' => 'Account A',
+            'slug' => 'account-a',
+            'status' => Account::STATUS_ACTIVE,
+        ]);
+        $accountB = Account::query()->create([
+            'name' => 'Account B',
+            'slug' => 'account-b',
+            'status' => Account::STATUS_ACTIVE,
+        ]);
+
+        $siteB = Site::query()->create([
+            'account_id' => $accountB->id,
+            'title' => 'Site B',
+            'public_slug' => 'w-siteb1',
+            'is_published' => true,
+        ]);
+
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.accounts.sites.update', [$accountA, $siteB]), [
+                'public_slug' => 'w-shouldnot',
+            ])
+            ->assertNotFound();
+    }
+
+    public function test_staff_user_can_launch_customer_admin_for_specific_site(): void
+    {
+        [$owner, $site] = $this->makeTenant('launch-acc', 'launch-site');
+        $account = $owner->account;
+
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->get(route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'content']))
+            ->assertRedirect(route('customer.admin.content.page'));
+
+        $this->actingAs($staff)->get('/app/admin/content')->assertOk();
+    }
+
+    public function test_staff_user_cannot_launch_customer_admin_for_mismatched_account_site(): void
+    {
+        [$ownerA] = $this->makeTenant('launch-a', 'launch-site-a');
+        [, $siteB] = $this->makeTenant('launch-b', 'launch-site-b');
+
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->get(route('staff.accounts.sites.launch-admin', [$ownerA->account, $siteB]))
+            ->assertNotFound();
+    }
+
     private function makeTenant(string $accountSlug, string $siteSlug): array
     {
         $account = Account::query()->create([

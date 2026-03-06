@@ -20,8 +20,32 @@
             @foreach ($account->sites as $site)
                 <div class="rounded border border-soft p-3">
                     <p class="font-medium">{{ $site->title }}</p>
-                    <p class="text-wedding-muted">Slug: {{ $site->public_slug }}</p>
-                    <a href="{{ route('wedding.public', ['public_slug' => $site->public_slug]) }}" target="_blank" rel="noopener noreferrer" class="text-xs underline">Open Public Site</a>
+                    <form method="POST" action="{{ route('staff.accounts.sites.update', [$account, $site]) }}" class="mt-2 grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
+                        @csrf
+                        @method('PUT')
+                        <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                            Public Slug
+                            <input
+                                type="text"
+                                name="public_slug"
+                                value="{{ old('public_slug', $site->public_slug) }}"
+                                class="mt-1 w-full border border-soft px-3 py-2 lowercase"
+                                pattern="[a-z0-9-]+"
+                                minlength="4"
+                                maxlength="24"
+                                required
+                            >
+                        </label>
+                        <button type="submit" class="admin-btn button-dark px-4 py-2 text-xs uppercase tracking-[0.12em]">Save Slug</button>
+                    </form>
+                    <p class="mt-2 text-wedding-muted">URL: {{ route('wedding.public', ['public_slug' => $site->public_slug]) }}</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <a href="{{ route('wedding.public', ['public_slug' => $site->public_slug]) }}" target="_blank" rel="noopener noreferrer" class="admin-btn border border-soft bg-white px-3 py-2 text-xs uppercase tracking-[0.1em]">Open Public Site</a>
+                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site]) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Dashboard</a>
+                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'content']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Content</a>
+                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'parties']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Households</a>
+                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'rsvps']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit RSVPs</a>
+                    </div>
                 </div>
             @endforeach
         </div>

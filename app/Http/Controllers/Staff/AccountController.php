@@ -7,11 +7,13 @@ use App\Models\Account;
 use App\Models\Guest;
 use App\Models\Party;
 use App\Models\Rsvp;
+use App\Models\Site;
 use App\Models\StaffAuditLog;
 use App\Models\StripeWebhookEvent;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
@@ -101,5 +103,66 @@ class AccountController extends Controller
         ]);
 
         return back()->with('status', 'Account updated.');
+    }
+
+    public function updateSite(Request $request, Account $account, Site $site): RedirectResponse
+    {
+        if ((int) $site->account_id !== (int) $account->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'public_slug' => [
+                'required',
+                'string',
+                'min:4',
+                'max:24',
+                'regex:/^[a-z0-9-]+$/',
+                Rule::unique('sites', 'public_slug')->ignore($site->id),
+            ],
+        ]);
+
+        $previousSlug = $site->public_slug;
+
+        $site->update([
+            'public_slug' => strtolower($validated['public_slug']),
+        ]);
+
+        StaffAuditLog::query()->create([
+            'staff_user_id' => $request->user()->id,
+            'account_id' => $account->id,
+            'action' => 'staff.site.slug.updated',
+            'payload' => [
+                'site_id' => $site->id,
+                'before' => ['public_slug' => $previousSlug],
+                'after' => ['public_slug' => $site->public_slug],
+            ],
+        ]);
+
+        return back()->with('status', 'Public URL slug updated.');
+    }
+
+    public function launchSiteAdmin(Request $request, Account $account, Site $site): RedirectResponse
+    {
+        if ((int) $site->account_id !== (int) $account->id) {
+            abort(404);
+        }
+
+        $section = (string) $request->query('section', 'dashboard');
+
+        $destinationRoute = match ($section) {
+            'content' => 'customer.admin.content.page',
+            'parties' => 'customer.admin.parties.page',
+            'rsvps' => 'customer.admin.rsvps.page',
+            default => 'customer.admin.dashboard',
+        };
+
+        $request->session()->put([
+            'staff_site_id' => $site->id,
+            'staff_account_id' => $account->id,
+            'current_site_id' => $site->id,
+        ]);
+
+        return redirect()->route($destinationRoute);
     }
 }
