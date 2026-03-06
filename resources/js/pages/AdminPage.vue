@@ -119,7 +119,7 @@
                                 <input v-model.number="content.hero.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
-                        <div class="border border-soft bg-white p-3">
+                        <div class="mt-[30px] border border-soft bg-white p-3">
                             <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">Hero Image Preview</p>
                             <div class="mx-auto w-full max-w-5xl overflow-hidden border border-soft aspect-[16/7]">
                                 <img
@@ -136,10 +136,12 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
                         <div class="content-section-block content-section-even">
-                        <h3 class="section-heading-with-badge">
-                            <span class="section-step-badge">3</span>
-                            <span class="font-heading text-3xl">Welcome</span>
-                        </h3>
+                        <div class="mb-3">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">3</span>
+                                <span class="font-heading text-3xl">Welcome</span>
+                            </h3>
+                        </div>
                         <div class="section-toggle-row">
                             <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('welcome') }" @click="toggleSectionVisibility('welcome')">
                                 <span class="section-toggle-thumb">
@@ -158,7 +160,7 @@
                         </div>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Letter</label>
-                        <RichTextEditor v-model="content.welcome.letter" tone="primary" />
+                        <RichTextEditor v-model="content.welcome.letter" class="mt-2" tone="primary" />
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Welcome Image
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
@@ -171,7 +173,7 @@
                                 <input v-model.number="content.welcome.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
-                        <div class="border border-soft bg-white p-3">
+                        <div class="mt-[30px] border border-soft bg-white p-3">
                             <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">Welcome Image Preview</p>
                             <div class="mx-auto w-full max-w-sm overflow-hidden border border-soft aspect-[4/5]">
                                 <img
@@ -211,7 +213,7 @@
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Timeline Heading
                                     <input v-model="content.timeline.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                                 </label>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">The Big Day Accent (Date/Subtitle)
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Timeline Accent
                                     <input v-model="content.timeline.dateAccent" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                                 </label>
                             </div>
@@ -255,10 +257,12 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
                         <div class="content-section-block content-section-even">
-                        <h3 class="section-heading-with-badge">
-                            <span class="section-step-badge">5</span>
-                            <span class="font-heading text-3xl">Our Story</span>
-                        </h3>
+                        <div class="mb-3">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">5</span>
+                                <span class="font-heading text-3xl">Our Story</span>
+                            </h3>
+                        </div>
                         <div class="section-toggle-row">
                             <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('story') }" @click="toggleSectionVisibility('story')">
                                 <span class="section-toggle-thumb">
@@ -267,16 +271,18 @@
                             </button>
                             <span class="section-toggle-note">Show or hide this section.</span>
                         </div>
-                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Heading
-                            <input v-model="content.story.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                        </label>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Heading
+                                <input v-model="content.story.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                            </label>
 
-                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Accent (Date/Subtitle)
-                            <input v-model="content.story.accent" class="mt-2 w-full border border-soft px-4 py-3">
-                        </label>
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Accent (Date/Subtitle)
+                                <input v-model="content.story.accent" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                            </label>
+                        </div>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Text</label>
-                        <RichTextEditor v-model="content.story.text" tone="primary" />
+                        <RichTextEditor v-model="content.story.text" class="mt-2" tone="primary" />
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Our Story Image
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'story.image')">
@@ -289,7 +295,7 @@
                                 <input v-model.number="content.story.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
-                        <div class="border border-soft bg-white p-3">
+                        <div class="mt-[30px] border border-soft bg-white p-3">
                             <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">Story Image Preview</p>
                             <div class="mx-auto w-full max-w-sm overflow-hidden border border-soft aspect-[4/5]">
                                 <img
@@ -306,10 +312,12 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
                         <div class="content-section-block content-section-odd">
-                        <h3 class="section-heading-with-badge">
-                            <span class="section-step-badge">6</span>
-                            <span class="font-heading text-3xl">Venue</span>
-                        </h3>
+                        <div class="mb-3">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">6</span>
+                                <span class="font-heading text-3xl">Venue</span>
+                            </h3>
+                        </div>
                         <div class="section-toggle-row">
                             <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('venue') }" @click="toggleSectionVisibility('venue')">
                                 <span class="section-toggle-thumb">
@@ -328,7 +336,7 @@
                         </div>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Blurb</label>
-                        <RichTextEditor v-model="content.details.venue.blurb" tone="secondary" />
+                        <RichTextEditor v-model="content.details.venue.blurb" class="mt-2" tone="secondary" />
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Venue Image
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'details.image')">
@@ -341,7 +349,7 @@
                                 <input v-model.number="content.details.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
-                        <div class="border border-soft bg-white p-3">
+                        <div class="mt-[30px] border border-soft bg-white p-3">
                             <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">Venue Image Preview</p>
                             <div class="mx-auto w-full max-w-sm overflow-hidden border border-soft aspect-[3/5]">
                                 <img
@@ -359,10 +367,12 @@
                         </div>
 
                         <div class="content-section-block content-section-even">
-                            <h3 class="section-heading-with-badge">
-                                <span class="section-step-badge">7</span>
-                                <span class="font-heading text-3xl">Travel</span>
-                            </h3>
+                            <div class="mb-3">
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">7</span>
+                                    <span class="font-heading text-3xl">Travel</span>
+                                </h3>
+                            </div>
                             <div class="section-toggle-row">
                                 <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('travel') }" @click="toggleSectionVisibility('travel')">
                                     <span class="section-toggle-thumb">
@@ -373,7 +383,7 @@
                             </div>
 
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Travel Information</label>
-                            <RichTextEditor v-model="content.details.travel" tone="primary" />
+                            <RichTextEditor v-model="content.details.travel" class="mt-2" tone="primary" />
                         </div>
 
                         <div class="w-full py-8">
@@ -381,10 +391,12 @@
                         </div>
 
                         <div class="content-section-block content-section-odd">
-                            <h3 class="section-heading-with-badge">
-                                <span class="section-step-badge">8</span>
-                                <span class="font-heading text-3xl">Menu & RSVP Settings</span>
-                            </h3>
+                            <div class="mb-3">
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">8</span>
+                                    <span class="font-heading text-3xl">Menu & RSVP Settings</span>
+                                </h3>
+                            </div>
                             <div class="section-toggle-row">
                                 <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('menu') }" @click="toggleSectionVisibility('menu')">
                                     <span class="section-toggle-thumb">
@@ -399,7 +411,7 @@
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Section Heading
                                     <input v-model="rsvpSettings.menu_heading" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="Wedding Menu">
                                 </label>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP Meal Type
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Select your RSVP Meal Type
                                     <select v-model="rsvpSettings.meal_mode" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                                         <option value="options">Guests choose meal options</option>
                                         <option value="set_menu">Set menu for all guests</option>
@@ -409,7 +421,7 @@
 
                             <div class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Intro Text</label>
-                                <RichTextEditor v-model="rsvpSettings.menu_intro" tone="secondary" />
+                                <RichTextEditor v-model="rsvpSettings.menu_intro" class="mt-2" tone="secondary" />
                             </div>
 
                             <div class="mt-4 grid gap-4 md:grid-cols-3">
@@ -418,7 +430,7 @@
                                 </label>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Notes Card Text</label>
-                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" tone="secondary" />
+                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" class="mt-2" tone="secondary" />
                                 </div>
                             </div>
 
@@ -498,7 +510,7 @@
 
                             <div v-if="rsvpSettings.meal_mode === 'set_menu'" class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Set Menu Description</label>
-                                <RichTextEditor v-model="rsvpSettings.set_menu_description" tone="secondary" />
+                                <RichTextEditor v-model="rsvpSettings.set_menu_description" class="mt-2" tone="secondary" />
                             </div>
                         </div>
 
@@ -538,7 +550,7 @@
                                     <div class="grid gap-3 md:grid-cols-3">
                                         <input v-model="faq.question" placeholder="Question" class="border border-soft bg-white px-3 py-2 md:col-span-1">
                                         <div class="md:col-span-2">
-                                            <RichTextEditor v-model="faq.answer" tone="secondary" surface="white" button-tone="primary" />
+                                            <RichTextEditor v-model="faq.answer" class="mt-2" tone="secondary" surface="white" button-tone="primary" />
                                         </div>
                                     </div>
                                     <div class="mt-3 flex justify-end">
@@ -584,7 +596,7 @@
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Final RSVP Request Text</label>
-                                    <RichTextEditor v-model="content.cta.text" tone="primary" />
+                                    <RichTextEditor v-model="content.cta.text" class="mt-2" tone="primary" />
                                 </div>
                             </div>
                         </div>
@@ -2151,5 +2163,16 @@ input,
 select,
 textarea {
     background: #ffffff;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.5L10 12L14.5 7.5' stroke='%230F1B1D' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 15px) center;
+    background-size: 16px;
+    padding-right: 2.5rem;
 }
 </style>
