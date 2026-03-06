@@ -141,7 +141,36 @@ class RsvpController extends Controller
 
     private function mealOptionsFromSettings(array $rsvpSettings): array
     {
-        $mainCourseTitles = collect($rsvpSettings['menu_courses']['main'] ?? [])
+        $courseSections = $rsvpSettings['menu_courses'] ?? [];
+
+        if (! is_array($courseSections)) {
+            $courseSections = [];
+        }
+
+        if (! array_is_list($courseSections)) {
+            $courseSections = collect($courseSections)->map(function ($items, $name) {
+                return [
+                    'name' => ucfirst((string) $name),
+                    'items' => is_array($items) ? $items : [],
+                ];
+            })->values()->all();
+        }
+
+        $mainLike = collect($courseSections)->first(function ($section) {
+            $name = strtolower(trim((string) ($section['name'] ?? '')));
+            return str_contains($name, 'main') || str_contains($name, 'entree');
+        });
+
+        $sourceItems = [];
+        if (is_array($mainLike) && count($mainLike['items'] ?? []) > 0) {
+            $sourceItems = $mainLike['items'];
+        } elseif (isset($courseSections[1]['items']) && is_array($courseSections[1]['items']) && count($courseSections[1]['items']) > 0) {
+            $sourceItems = $courseSections[1]['items'];
+        } elseif (isset($courseSections[0]['items']) && is_array($courseSections[0]['items']) && count($courseSections[0]['items']) > 0) {
+            $sourceItems = $courseSections[0]['items'];
+        }
+
+        $mainCourseTitles = collect($sourceItems)
             ->pluck('title')
             ->map(fn ($title) => trim((string) $title))
             ->filter(fn ($title) => $title !== '')

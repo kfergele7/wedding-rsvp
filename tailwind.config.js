@@ -19,9 +19,18 @@ export default {
             colors: {
                 wedding: {
                     bg: '#F7F5F2',
-                    text: '#1E1E1E',
-                    muted: '#6B6B6B',
+                    light: '#F2ECE3',
+                    offwhite: '#F7F7F7',
+                    text: '#0F1B1D',
+                    muted: '#848484',
                     band: '#22363A',
+                    primarygreen: '#466369',
+                    black: '#0F1B1D',
+                    danger: '#E66363',
+                    dangerdark: '#B93F3F',
+                    disabled: '#848484',
+                    success: '#21C177',
+                    successdark: '#1AA267',
                 },
             },
             maxWidth: {

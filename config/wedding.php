@@ -10,30 +10,42 @@ return [
         'menu_note_text' => '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
         'meal_options' => [],
         'menu_courses' => [
-            'starter' => [
-                [
-                    'title' => 'Heirloom Tomato Tart',
-                    'description' => 'Roasted heirloom tomatoes, whipped feta, and basil oil on crisp puff pastry.',
+            [
+                'id' => 'starter',
+                'name' => 'Starter',
+                'items' => [
+                    [
+                        'title' => 'Heirloom Tomato Tart',
+                        'description' => 'Roasted heirloom tomatoes, whipped feta, and basil oil on crisp puff pastry.',
+                    ],
                 ],
             ],
-            'main' => [
-                [
-                    'title' => 'Seabass',
-                    'description' => 'Pan seared seabass served on a bed of whipped mash with tender-stem broccoli and a white wine cream sauce.',
-                ],
-                [
-                    'title' => 'Beef Fillet',
-                    'description' => 'Grass-fed beef fillet, dauphinoise potatoes, seasonal greens, and red wine jus.',
-                ],
-                [
-                    'title' => 'Wild Mushroom Risotto',
-                    'description' => 'Creamy arborio risotto with wild mushrooms, parmesan, and truffle oil.',
+            [
+                'id' => 'main',
+                'name' => 'Main',
+                'items' => [
+                    [
+                        'title' => 'Seabass',
+                        'description' => 'Pan seared seabass served on a bed of whipped mash with tender-stem broccoli and a white wine cream sauce.',
+                    ],
+                    [
+                        'title' => 'Beef Fillet',
+                        'description' => 'Grass-fed beef fillet, dauphinoise potatoes, seasonal greens, and red wine jus.',
+                    ],
+                    [
+                        'title' => 'Wild Mushroom Risotto',
+                        'description' => 'Creamy arborio risotto with wild mushrooms, parmesan, and truffle oil.',
+                    ],
                 ],
             ],
-            'dessert' => [
-                [
-                    'title' => 'Lemon Posset',
-                    'description' => 'Silky lemon posset with shortbread crumble and fresh berries.',
+            [
+                'id' => 'dessert',
+                'name' => 'Dessert',
+                'items' => [
+                    [
+                        'title' => 'Lemon Posset',
+                        'description' => 'Silky lemon posset with shortbread crumble and fresh berries.',
+                    ],
                 ],
             ],
         ],
@@ -99,6 +111,15 @@ return [
         'theme' => [
             'primary_color' => '#22363A',
             'button_color' => '#22363A',
+        ],
+        'section_visibility' => [
+            'welcome' => true,
+            'story' => true,
+            'timeline' => true,
+            'venue' => true,
+            'travel' => true,
+            'menu' => true,
+            'faqs' => true,
         ],
     ],
 ];

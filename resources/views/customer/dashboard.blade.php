@@ -73,7 +73,7 @@
                 @method('PUT')
                 <div class="flex flex-wrap items-center gap-2">
                     <input type="text" name="title" value="{{ old('title', $siteTitle) }}" required class="w-full max-w-md border border-soft bg-white px-4 py-3 text-base">
-                    <button type="submit" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                    <button type="submit" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white">
                         <span class="material-symbols-outlined btn-icon">save</span>
                         Save Title
                     </button>
@@ -86,19 +86,19 @@
                 </a>
             </p>
             <div class="mt-3 flex flex-wrap gap-2">
-                <a href="{{ $publicUrl }}" target="_blank" rel="noopener noreferrer" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+                <a href="{{ $publicUrl }}" target="_blank" rel="noopener noreferrer" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white">
                     <span class="material-symbols-outlined btn-icon">visibility</span>
                     Preview Site
                 </a>
-                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-copy-link="{{ $publicUrl }}">
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white" data-copy-link="{{ $publicUrl }}">
                     <span class="material-symbols-outlined btn-icon">content_copy</span>
                     Copy Link
                 </button>
-                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-share-link="{{ $publicUrl }}">
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white" data-share-link="{{ $publicUrl }}">
                     <span class="material-symbols-outlined btn-icon">share</span>
                     Share
                 </button>
-                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white" data-open-qr="{{ $publicUrl }}" data-site-slug="{{ $siteSlug }}">
+                <button type="button" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white" data-open-qr="{{ $publicUrl }}" data-site-slug="{{ $siteSlug }}">
                     <span class="material-symbols-outlined btn-icon">qr_code_2</span>
                     QR Code
                 </button>
@@ -148,7 +148,7 @@
                 @if ($billing['has_paid_access'] && ! $billing['cancel_at_period_end'] && $billing['status'] !== 'gifted')
                     <form method="POST" action="{{ $billing['cancel_url'] }}">
                         @csrf
-                        <button type="submit" class="inline-flex items-center justify-center gap-2 border border-red-400 bg-white px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-red-700 transition hover:bg-red-50"><span class="material-symbols-outlined btn-icon">event_busy</span>Cancel At Period End</button>
+                        <button type="submit" class="admin-btn admin-btn-danger inline-flex items-center justify-center gap-2 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em]"><span class="material-symbols-outlined btn-icon">event_busy</span>Cancel At Period End</button>
                     </form>
                 @endif
             </div>
@@ -242,7 +242,7 @@
     <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-white p-6 shadow-soft md:mt-16">
         <div class="flex items-start justify-between gap-3">
             <h3 class="font-heading text-3xl">Share QR Code</h3>
-            <button type="button" id="qrCloseBtn" class="admin-btn inline-flex items-center justify-center border border-red-400 bg-white px-3 py-2 text-xs uppercase tracking-[0.12em] text-red-700 transition hover:bg-red-50">X Close</button>
+            <button type="button" id="qrCloseBtn" class="admin-btn admin-btn-danger inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]">X Close</button>
         </div>
         <p class="mt-2 text-sm text-wedding-muted">Download, share digitally, or print your invitation QR code.</p>
 
@@ -251,15 +251,15 @@
         </div>
 
         <div class="mt-5 flex flex-wrap justify-center gap-2">
-            <a id="qrDownloadBtn" href="#" download class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+            <a id="qrDownloadBtn" href="#" download class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white">
                 <span class="material-symbols-outlined btn-icon">download</span>
                 Download
             </a>
-            <button type="button" id="qrShareBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+            <button type="button" id="qrShareBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white">
                 <span class="material-symbols-outlined btn-icon">share</span>
                 Share Image
             </button>
-            <button type="button" id="qrPrintBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b] hover:text-white">
+            <button type="button" id="qrPrintBtn" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em] transition hover:border-wedding-disabled hover:bg-wedding-disabled hover:text-white">
                 <span class="material-symbols-outlined btn-icon">print</span>
                 Print
             </button>

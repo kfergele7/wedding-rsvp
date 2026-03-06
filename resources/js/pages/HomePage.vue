@@ -3,10 +3,15 @@
         <HeroSection :content="content.hero" @open-rsvp="openRsvpModal" />
 
         <main>
-            <WelcomeSection :content="content.welcome" />
-            <TimelineSection :content="content.timeline" :primary-color="content.theme.primary_color" />
-            <StorySection :content="content.story" />
-            <DetailsSection :content="content.details" :rsvp-settings="rsvpSettings" :primary-color="content.theme.primary_color" />
+            <WelcomeSection v-if="sectionVisibility.welcome" :content="content.welcome" />
+            <TimelineSection v-if="sectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" />
+            <StorySection v-if="sectionVisibility.story" :content="content.story" />
+            <DetailsSection
+                :content="content.details"
+                :rsvp-settings="rsvpSettings"
+                :primary-color="content.theme.primary_color"
+                :section-visibility="sectionVisibility"
+            />
             <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
         </main>
 
@@ -122,6 +127,15 @@ const fallbackContent = {
         primary_color: '#22363A',
         button_color: '#22363A',
     },
+    section_visibility: {
+        welcome: true,
+        story: true,
+        timeline: true,
+        venue: true,
+        travel: true,
+        menu: true,
+        faqs: true,
+    },
 };
 
 const content = computed(() => {
@@ -146,8 +160,11 @@ const content = computed(() => {
         },
         cta: { ...fallbackContent.cta, ...(incoming.cta || {}) },
         theme: { ...fallbackContent.theme, ...(incoming.theme || {}) },
+        section_visibility: { ...fallbackContent.section_visibility, ...(incoming.section_visibility || {}) },
     };
 });
+
+const sectionVisibility = computed(() => content.value.section_visibility || fallbackContent.section_visibility);
 
 const themeVars = computed(() => ({
     '--wedding-button-color': content.value.theme.button_color || fallbackContent.theme.button_color,
@@ -164,26 +181,38 @@ const fallbackRsvpSettings = {
     menu_note_title: 'Dining Notes',
     menu_note_text: '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
     meal_options: [],
-    menu_courses: {
-        starter: [
-            {
-                title: 'Heirloom Tomato Tart',
-                description: 'Roasted heirloom tomatoes, whipped feta, and basil oil on crisp puff pastry.',
-            },
-        ],
-        main: [
-            {
-                title: 'Seabass',
-                description: 'Pan seared seabass served on a bed of whipped mash with tender-stem broccoli and a white wine cream sauce.',
-            },
-        ],
-        dessert: [
-            {
-                title: 'Lemon Posset',
-                description: 'Silky lemon posset with shortbread crumble and fresh berries.',
-            },
-        ],
-    },
+    menu_courses: [
+        {
+            id: 'starter',
+            name: 'Starter',
+            items: [
+                {
+                    title: 'Heirloom Tomato Tart',
+                    description: 'Roasted heirloom tomatoes, whipped feta, and basil oil on crisp puff pastry.',
+                },
+            ],
+        },
+        {
+            id: 'main',
+            name: 'Main',
+            items: [
+                {
+                    title: 'Seabass',
+                    description: 'Pan seared seabass served on a bed of whipped mash with tender-stem broccoli and a white wine cream sauce.',
+                },
+            ],
+        },
+        {
+            id: 'dessert',
+            name: 'Dessert',
+            items: [
+                {
+                    title: 'Lemon Posset',
+                    description: 'Silky lemon posset with shortbread crumble and fresh berries.',
+                },
+            ],
+        },
+    ],
 };
 
 const rsvpSettings = computed(() => {
@@ -195,11 +224,7 @@ const rsvpSettings = computed(() => {
         ...incoming,
         meal_mode: mealMode,
         meal_options: incoming.meal_options?.length ? incoming.meal_options : fallbackRsvpSettings.meal_options,
-        menu_courses: {
-            starter: incoming.menu_courses?.starter || fallbackRsvpSettings.menu_courses.starter,
-            main: incoming.menu_courses?.main || fallbackRsvpSettings.menu_courses.main,
-            dessert: incoming.menu_courses?.dessert || fallbackRsvpSettings.menu_courses.dessert,
-        },
+        menu_courses: normalizeMenuCourses(incoming.menu_courses),
     };
 });
 
@@ -209,5 +234,59 @@ function openRsvpModal() {
 
 function closeRsvpModal() {
     isRsvpModalOpen.value = false;
+}
+
+function normalizeMenuCourses(courses) {
+    const defaultNameKeys = new Set(['starter', 'main', 'dessert']);
+    const seenDefaultKeys = new Set();
+    const seenIds = new Set();
+
+    if (Array.isArray(courses) && courses.length > 0) {
+        const normalized = courses
+            .map((course, index) => {
+                const rawId = (course.id || '').toString().trim().toLowerCase();
+                const name = (course.name || '').toString().trim();
+                const nameKey = name.toLowerCase();
+                const defaultKey = defaultNameKeys.has(rawId) ? rawId : (defaultNameKeys.has(nameKey) ? nameKey : null);
+                const id = rawId || `course-${index}`;
+
+                return {
+                    id,
+                    name: name || (defaultKey ? defaultKey.charAt(0).toUpperCase() + defaultKey.slice(1) : `Course ${index + 1}`),
+                    defaultKey,
+                    items: Array.isArray(course.items) ? course.items : [],
+                };
+            })
+            .filter((course) => {
+                if (course.defaultKey) {
+                    if (seenDefaultKeys.has(course.defaultKey)) {
+                        return false;
+                    }
+                    seenDefaultKeys.add(course.defaultKey);
+                }
+
+                if (seenIds.has(course.id)) {
+                    return false;
+                }
+                seenIds.add(course.id);
+                return true;
+            })
+            .map(({ defaultKey, ...course }) => course);
+
+        if (normalized.length > 0) {
+            return normalized;
+        }
+    }
+
+    if (courses && typeof courses === 'object') {
+        const legacyOrder = ['starter', 'main', 'dessert'];
+        return legacyOrder.map((key) => ({
+            id: key,
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            items: Array.isArray(courses[key]) ? courses[key] : [],
+        }));
+    }
+
+    return fallbackRsvpSettings.menu_courses;
 }
 </script>

@@ -1,41 +1,43 @@
 <template>
     <div class="admin-ui min-h-screen bg-wedding-bg">
         <header class="border-b border-soft bg-white/90">
-            <div class="site-shell flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Wedding Admin</p>
-                    <h1 class="font-heading text-4xl">Content & Guest Management</h1>
-                </div>
+            <div class="site-shell py-6">
+                <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Wedding Admin</p>
+                <h1 class="font-heading text-4xl">Content & Guest Management</h1>
+            </div>
+        </header>
 
-                <div class="flex flex-wrap items-center gap-2">
+        <div class="admin-sticky-nav sticky top-0 z-40 border-y border-soft bg-white/95 backdrop-blur">
+            <div class="site-shell flex flex-wrap items-center justify-between gap-3 py-3">
+                <nav class="flex flex-wrap gap-2">
+                    <a
+                        v-for="item in navItems"
+                        :key="item.key"
+                        :href="item.href"
+                        class="admin-btn inline-flex items-center gap-2 border px-4 py-3 text-xs uppercase tracking-[0.15em]"
+                        :class="section === item.key ? 'admin-btn-active' : ''"
+                    >
+                        <span class="material-symbols-outlined btn-icon">{{ item.icon }}</span>
+                        {{ item.label }}
+                    </a>
+                </nav>
+
+                <div class="flex flex-wrap items-center gap-2 border-l border-soft pl-4">
                     <a
                         v-if="accountUrl"
                         :href="accountUrl"
-                        class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.14em]"
+                        class="admin-btn inline-flex items-center gap-2 border px-4 py-3 text-xs uppercase tracking-[0.14em]"
                     >
                         <span class="material-symbols-outlined btn-icon">person</span>
                         My Account
                     </a>
                     <form :action="logoutUrl" method="POST">
                         <input type="hidden" name="_token" :value="csrfToken">
-                        <button class="admin-btn button-dark inline-flex items-center gap-2 px-5 py-3 text-xs uppercase tracking-[0.16em]" type="submit"><span class="material-symbols-outlined btn-icon">logout</span>Logout</button>
+                        <button class="admin-btn admin-btn-danger-solid inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.16em]" type="submit"><span class="material-symbols-outlined btn-icon">logout</span>Logout</button>
                     </form>
                 </div>
             </div>
-
-            <nav class="site-shell flex flex-wrap gap-2 pb-6">
-                <a
-                    v-for="item in navItems"
-                    :key="item.key"
-                    :href="item.href"
-                    class="admin-btn inline-flex items-center gap-2 border px-4 py-2 text-xs uppercase tracking-[0.15em]"
-                    :class="section === item.key ? 'border-wedding-band bg-wedding-band text-white' : 'border-soft bg-white'"
-                >
-                    <span class="material-symbols-outlined btn-icon">{{ item.icon }}</span>
-                    {{ item.label }}
-                </a>
-            </nav>
-        </header>
+        </div>
 
         <main class="site-shell py-10">
             <section v-if="section === 'dashboard'" class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
@@ -50,30 +52,30 @@
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="font-heading text-3xl">Content</h2>
                     </div>
-                    <p class="mt-2 text-wedding-muted">Update text, imagery, and colors shown on your single-page wedding website.</p>
+                    <p class="mt-2 text-wedding-muted">Update text, imagery, and colours shown on your single-page wedding website.</p>
 
                     <div v-if="content" class="mt-8 space-y-6">
                         <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">1</span>
-                                <span class="font-heading text-3xl">Theme Colors</span>
+                                <span class="font-heading text-3xl">Theme Colours</span>
                             </h3>
-                            <p class="mt-2 text-sm text-wedding-muted">Primary section color applies to The Big Day and Ready to Celebrate sections. Button color applies to all dark buttons (hero button excluded).</p>
+                            <p class="mt-2 text-sm text-wedding-muted">Primary section colour applies to The Big Day and Ready to Celebrate sections. Button colour applies to all dark buttons (hero button excluded).</p>
                             <div class="mt-4 grid gap-4 md:grid-cols-2">
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Primary Section Color
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Primary Section Colour
                                     <div class="mt-2 flex items-center gap-3">
                                         <input v-model="content.theme.primary_color" type="color" class="h-12 w-16 border border-soft bg-white p-1">
                                         <input v-model="content.theme.primary_color" class="h-12 w-full border border-soft px-4 py-3 uppercase" placeholder="#22363A">
                                     </div>
                                 </label>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Button Color
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Button Colour
                                     <div class="mt-2 flex items-center gap-3">
                                         <input v-model="content.theme.button_color" type="color" class="h-12 w-16 border border-soft bg-white p-1">
                                         <input v-model="content.theme.button_color" class="h-12 w-full border border-soft px-4 py-3 uppercase" placeholder="#22363A">
                                     </div>
                                 </label>
                             </div>
-                            <p class="mt-3 text-xs text-wedding-muted">Use dark colors to maintain white text contrast.</p>
+                            <p class="mt-3 text-xs font-semibold text-wedding-muted">Use dark colours to maintain white text contrast.</p>
                         </div>
 
                         <div class="w-full py-8">
@@ -111,7 +113,7 @@
                                 <input v-model="content.hero.image" class="mt-2 w-full border border-soft px-4 py-3">
                             </label>
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Hero Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-2 w-full border border-soft px-4 py-3" @change="uploadContentImage($event, 'hero.image')">
+                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'hero.image')">
                             </label>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -143,6 +145,14 @@
                             <span class="section-step-badge">3</span>
                             <span class="font-heading text-3xl">Welcome</span>
                         </h3>
+                        <div class="section-toggle-row">
+                            <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('welcome') }" @click="toggleSectionVisibility('welcome')">
+                                <span class="section-toggle-thumb">
+                                    <span v-if="isSectionVisible('welcome')" class="material-symbols-outlined">check</span>
+                                </span>
+                            </button>
+                            <span class="section-toggle-note">Show or hide this section.</span>
+                        </div>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Heading
                                 <input v-model="content.welcome.heading" class="mt-2 w-full border border-soft px-4 py-3">
@@ -153,14 +163,14 @@
                         </div>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Letter</label>
-                        <RichTextEditor v-model="content.welcome.letter" />
+                        <RichTextEditor v-model="content.welcome.letter" tone="primary" />
 
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Image Path
                                 <input v-model="content.welcome.image" class="mt-2 w-full border border-soft px-4 py-3">
                             </label>
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Welcome Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-2 w-full border border-soft px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
+                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
                             </label>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -187,13 +197,88 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <div class="content-section-block content-section-odd">
+                        <div class="content-section-block content-section-odd mt-2">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">4</span>
+                                    <span class="font-heading text-3xl">Timeline</span>
+                                </h3>
+                                <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMax" @click="addTimelineItem">
+                                    <span class="material-symbols-outlined btn-icon">add</span>
+                                    Add Time
+                                </button>
+                            </div>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('timeline') }" @click="toggleSectionVisibility('timeline')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('timeline')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Timeline Heading
+                                    <input v-model="content.timeline.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                </label>
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">The Big Day Accent (Date/Subtitle)
+                                    <input v-model="content.timeline.dateAccent" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                </label>
+                            </div>
+
+                            <p v-if="isTimelineAtMax || isTimelineAtMin" class="mt-3 text-sm text-wedding-danger">
+                                {{ isTimelineAtMax ? 'Maximum of 5 timeline items reached.' : 'Minimum of 2 timeline items is required.' }}
+                            </p>
+
+                            <div class="mt-4 space-y-3">
+                                <div
+                                    v-for="(item, index) in content.timeline.items"
+                                    :id="`timeline-item-${index}`"
+                                    :key="index"
+                                    class="grid gap-3 border border-soft bg-wedding-bg p-3 md:grid-cols-[1fr_1fr_3fr_auto]"
+                                    @dragover.prevent="onDragOver('timeline', index)"
+                                    @drop="onDrop('timeline', index)"
+                                >
+                                    <input v-model="item.time" placeholder="Time" class="border border-soft bg-white px-3 py-2">
+                                    <input v-model="item.title" placeholder="Title" class="border border-soft bg-white px-3 py-2">
+                                    <input v-model="item.description" placeholder="Description" class="w-full border border-soft bg-white px-3 py-2">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                            draggable="true"
+                                            @dragstart="onDragStart('timeline', index)"
+                                            @dragend="onDragEnd"
+                                        >
+                                            <span class="material-symbols-outlined btn-icon">drag_indicator</span>
+                                            Move
+                                        </button>
+                                        <button type="button" class="admin-btn admin-btn-danger inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMin" @click="removeTimelineItem(index)">
+                                            <span class="material-symbols-outlined btn-icon">{{ isTimelineAtMin ? 'block' : 'close' }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+                        <div class="content-section-block content-section-even">
                         <h3 class="section-heading-with-badge">
-                            <span class="section-step-badge">4</span>
+                            <span class="section-step-badge">5</span>
                             <span class="font-heading text-3xl">Our Story</span>
                         </h3>
+                        <div class="section-toggle-row">
+                            <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('story') }" @click="toggleSectionVisibility('story')">
+                                <span class="section-toggle-thumb">
+                                    <span v-if="isSectionVisible('story')" class="material-symbols-outlined">check</span>
+                                </span>
+                            </button>
+                            <span class="section-toggle-note">Show or hide this section.</span>
+                        </div>
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Heading
-                            <input v-model="content.story.heading" class="mt-2 w-full border border-soft px-4 py-3">
+                            <input v-model="content.story.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                         </label>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Accent (Date/Subtitle)
@@ -201,14 +286,14 @@
                         </label>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Text</label>
-                        <RichTextEditor v-model="content.story.text" />
+                        <RichTextEditor v-model="content.story.text" tone="primary" />
 
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Image Path
                                 <input v-model="content.story.image" class="mt-2 w-full border border-soft px-4 py-3">
                             </label>
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Our Story Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-2 w-full border border-soft px-4 py-3" @change="uploadContentImage($event, 'story.image')">
+                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'story.image')">
                             </label>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -235,63 +320,37 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-
-                        <div class="content-section-block content-section-even mt-2">
-                            <div class="mb-3 flex items-center justify-between">
-                                <h3 class="section-heading-with-badge">
-                                    <span class="section-step-badge">5</span>
-                                    <span class="font-heading text-3xl">Timeline</span>
-                                </h3>
-                                <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addTimelineItem">Add Item</button>
-                            </div>
-
-                            <div class="grid gap-4 md:grid-cols-2">
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Timeline Heading
-                                    <input v-model="content.timeline.heading" class="mt-2 w-full border border-soft px-4 py-3">
-                                </label>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">The Big Day Accent (Date/Subtitle)
-                                    <input v-model="content.timeline.dateAccent" class="mt-2 w-full border border-soft px-4 py-3">
-                                </label>
-                            </div>
-
-                            <div class="mt-4 space-y-3">
-                                <div v-for="(item, index) in content.timeline.items" :key="index" class="grid gap-3 border border-soft p-3 md:grid-cols-3">
-                                    <input v-model="item.time" placeholder="Time" class="border border-soft px-3 py-2">
-                                    <input v-model="item.title" placeholder="Title" class="border border-soft px-3 py-2">
-                                    <div class="flex gap-2">
-                                        <input v-model="item.description" placeholder="Description" class="w-full border border-soft px-3 py-2">
-                                        <button type="button" class="admin-btn admin-btn-danger px-3" @click="removeTimelineItem(index)">X</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="w-full py-8">
-                            <hr class="w-full border-t-2 border-wedding-band">
-                        </div>
                         <div class="content-section-block content-section-odd">
                         <h3 class="section-heading-with-badge">
                             <span class="section-step-badge">6</span>
-                            <span class="font-heading text-3xl">Venue, Travel, and FAQ</span>
+                            <span class="font-heading text-3xl">Venue</span>
                         </h3>
+                        <div class="section-toggle-row">
+                            <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('venue') }" @click="toggleSectionVisibility('venue')">
+                                <span class="section-toggle-thumb">
+                                    <span v-if="isSectionVisible('venue')" class="material-symbols-outlined">check</span>
+                                </span>
+                            </button>
+                            <span class="section-toggle-note">Show or hide this section.</span>
+                        </div>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Name
-                                <input v-model="content.details.venue.name" class="mt-2 w-full border border-soft px-4 py-3">
+                                <input v-model="content.details.venue.name" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                             </label>
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Address
-                                <input v-model="content.details.venue.address" class="mt-2 w-full border border-soft px-4 py-3">
+                                <input v-model="content.details.venue.address" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                             </label>
                         </div>
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Blurb</label>
-                        <RichTextEditor v-model="content.details.venue.blurb" />
+                        <RichTextEditor v-model="content.details.venue.blurb" tone="secondary" />
 
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Details Image Path
-                                <input v-model="content.details.image" class="mt-2 w-full border border-soft px-4 py-3">
+                                <input v-model="content.details.image" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                             </label>
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Venue Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-2 w-full border border-soft px-4 py-3" @change="uploadContentImage($event, 'details.image')">
+                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'details.image')">
                             </label>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -313,22 +372,6 @@
                                 >
                             </div>
                         </div>
-
-                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Travel Information</label>
-                        <RichTextEditor v-model="content.details.travel" />
-
-                        <div class="grid gap-4 md:grid-cols-3">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Title
-                                <input v-model="content.cta.title" class="mt-2 w-full border border-soft px-4 py-3">
-                            </label>
-                            <div>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Text</label>
-                                <RichTextEditor v-model="content.cta.text" />
-                            </div>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Button Label
-                                <input v-model="content.cta.buttonLabel" class="mt-2 w-full border border-soft px-4 py-3">
-                            </label>
-                        </div>
                         </div>
 
                         <div class="w-full py-8">
@@ -338,13 +381,58 @@
                         <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">7</span>
+                                <span class="font-heading text-3xl">Travel & RSVP CTA</span>
+                            </h3>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('travel') }" @click="toggleSectionVisibility('travel')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('travel')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
+                            </div>
+
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Travel Information</label>
+                            <RichTextEditor v-model="content.details.travel" tone="primary" />
+
+                            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                <div class="space-y-4 md:col-span-1">
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Title
+                                        <input v-model="content.cta.title" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                    </label>
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Button Label
+                                        <input v-model="content.cta.buttonLabel" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                    </label>
+                                </div>
+                                <div class="md:col-span-1">
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Text</label>
+                                    <RichTextEditor v-model="content.cta.text" tone="primary" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div class="content-section-block content-section-odd">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">8</span>
                                 <span class="font-heading text-3xl">Menu & RSVP Settings</span>
                             </h3>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('menu') }" @click="toggleSectionVisibility('menu')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('menu')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
+                            </div>
                             <p class="mt-2 text-sm text-wedding-muted">This controls the menu section shown above FAQs and whether RSVP asks guests for meal selections.</p>
 
                             <div class="mt-4 grid gap-4 md:grid-cols-2">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Section Heading
-                                    <input v-model="rsvpSettings.menu_heading" class="mt-2 w-full border border-soft px-4 py-3" placeholder="Wedding Menu">
+                                    <input v-model="rsvpSettings.menu_heading" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="Wedding Menu">
                                 </label>
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP Meal Type
                                     <select v-model="rsvpSettings.meal_mode" class="mt-2 w-full border border-soft bg-white px-4 py-3">
@@ -356,73 +444,97 @@
 
                             <div class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Intro Text</label>
-                                <RichTextEditor v-model="rsvpSettings.menu_intro" />
+                                <RichTextEditor v-model="rsvpSettings.menu_intro" tone="secondary" />
                             </div>
 
-                            <div class="mt-4 grid gap-4 md:grid-cols-2">
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Notes Card Title
-                                    <input v-model="rsvpSettings.menu_note_title" class="mt-2 w-full border border-soft px-4 py-3" placeholder="Dining Notes">
+                            <div class="mt-4 grid gap-4 md:grid-cols-3">
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted md:col-span-1">Menu Notes Card Title
+                                    <input v-model="rsvpSettings.menu_note_title" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="Dining Notes">
                                 </label>
-                                <div>
+                                <div class="md:col-span-2">
                                     <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Notes Card Text</label>
-                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" />
+                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" tone="secondary" />
                                 </div>
                             </div>
 
-                            <div class="mt-6 space-y-6">
-                                <div class="border border-soft p-4">
-                                    <div class="mb-3 flex items-center justify-between">
-                                        <h4 class="font-heading text-xl">Starter</h4>
-                                        <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addMenuCourseItem('starter')">Add Starter</button>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div v-for="(item, index) in rsvpSettings.menu_courses.starter" :key="`starter-${index}`" class="grid gap-3 border border-soft p-3">
-                                            <input v-model="item.title" class="border border-soft px-3 py-2" placeholder="Dish title">
-                                            <input v-model="item.description" class="border border-soft px-3 py-2" placeholder="Dish description">
-                                            <div class="flex justify-end">
-                                                <button type="button" class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourseItem('starter', index)">Remove</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="menu-courses-divider">
+                                <hr class="w-full border-t border-wedding-band/70">
+                            </div>
 
-                                <div class="border border-soft p-4">
-                                    <div class="mb-3 flex items-center justify-between">
-                                        <h4 class="font-heading text-xl">Main</h4>
-                                        <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addMenuCourseItem('main')">Add Main</button>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div v-for="(item, index) in rsvpSettings.menu_courses.main" :key="`main-${index}`" class="grid gap-3 border border-soft p-3">
-                                            <input v-model="item.title" class="border border-soft px-3 py-2" placeholder="Dish title">
-                                            <input v-model="item.description" class="border border-soft px-3 py-2" placeholder="Dish description">
-                                            <div class="flex justify-end">
-                                                <button type="button" class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourseItem('main', index)">Remove</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="mt-3 text-xs text-wedding-muted">Main dish titles are used automatically as RSVP meal choices when guests choose options.</p>
-                                </div>
+                            <h4 class="font-heading text-2xl">Build Your Menu</h4>
 
-                                <div class="border border-soft p-4">
-                                    <div class="mb-3 flex items-center justify-between">
-                                        <h4 class="font-heading text-xl">Dessert</h4>
-                                        <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addMenuCourseItem('dessert')">Add Dessert</button>
+                            <div class="mb-4 flex justify-end">
+                                <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="addMenuCourse">
+                                    <span class="material-symbols-outlined btn-icon">add</span>
+                                    Add Course
+                                </button>
+                            </div>
+
+                            <div class="mt-4 space-y-6">
+                                <div
+                                    v-for="(course, courseIndex) in rsvpSettings.menu_courses"
+                                    :id="`menu-course-${courseIndex}`"
+                                    :key="course.id || `course-${courseIndex}`"
+                                    class="border border-soft bg-wedding-bg p-4"
+                                    @dragover.prevent="onDragOver('courses', courseIndex)"
+                                    @drop="onDrop('courses', courseIndex)"
+                                >
+                                    <div class="grid gap-3">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Course Name</label>
+                                            <div class="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                    draggable="true"
+                                                    @dragstart="onDragStart('courses', courseIndex)"
+                                                    @dragend="onDragEnd"
+                                                >
+                                                    <span class="material-symbols-outlined btn-icon">drag_indicator</span>
+                                                    Move
+                                                </button>
+                                                <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourse(courseIndex)">
+                                                    <span class="material-symbols-outlined btn-icon">close</span>
+                                                    Remove Course
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input v-model="course.name" class="w-full border border-soft bg-white px-4 py-3" placeholder="Starter">
+                                    </div>
+
+                                    <div class="mb-4 mt-5 flex items-center justify-between">
+                                        <h4 class="font-heading text-xl">{{ course.name || `Course ${courseIndex + 1}` }}</h4>
+                                        <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="addMenuCourseItem(courseIndex)">
+                                            <span class="material-symbols-outlined btn-icon">add</span>
+                                            Add {{ course.name || 'Course' }}
+                                        </button>
                                     </div>
                                     <div class="space-y-3">
-                                        <div v-for="(item, index) in rsvpSettings.menu_courses.dessert" :key="`dessert-${index}`" class="grid gap-3 border border-soft p-3">
-                                            <input v-model="item.title" class="border border-soft px-3 py-2" placeholder="Dish title">
-                                            <input v-model="item.description" class="border border-soft px-3 py-2" placeholder="Dish description">
+                                        <div
+                                            v-for="(item, itemIndex) in course.items"
+                                            :id="`menu-course-${courseIndex}-item-${itemIndex}`"
+                                            :key="`${course.id || courseIndex}-${itemIndex}`"
+                                            class="grid gap-3 border border-soft bg-white p-3"
+                                        >
+                                            <input v-model="item.title" class="border border-soft bg-white px-3 py-2" placeholder="Dish title">
+                                            <input v-model="item.description" class="border border-soft bg-white px-3 py-2" placeholder="Dish description">
                                             <div class="flex justify-end">
-                                                <button type="button" class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourseItem('dessert', index)">Remove</button>
+                                                <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourseItem(courseIndex, itemIndex)">
+                                                    <span class="material-symbols-outlined btn-icon">close</span>
+                                                    Remove {{ course.name || 'Course' }}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
+                                    <p v-if="courseIndex === 1" class="mt-3 text-xs text-wedding-muted">
+                                        Main-like course titles are used automatically as RSVP meal choices when guests choose options.
+                                    </p>
                                 </div>
                             </div>
 
                             <div v-if="rsvpSettings.meal_mode === 'set_menu'" class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Set Menu Description</label>
-                                <RichTextEditor v-model="rsvpSettings.set_menu_description" />
+                                <RichTextEditor v-model="rsvpSettings.set_menu_description" tone="secondary" />
                             </div>
                         </div>
 
@@ -430,23 +542,58 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-odd">
+                        <div class="content-section-block content-section-even">
                             <div class="mb-3 flex items-center justify-between">
                                 <h3 class="section-heading-with-badge">
-                                    <span class="section-step-badge">8</span>
+                                    <span class="section-step-badge">9</span>
                                     <span class="font-heading text-3xl">FAQ Items</span>
                                 </h3>
-                                <button type="button" class="admin-btn border border-wedding-band bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" @click="addFaqItem">Add FAQ</button>
+                                <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="addFaqItem">
+                                    <span class="material-symbols-outlined btn-icon">add</span>
+                                    Add FAQ
+                                </button>
+                            </div>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('faqs') }" @click="toggleSectionVisibility('faqs')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('faqs')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
                             </div>
 
                             <div class="space-y-3">
-                                <div v-for="(faq, index) in content.details.faqs" :key="index" class="grid gap-3 border border-soft p-3 md:grid-cols-2">
-                                    <input v-model="faq.question" placeholder="Question" class="border border-soft px-3 py-2">
-                                    <div class="flex gap-2">
-                                        <div class="w-full">
-                                            <RichTextEditor v-model="faq.answer" />
+                                <div
+                                    v-for="(faq, index) in content.details.faqs"
+                                    :id="`faq-item-${index}`"
+                                    :key="index"
+                                    class="rounded border border-soft bg-wedding-bg p-3"
+                                    @dragover.prevent="onDragOver('faqs', index)"
+                                    @drop="onDrop('faqs', index)"
+                                >
+                                    <div class="grid gap-3 md:grid-cols-3">
+                                        <input v-model="faq.question" placeholder="Question" class="border border-soft bg-white px-3 py-2 md:col-span-1">
+                                        <div class="md:col-span-2">
+                                            <RichTextEditor v-model="faq.answer" tone="secondary" surface="white" button-tone="primary" />
                                         </div>
-                                        <button type="button" class="admin-btn admin-btn-danger px-3" @click="removeFaqItem(index)">X</button>
+                                    </div>
+                                    <div class="mt-3 flex justify-end">
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                draggable="true"
+                                                @dragstart="onDragStart('faqs', index)"
+                                                @dragend="onDragEnd"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">drag_indicator</span>
+                                                Move
+                                            </button>
+                                            <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeFaqItem(index)">
+                                                <span class="material-symbols-outlined btn-icon">close</span>
+                                                Remove FAQ
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -480,7 +627,10 @@
                                 <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP Code</label>
                                 <input v-model="newParty.code" placeholder="RSVP Code" class="h-12 w-full border border-soft px-4 py-3 uppercase">
                             </div>
-                            <button class="admin-btn h-12 bg-wedding-band px-3 text-xs uppercase tracking-[0.12em] text-white" type="button" @click="generateCodeForCreate">Generate</button>
+                            <button class="admin-btn h-12 inline-flex items-center gap-2 px-3 text-xs uppercase tracking-[0.12em]" type="button" @click="generateCodeForCreate">
+                                <span class="material-symbols-outlined btn-icon">autorenew</span>
+                                Generate
+                            </button>
                         </div>
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
@@ -491,7 +641,10 @@
                             <input v-model="newParty.notes" placeholder="Notes" class="w-full border border-soft px-4 py-3">
                         </div>
                     </div>
-                    <button class="admin-btn button-dark mt-4" type="button" @click="createParty">Create Party</button>
+                    <button class="admin-btn admin-btn-success mt-4 inline-flex items-center gap-2" type="button" @click="createParty">
+                        <span class="material-symbols-outlined btn-icon">add</span>
+                        Create Household
+                    </button>
                     <p v-if="globalMessage" class="mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                         {{ globalMessage }}
                     </p>
@@ -553,7 +706,10 @@
                                     <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP Code</label>
                                     <input v-model="selectedParty.code" placeholder="RSVP Code" class="h-12 w-full border border-soft px-4 py-3 uppercase">
                                 </div>
-                                <button class="admin-btn h-12 bg-wedding-band px-3 text-xs uppercase tracking-[0.12em] text-white" type="button" @click="generateCodeForSelectedParty">Generate</button>
+                                <button class="admin-btn h-12 inline-flex items-center gap-2 px-3 text-xs uppercase tracking-[0.12em]" type="button" @click="generateCodeForSelectedParty">
+                                    <span class="material-symbols-outlined btn-icon">autorenew</span>
+                                    Generate
+                                </button>
                             </div>
                             <div>
                                 <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
@@ -565,8 +721,14 @@
                             </div>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-2">
-                            <button class="admin-btn button-dark" type="button" @click="updateParty">Save Party</button>
-                            <button class="admin-btn admin-btn-danger px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="deleteParty">Delete</button>
+                            <button class="admin-btn inline-flex items-center gap-2" type="button" @click="updateParty">
+                                <span class="material-symbols-outlined btn-icon">save</span>
+                                Save Party
+                            </button>
+                            <button class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="deleteParty">
+                                <span class="material-symbols-outlined btn-icon">close</span>
+                                Remove Household
+                            </button>
                         </div>
 
                         <h4 class="mt-8 font-heading text-2xl">Guests</h4>
@@ -579,8 +741,14 @@
                                     Child
                                 </label>
                                 <div class="flex gap-2">
-                                    <button class="admin-btn border border-soft px-3 text-xs" type="button" @click="updateGuest(guest)">Save</button>
-                                    <button class="admin-btn admin-btn-danger px-3 text-xs" type="button" @click="deleteGuest(guest)">Delete</button>
+                                    <button class="admin-btn inline-flex items-center gap-1 px-3 text-xs" type="button" @click="updateGuest(guest)">
+                                        <span class="material-symbols-outlined btn-icon">save</span>
+                                        Save
+                                    </button>
+                                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 text-xs" type="button" @click="deleteGuest(guest)">
+                                        <span class="material-symbols-outlined btn-icon">close</span>
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -594,11 +762,14 @@
                                 <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Last Name</label>
                                 <input v-model="newGuest.last_name" placeholder="Last name" class="w-full border border-soft px-3 py-2">
                             </div>
-                            <label class="inline-flex h-[42px] items-center gap-2 border border-soft px-3 py-2 text-sm">
+                            <label class="inline-flex h-12 items-center gap-2 border border-soft bg-white px-3 py-2 text-sm">
                                 <input v-model="newGuest.is_child" type="checkbox">
                                 Child
                             </label>
-                            <button class="admin-btn h-[42px] bg-wedding-band px-3 py-2 text-xs uppercase tracking-[0.12em] text-white" type="button" @click="addGuest">Add Guest</button>
+                            <button class="admin-btn admin-btn-success h-12 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addGuest">
+                                <span class="material-symbols-outlined btn-icon">person_add</span>
+                                Add Guest
+                            </button>
                         </div>
                         <p v-if="globalMessage" class="mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                             {{ globalMessage }}
@@ -657,11 +828,12 @@
                             </div>
 
                             <button
-                                class="admin-btn px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                :class="row.rsvp?.status ? 'border border-soft bg-white' : 'button-dark'"
+                                class="admin-btn inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                :class="!row.rsvp?.status ? 'admin-btn-success' : ''"
                                 type="button"
                                 @click="editRsvp(row)"
                             >
+                                <span class="material-symbols-outlined btn-icon">{{ row.rsvp?.status ? 'edit' : 'add' }}</span>
                                 {{ row.rsvp?.status ? 'Edit RSVP' : 'Add RSVP' }}
                             </button>
                         </div>
@@ -693,7 +865,10 @@
             <div class="mx-auto mt-6 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:mt-16 md:p-8">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="font-heading text-3xl">{{ editingRsvp.rsvp?.status ? 'Update RSVP' : 'Add RSVP' }} · {{ editingRsvp.party_name }}</h3>
-                    <button class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpModal">X Close</button>
+                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpModal">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Close
+                    </button>
                 </div>
 
                 <div class="mt-5 grid gap-3 md:grid-cols-2">
@@ -713,8 +888,14 @@
                 </label>
 
                 <div class="mt-5 flex flex-wrap justify-end gap-3">
-                    <button class="admin-btn admin-btn-danger px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpModal">X Close</button>
-                    <button class="admin-btn button-dark" type="button" @click="saveAdminRsvp">Save RSVP</button>
+                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpModal">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Close
+                    </button>
+                    <button class="admin-btn inline-flex items-center gap-2" type="button" @click="saveAdminRsvp">
+                        <span class="material-symbols-outlined btn-icon">save</span>
+                        Save RSVP
+                    </button>
                 </div>
 
                 <p v-if="globalMessage" class="mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -723,6 +904,36 @@
                 <p v-if="globalError" class="mt-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {{ globalError }}
                 </p>
+            </div>
+        </div>
+
+        <div v-if="confirmModal.open" class="fixed inset-0 z-[90] bg-black/40 p-4" @click.self="closeConfirmModal(false)">
+            <div class="mx-auto mt-20 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
+                <h3 class="font-heading text-3xl">{{ confirmModal.title }}</h3>
+                <p class="mt-3 text-wedding-muted">{{ confirmModal.message }}</p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="closeConfirmModal(false)">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Cancel
+                    </button>
+                    <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="closeConfirmModal(true)">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="noticeModal.open" class="fixed inset-0 z-[85] bg-black/40 p-4" @click.self="closeNoticeModal">
+            <div class="mx-auto mt-24 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
+                <h3 class="font-heading text-3xl">{{ noticeModal.title }}</h3>
+                <p class="mt-3 text-wedding-muted">{{ noticeModal.message }}</p>
+                <div class="mt-6 flex justify-end">
+                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="closeNoticeModal">
+                        <span class="material-symbols-outlined btn-icon">check</span>
+                        OK
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -754,12 +965,12 @@
                             :href="previewUrl"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="admin-btn inline-flex items-center justify-center gap-2 border border-soft bg-white px-8 py-4 text-xs uppercase tracking-[0.2em]"
+                            class="admin-btn inline-flex items-center justify-center gap-2 border px-8 py-4 text-xs uppercase tracking-[0.2em]"
                         >
                             <span class="material-symbols-outlined btn-icon">visibility</span>
                             Open Public Preview
                         </a>
-                        <button class="admin-btn button-dark inline-flex items-center gap-2" type="button" @click="saveContent"><span class="material-symbols-outlined btn-icon">save</span>Save Content</button>
+                        <button class="admin-btn button-dark admin-btn-success inline-flex items-center gap-2" type="button" @click="saveContent"><span class="material-symbols-outlined btn-icon">save</span>Save Content</button>
                     </div>
                 </div>
             </div>
@@ -790,6 +1001,23 @@ const globalError = ref('');
 const lastSavedAt = ref('');
 const lastSavedContentSnapshot = ref('');
 const lastSavedRsvpSnapshot = ref('');
+const timelineMinItems = 2;
+const timelineMaxItems = 5;
+const confirmResolve = ref(null);
+const confirmModal = reactive({
+    open: false,
+    title: '',
+    message: '',
+});
+const noticeModal = reactive({
+    open: false,
+    title: '',
+    message: '',
+});
+const dragState = reactive({
+    type: '',
+    fromIndex: -1,
+});
 
 const stats = ref({
     total_households: 0,
@@ -800,6 +1028,12 @@ const stats = ref({
 });
 
 const content = ref(null);
+const defaultMenuCourses = [
+    { id: 'starter', name: 'Starter', items: [{ title: '', description: '' }] },
+    { id: 'main', name: 'Main', items: [{ title: '', description: '' }] },
+    { id: 'dessert', name: 'Dessert', items: [{ title: '', description: '' }] },
+];
+
 const rsvpSettings = ref({
     meal_mode: 'options',
     menu_heading: 'Wedding Menu',
@@ -808,11 +1042,10 @@ const rsvpSettings = ref({
     menu_note_title: 'Dining Notes',
     menu_note_text: '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
     meal_options: [],
-    menu_courses: {
-        starter: [{ title: '', description: '' }],
-        main: [{ title: '', description: '' }],
-        dessert: [{ title: '', description: '' }],
-    },
+    menu_courses: defaultMenuCourses.map((course) => ({
+        ...course,
+        items: course.items.map((item) => ({ ...item })),
+    })),
 });
 const parties = ref([]);
 const partySearchTerm = ref('');
@@ -869,6 +1102,8 @@ const hasUnsavedChanges = computed(() => {
     return serialize(content.value) !== lastSavedContentSnapshot.value
         || serialize(rsvpSettings.value) !== lastSavedRsvpSnapshot.value;
 });
+const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
+const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
 const filteredRsvpRows = computed(() =>
     rsvpRows.value.filter((row) => {
         const searchTerm = rsvpSearchTerm.value.trim().toLowerCase();
@@ -941,6 +1176,7 @@ async function loadContent() {
         const response = await window.axios.get(`${apiBaseUrl}/content`);
         content.value = response.data.content;
         ensureImageFocusDefaults();
+        ensureSectionVisibilityDefaults();
         lastSavedAt.value = formatDateTime(response.data.last_saved_at);
         const legacyMealChoicesEnabled = response.data.rsvp_settings?.meal_choices_enabled;
         const defaultMealMode = legacyMealChoicesEnabled === false ? 'set_menu' : 'options';
@@ -954,17 +1190,7 @@ async function loadContent() {
             meal_options: response.data.rsvp_settings?.meal_options?.length
                 ? response.data.rsvp_settings.meal_options
                 : [],
-            menu_courses: {
-                starter: response.data.rsvp_settings?.menu_courses?.starter?.length
-                    ? response.data.rsvp_settings.menu_courses.starter
-                    : [{ title: '', description: '' }],
-                main: response.data.rsvp_settings?.menu_courses?.main?.length
-                    ? response.data.rsvp_settings.menu_courses.main
-                    : [{ title: '', description: '' }],
-                dessert: response.data.rsvp_settings?.menu_courses?.dessert?.length
-                    ? response.data.rsvp_settings.menu_courses.dessert
-                    : [{ title: '', description: '' }],
-            },
+            menu_courses: normalizeMenuCourses(response.data.rsvp_settings?.menu_courses),
         };
         captureSavedSnapshots();
     } catch (error) {
@@ -999,18 +1225,41 @@ function formatStatus(status) {
 }
 
 function addTimelineItem() {
+    if (!content.value) {
+        return;
+    }
+    if (isTimelineAtMax.value) {
+        openNoticeModal('Timeline limit reached', 'You can only have a maximum of 5 timeline items in this section.');
+        return;
+    }
+
     content.value.timeline.items.push({ time: '', title: '', description: '' });
+    const targetIndex = content.value.timeline.items.length - 1;
+    scrollToElementById(`timeline-item-${targetIndex}`);
 }
 
-function removeTimelineItem(index) {
+async function removeTimelineItem(index) {
+    if (isTimelineAtMin.value) {
+        return;
+    }
+    const confirmed = await openConfirmModal('Remove Timeline Item', 'Are you sure you want to remove this timeline item?');
+    if (!confirmed) {
+        return;
+    }
     content.value.timeline.items.splice(index, 1);
 }
 
 function addFaqItem() {
     content.value.details.faqs.push({ question: '', answer: '' });
+    const targetIndex = content.value.details.faqs.length - 1;
+    scrollToElementById(`faq-item-${targetIndex}`);
 }
 
-function removeFaqItem(index) {
+async function removeFaqItem(index) {
+    const confirmed = await openConfirmModal('Remove FAQ', 'Are you sure you want to remove this FAQ item?');
+    if (!confirmed) {
+        return;
+    }
     content.value.details.faqs.splice(index, 1);
 }
 
@@ -1034,9 +1283,13 @@ async function saveContent() {
         if (response.data?.content) {
             content.value = response.data.content;
             ensureImageFocusDefaults();
+            ensureSectionVisibilityDefaults();
         }
         if (response.data?.rsvp_settings) {
-            rsvpSettings.value = response.data.rsvp_settings;
+            rsvpSettings.value = {
+                ...response.data.rsvp_settings,
+                menu_courses: normalizeMenuCourses(response.data.rsvp_settings?.menu_courses),
+            };
         }
         lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
         captureSavedSnapshots();
@@ -1046,20 +1299,64 @@ async function saveContent() {
     }
 }
 
-function addMenuCourseItem(courseKey) {
-    if (!rsvpSettings.value.menu_courses?.[courseKey]) {
-        rsvpSettings.value.menu_courses[courseKey] = [];
+function addMenuCourse() {
+    if (!Array.isArray(rsvpSettings.value.menu_courses)) {
+        rsvpSettings.value.menu_courses = [];
     }
-    rsvpSettings.value.menu_courses[courseKey].push({ title: '', description: '' });
+
+    rsvpSettings.value.menu_courses.push({
+        id: `course-${Date.now()}`,
+        name: `Course ${rsvpSettings.value.menu_courses.length + 1}`,
+        items: [{ title: '', description: '' }],
+    });
+    const courseIndex = rsvpSettings.value.menu_courses.length - 1;
+    scrollToElementById(`menu-course-${courseIndex}`);
 }
 
-function removeMenuCourseItem(courseKey, index) {
-    if (!rsvpSettings.value.menu_courses?.[courseKey]) {
+async function removeMenuCourse(courseIndex) {
+    if ((rsvpSettings.value.menu_courses || []).length <= 1) {
+        openNoticeModal('Cannot remove course', 'At least one menu course is required.');
         return;
     }
-    rsvpSettings.value.menu_courses[courseKey].splice(index, 1);
-    if (rsvpSettings.value.menu_courses[courseKey].length === 0) {
-        rsvpSettings.value.menu_courses[courseKey].push({ title: '', description: '' });
+
+    const confirmed = await openConfirmModal('Remove Course', 'Are you sure you want to remove this course?');
+    if (!confirmed) {
+        return;
+    }
+
+    rsvpSettings.value.menu_courses.splice(courseIndex, 1);
+}
+
+function addMenuCourseItem(courseIndex) {
+    if (!Array.isArray(rsvpSettings.value.menu_courses)) {
+        rsvpSettings.value.menu_courses = [];
+    }
+    if (!rsvpSettings.value.menu_courses[courseIndex]) {
+        return;
+    }
+
+    if (!Array.isArray(rsvpSettings.value.menu_courses[courseIndex].items)) {
+        rsvpSettings.value.menu_courses[courseIndex].items = [];
+    }
+    rsvpSettings.value.menu_courses[courseIndex].items.push({ title: '', description: '' });
+    const itemIndex = rsvpSettings.value.menu_courses[courseIndex].items.length - 1;
+    scrollToElementById(`menu-course-${courseIndex}-item-${itemIndex}`);
+}
+
+async function removeMenuCourseItem(courseIndex, itemIndex) {
+    const course = rsvpSettings.value.menu_courses?.[courseIndex];
+    if (!course || !Array.isArray(course.items)) {
+        return;
+    }
+
+    const confirmed = await openConfirmModal('Remove Course Item', 'Are you sure you want to remove this menu item?');
+    if (!confirmed) {
+        return;
+    }
+
+    course.items.splice(itemIndex, 1);
+    if (course.items.length === 0) {
+        course.items.push({ title: '', description: '' });
     }
 }
 
@@ -1096,6 +1393,110 @@ function ensureImageFocusDefaults() {
             content.value[section][key] = 50;
         }
     });
+}
+
+function ensureSectionVisibilityDefaults() {
+    if (!content.value) {
+        return;
+    }
+
+    if (typeof content.value.section_visibility !== 'object' || content.value.section_visibility === null) {
+        content.value.section_visibility = {};
+    }
+
+    const defaults = {
+        welcome: true,
+        story: true,
+        timeline: true,
+        venue: true,
+        travel: true,
+        menu: true,
+        faqs: true,
+    };
+
+    Object.entries(defaults).forEach(([key, defaultValue]) => {
+        if (typeof content.value.section_visibility[key] !== 'boolean') {
+            content.value.section_visibility[key] = defaultValue;
+        }
+    });
+}
+
+function isSectionVisible(sectionKey) {
+    return Boolean(content.value?.section_visibility?.[sectionKey]);
+}
+
+function toggleSectionVisibility(sectionKey) {
+    ensureSectionVisibilityDefaults();
+    content.value.section_visibility[sectionKey] = !Boolean(content.value.section_visibility[sectionKey]);
+}
+
+function normalizeMenuCourses(courses) {
+    const defaultNameKeys = new Set(['starter', 'main', 'dessert']);
+    const seenDefaultKeys = new Set();
+    const seenIds = new Set();
+    let dynamicIndex = 1;
+
+    if (Array.isArray(courses) && courses.length > 0) {
+        const normalized = courses
+            .map((course, index) => {
+                const rawId = (course.id || '').toString().trim().toLowerCase();
+                const name = (course.name || '').toString().trim();
+                const nameKey = name.toLowerCase();
+                const defaultKey = defaultNameKeys.has(rawId) ? rawId : (defaultNameKeys.has(nameKey) ? nameKey : null);
+                const id = rawId || `course-${index + 1}`;
+
+                return {
+                    id,
+                    name: name || (defaultKey ? defaultKey.charAt(0).toUpperCase() + defaultKey.slice(1) : `Course ${index + 1}`),
+                    defaultKey,
+                    items: normalizeCourseItems(course.items),
+                };
+            })
+            .filter((course) => {
+                if (course.defaultKey) {
+                    if (seenDefaultKeys.has(course.defaultKey)) {
+                        return false;
+                    }
+                    seenDefaultKeys.add(course.defaultKey);
+                }
+
+                if (seenIds.has(course.id)) {
+                    return false;
+                }
+                seenIds.add(course.id);
+                return true;
+            })
+            .map(({ defaultKey, ...course }) => course);
+
+        if (normalized.length > 0) {
+            return normalized;
+        }
+    }
+
+    if (courses && typeof courses === 'object') {
+        return ['starter', 'main', 'dessert'].map((key) => ({
+            id: key,
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            items: normalizeCourseItems(courses[key]),
+        }));
+    }
+
+    return defaultMenuCourses.map((course) => ({
+        id: course.id || `course-${dynamicIndex++}`,
+        name: course.name,
+        items: normalizeCourseItems(course.items.map((item) => ({ ...item }))),
+    }));
+}
+
+function normalizeCourseItems(items) {
+    if (!Array.isArray(items) || items.length === 0) {
+        return [{ title: '', description: '' }];
+    }
+
+    return items.map((item) => ({
+        title: (item?.title || '').toString(),
+        description: (item?.description || '').toString(),
+    }));
 }
 
 async function uploadContentImage(event, field) {
@@ -1237,7 +1638,11 @@ async function deleteParty() {
         return;
     }
 
-    if (!window.confirm('Delete this household and all guests/RSVP data?')) {
+    const confirmed = await openConfirmModal(
+        'Remove Household',
+        'Are you sure you want to remove this household and all guests/RSVP data?'
+    );
+    if (!confirmed) {
         return;
     }
 
@@ -1295,7 +1700,8 @@ async function updateGuest(guest) {
 
 async function deleteGuest(guest) {
     clearError();
-    if (!window.confirm('Remove this guest?')) {
+    const confirmed = await openConfirmModal('Remove Guest', 'Are you sure you want to remove this guest?');
+    if (!confirmed) {
         return;
     }
 
@@ -1376,6 +1782,91 @@ async function importParties(event) {
     }
 }
 
+function openConfirmModal(title, message) {
+    confirmModal.title = title;
+    confirmModal.message = message;
+    confirmModal.open = true;
+
+    return new Promise((resolve) => {
+        confirmResolve.value = resolve;
+    });
+}
+
+function closeConfirmModal(confirmed) {
+    confirmModal.open = false;
+    if (typeof confirmResolve.value === 'function') {
+        confirmResolve.value(confirmed);
+        confirmResolve.value = null;
+    }
+}
+
+function openNoticeModal(title, message) {
+    noticeModal.title = title;
+    noticeModal.message = message;
+    noticeModal.open = true;
+}
+
+function closeNoticeModal() {
+    noticeModal.open = false;
+}
+
+function scrollToElementById(elementId) {
+    nextTick(() => {
+        window.requestAnimationFrame(() => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+}
+
+function onDragStart(type, index) {
+    dragState.type = type;
+    dragState.fromIndex = index;
+}
+
+function onDragOver(type, index) {
+    if (dragState.type !== type || dragState.fromIndex === index) {
+        return;
+    }
+}
+
+function onDrop(type, toIndex) {
+    if (dragState.type !== type || dragState.fromIndex < 0 || dragState.fromIndex === toIndex) {
+        onDragEnd();
+        return;
+    }
+
+    if (type === 'timeline' && content.value?.timeline?.items) {
+        moveInArray(content.value.timeline.items, dragState.fromIndex, toIndex);
+    }
+
+    if (type === 'courses' && Array.isArray(rsvpSettings.value?.menu_courses)) {
+        moveInArray(rsvpSettings.value.menu_courses, dragState.fromIndex, toIndex);
+    }
+
+    if (type === 'faqs' && content.value?.details?.faqs) {
+        moveInArray(content.value.details.faqs, dragState.fromIndex, toIndex);
+    }
+
+    onDragEnd();
+}
+
+function onDragEnd() {
+    dragState.type = '';
+    dragState.fromIndex = -1;
+}
+
+function moveInArray(list, fromIndex, toIndex) {
+    if (!Array.isArray(list) || fromIndex < 0 || toIndex < 0 || fromIndex >= list.length || toIndex >= list.length) {
+        return;
+    }
+
+    const [moved] = list.splice(fromIndex, 1);
+    list.splice(toIndex, 0, moved);
+}
+
 function setMessage(message) {
     globalMessage.value = message;
     clearError();
@@ -1444,38 +1935,106 @@ function serialize(value) {
 
 <style scoped>
 .admin-ui label {
-    color: #1e1e1e;
+    color: #0f1b1d;
 }
 
 .admin-btn {
+    border: 1px solid #22363a;
+    background-color: #22363a !important;
+    color: #ffffff !important;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .admin-btn:hover {
-    background-color: #8b8b8b !important;
-    border-color: #8b8b8b !important;
+    background-color: #466369 !important;
+    border-color: #466369 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-active {
+    background: #22363a !important;
+    color: #ffffff !important;
+    border-color: #22363a !important;
+    border-bottom-width: 2px;
+    border-bottom-color: #466369 !important;
+    pointer-events: none;
+    cursor: default;
+}
+
+.admin-btn-active:hover {
+    background: #22363a !important;
+    border-color: #22363a !important;
+    border-bottom-color: #466369 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-success {
+    border-color: #21c177 !important;
+    background-color: #21c177 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-success:hover {
+    border-color: #1aa267 !important;
+    background-color: #1aa267 !important;
+}
+
+.admin-btn-outline {
+    border-color: #22363a !important;
+    background-color: #22363a !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-outline:hover {
+    border-color: #466369 !important;
+    background-color: #466369 !important;
     color: #ffffff !important;
 }
 
 .admin-btn-danger {
-    border: 1px solid #b42318;
-    background-color: #ffffff;
-    color: #b42318;
+    border: 1px solid #e66363;
+    background-color: #e66363 !important;
+    color: #ffffff !important;
 }
 
 .admin-btn-danger:hover {
-    border-color: #912018 !important;
-    background-color: #fef2f2 !important;
-    color: #912018 !important;
+    border-color: #b93f3f !important;
+    background-color: #b93f3f !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-danger-solid {
+    border: 1px solid #e66363 !important;
+    background-color: #e66363 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-danger-solid:hover {
+    border-color: #b93f3f !important;
+    background-color: #b93f3f !important;
+    color: #ffffff !important;
+}
+
+.admin-btn:disabled,
+.admin-btn-danger:disabled,
+.admin-btn-danger-solid:disabled,
+.admin-btn-success:disabled,
+.admin-btn-outline:disabled {
+    border-color: #848484 !important;
+    background-color: #848484 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
 }
 
 .content-section-block {
     border: 1px solid #22363a;
-    padding: 1.25rem;
+    padding: 1.5rem;
 }
 
 .content-section-block label {
-    line-height: 1.35;
+    line-height: 1.4;
 }
 
 .content-section-block label > input,
@@ -1485,19 +2044,19 @@ function serialize(value) {
 .content-section-block label > .grid,
 .content-section-block label > .cms-rich,
 .content-section-block label > .admin-rich-editor {
-    margin-top: 0.65rem !important;
+    margin-top: 0.9rem !important;
 }
 
 .content-section-block > label:not(:first-child) {
-    margin-top: 0.9rem;
+    margin-top: 1.1rem;
 }
 
 .content-section-block .grid > label {
-    margin-top: 0.55rem;
+    margin-top: 0.85rem;
 }
 
 .content-section-even {
-    background: #f9f6f1;
+    background: #f2ece3;
 }
 
 .content-section-odd {
@@ -1523,5 +2082,84 @@ function serialize(value) {
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.04em;
+}
+
+.section-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.35rem 0 1.2rem;
+}
+
+.section-toggle-note {
+    color: #848484;
+    font-size: 0.82rem;
+}
+
+.section-toggle {
+    position: relative;
+    width: 2.6rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    border: 2px solid #848484;
+    background: #f7f7f7;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.section-toggle-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0.15rem;
+    transform: translateY(-50%);
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 9999px;
+    background: #848484;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    transition: left 0.2s ease, background-color 0.2s ease;
+}
+
+.section-toggle.is-active {
+    border-color: #21c177;
+    background: #21c177;
+}
+
+.section-toggle.is-active .section-toggle-thumb {
+    left: calc(100% - 1.2rem);
+    background: #ffffff;
+    color: #21c177;
+}
+
+.section-toggle .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.file-input-field {
+    background: #ffffff;
+}
+
+.file-input-field::file-selector-button {
+    margin-right: 0.8rem;
+}
+
+.menu-courses-divider {
+    margin: 2.6rem 0 2.2rem;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+input,
+select,
+textarea {
+    background: #ffffff;
 }
 </style>

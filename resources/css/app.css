@@ -5,6 +5,21 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --wedding-primary-dark: #22363a;
+    --wedding-primary-green: #466369;
+    --wedding-black: #0f1b1d;
+    --wedding-white: #ffffff;
+    --wedding-primary-light: #f7f5f2;
+    --wedding-secondary-light: #f2ece3;
+    --wedding-off-white: #f7f7f7;
+    --wedding-disabled: #848484;
+    --wedding-danger: #e66363;
+    --wedding-danger-dark: #b93f3f;
+    --wedding-success: #21c177;
+    --wedding-success-dark: #1aa267;
+}
+
 @layer base {
     html {
         scroll-behavior: smooth;
@@ -33,12 +48,28 @@
     }
 
     .button-primary {
-        @apply inline-flex items-center justify-center border border-white/30 bg-white/10 px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-wedding-text;
+        @apply inline-flex items-center justify-center border px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] transition;
+        border-color: var(--wedding-white);
+        background-color: var(--wedding-white);
+        color: var(--wedding-black);
+        box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
+    }
+
+    .button-primary:hover {
+        border-color: var(--wedding-secondary-light);
+        background-color: var(--wedding-secondary-light);
+        color: var(--wedding-black);
     }
 
     .button-dark {
-        @apply inline-flex items-center justify-center border border-soft px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b];
+        @apply inline-flex items-center justify-center border border-soft px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition;
         background-color: var(--wedding-button-color, #22363a);
+        box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
+    }
+
+    .button-dark:hover {
+        border-color: var(--wedding-primary-green);
+        background-color: var(--wedding-primary-green);
     }
 
     .cms-rich p + p {
@@ -58,12 +89,71 @@
     }
 
     .cms-button-link {
-        @apply inline-flex items-center justify-center border border-soft px-5 py-2 text-xs font-medium uppercase tracking-[0.14em] text-white no-underline transition hover:border-[#8b8b8b] hover:bg-[#8b8b8b];
+        @apply inline-flex items-center justify-center border border-soft px-5 py-2 text-xs font-medium uppercase tracking-[0.14em] text-white no-underline transition;
         background-color: var(--wedding-button-color, #22363a);
+        box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
+    }
+
+    .cms-button-link:hover {
+        border-color: var(--wedding-primary-green);
+        background-color: var(--wedding-primary-green);
     }
 
     .btn-icon {
         font-size: 18px;
         line-height: 1;
     }
+
+    .admin-btn {
+        background-color: var(--wedding-primary-dark) !important;
+        border-color: var(--wedding-primary-dark) !important;
+        color: var(--wedding-white) !important;
+        box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
+    }
+
+    .admin-btn:hover {
+        background-color: var(--wedding-primary-green) !important;
+        border-color: var(--wedding-primary-green) !important;
+        color: var(--wedding-white) !important;
+    }
+
+    .admin-btn-danger {
+        background-color: var(--wedding-danger) !important;
+        border-color: var(--wedding-danger) !important;
+        color: var(--wedding-white) !important;
+        box-shadow: 0 6px 14px rgba(230, 99, 99, 0.22);
+    }
+
+    .admin-btn-danger:hover {
+        background-color: var(--wedding-danger-dark) !important;
+        border-color: var(--wedding-danger-dark) !important;
+        color: var(--wedding-white) !important;
+    }
+}
+
+/* Palette normalization for existing status utility classes used across views/components. */
+.border-emerald-200 { border-color: var(--wedding-success) !important; }
+.bg-emerald-50 { background-color: rgba(33, 193, 119, 0.12) !important; }
+.text-emerald-700 { color: var(--wedding-success) !important; }
+
+.border-red-200,
+.border-red-300,
+.border-red-400 { border-color: var(--wedding-danger) !important; }
+.bg-red-50 { background-color: rgba(230, 99, 99, 0.12) !important; }
+.text-red-700 { color: var(--wedding-danger) !important; }
+
+.border-amber-200 { border-color: var(--wedding-secondary-light) !important; }
+.bg-amber-50 { background-color: var(--wedding-secondary-light) !important; }
+.text-amber-700,
+.text-amber-800 { color: var(--wedding-black) !important; }
+
+button:disabled,
+.admin-btn:disabled,
+.button-dark:disabled,
+.cms-button-link:disabled {
+    background-color: var(--wedding-disabled) !important;
+    border-color: var(--wedding-disabled) !important;
+    color: var(--wedding-white) !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
 }

@@ -53,15 +53,10 @@ class SaveSiteSettingsRequest extends FormRequest
             'rsvp_settings.meal_options' => ['nullable', 'array'],
             'rsvp_settings.meal_options.*' => ['string', 'min:1', 'max:60'],
             'rsvp_settings.menu_courses' => ['nullable', 'array'],
-            'rsvp_settings.menu_courses.starter' => ['nullable', 'array'],
-            'rsvp_settings.menu_courses.main' => ['nullable', 'array'],
-            'rsvp_settings.menu_courses.dessert' => ['nullable', 'array'],
-            'rsvp_settings.menu_courses.starter.*.title' => ['nullable', 'string', 'max:120'],
-            'rsvp_settings.menu_courses.starter.*.description' => ['nullable', 'string', 'max:500'],
-            'rsvp_settings.menu_courses.main.*.title' => ['nullable', 'string', 'max:120'],
-            'rsvp_settings.menu_courses.main.*.description' => ['nullable', 'string', 'max:500'],
-            'rsvp_settings.menu_courses.dessert.*.title' => ['nullable', 'string', 'max:120'],
-            'rsvp_settings.menu_courses.dessert.*.description' => ['nullable', 'string', 'max:500'],
+            'rsvp_settings.menu_courses.*.name' => ['nullable', 'string', 'max:120'],
+            'rsvp_settings.menu_courses.*.items' => ['nullable', 'array'],
+            'rsvp_settings.menu_courses.*.items.*.title' => ['nullable', 'string', 'max:120'],
+            'rsvp_settings.menu_courses.*.items.*.description' => ['nullable', 'string', 'max:500'],
         ];
     }
 

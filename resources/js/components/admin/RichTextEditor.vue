@@ -1,19 +1,20 @@
 <template>
     <div class="space-y-2">
-        <div class="flex flex-wrap gap-2 border border-soft bg-[#eeeeee] p-2">
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="runCommand('bold')"><strong>B</strong></button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="runCommand('italic')"><em>I</em></button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="runCommand('insertUnorderedList')">List</button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="insertLineBreak">Line Break</button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="insertParagraph">Paragraph</button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="openLinkModal('link')">Link</button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="openLinkModal('button')">Button Link</button>
-            <button type="button" class="admin-btn border border-soft px-2 py-1 text-xs" @click="clearFormatting">Clear</button>
+        <div class="rich-toolbar flex flex-wrap gap-2 border border-soft p-2" :class="toolbarClass">
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('bold')"><strong>B</strong></button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('italic')"><em>I</em></button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('insertUnorderedList')">List</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="insertLineBreak">Line Break</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="insertParagraph">Paragraph</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="openLinkModal('link')">Link</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="openLinkModal('button')">Button Link</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="clearFormatting">Clear</button>
         </div>
 
         <div
             ref="editor"
-            class="cms-rich min-h-32 border border-soft bg-white p-3"
+            class="cms-rich min-h-32 border border-soft p-3"
+            :class="editorClass"
             contenteditable="true"
             @input="syncToModel"
             @blur="syncToModel"
@@ -69,6 +70,18 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    tone: {
+        type: String,
+        default: 'secondary',
+    },
+    surface: {
+        type: String,
+        default: 'white',
+    },
+    buttonTone: {
+        type: String,
+        default: 'offwhite',
+    },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -79,6 +92,9 @@ const linkModalMode = ref('link');
 const linkUrl = ref('');
 const linkText = ref('');
 const linkModalError = ref('');
+const toolbarClass = ref('toolbar-secondary');
+const editorClass = ref('editor-white');
+const formatButtonClass = ref('format-btn-offwhite');
 
 onMounted(() => {
     if (editor.value) {
@@ -97,6 +113,30 @@ watch(
             editor.value.innerHTML = nextValue || '';
         }
     }
+);
+
+watch(
+    () => props.tone,
+    (nextTone) => {
+        toolbarClass.value = nextTone === 'primary' ? 'toolbar-primary' : 'toolbar-secondary';
+    },
+    { immediate: true }
+);
+
+watch(
+    () => props.surface,
+    (nextSurface) => {
+        editorClass.value = nextSurface === 'primary' ? 'editor-primary' : 'editor-white';
+    },
+    { immediate: true }
+);
+
+watch(
+    () => props.buttonTone,
+    (nextTone) => {
+        formatButtonClass.value = nextTone === 'primary' ? 'format-btn-primary' : 'format-btn-offwhite';
+    },
+    { immediate: true }
 );
 
 function runCommand(command, value = null) {
@@ -175,3 +215,40 @@ function escapeAttribute(value) {
     return value.replaceAll('"', '&quot;');
 }
 </script>
+
+<style scoped>
+.format-btn {
+    color: #0f1b1d;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.format-btn:hover {
+    background: #f7f5f2;
+    border-color: #466369;
+    color: #0f1b1d;
+}
+
+.format-btn-offwhite {
+    background: #f7f7f7;
+}
+
+.format-btn-primary {
+    background: #f7f5f2;
+}
+
+.toolbar-secondary {
+    background: #f2ece3;
+}
+
+.toolbar-primary {
+    background: #f7f5f2;
+}
+
+.editor-white {
+    background: #ffffff;
+}
+
+.editor-primary {
+    background: #f7f5f2;
+}
+</style>
