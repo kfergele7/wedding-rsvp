@@ -108,14 +108,9 @@
                             <input v-model="content.hero.buttonLabel" class="mt-2 w-full border border-soft px-4 py-3">
                         </label>
 
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Background Image Path
-                                <input v-model="content.hero.image" class="mt-2 w-full border border-soft px-4 py-3">
-                            </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Hero Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'hero.image')">
-                            </label>
-                        </div>
+                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Hero Image
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'hero.image')">
+                        </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Focus X: {{ content.hero.imageFocusX }}%
                                 <input v-model.number="content.hero.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
@@ -165,14 +160,9 @@
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Letter</label>
                         <RichTextEditor v-model="content.welcome.letter" tone="primary" />
 
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Image Path
-                                <input v-model="content.welcome.image" class="mt-2 w-full border border-soft px-4 py-3">
-                            </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Welcome Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
-                            </label>
-                        </div>
+                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Welcome Image
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
+                        </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Focus X: {{ content.welcome.imageFocusX }}%
                                 <input v-model.number="content.welcome.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
@@ -288,14 +278,9 @@
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Text</label>
                         <RichTextEditor v-model="content.story.text" tone="primary" />
 
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Our Story Image Path
-                                <input v-model="content.story.image" class="mt-2 w-full border border-soft px-4 py-3">
-                            </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Our Story Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'story.image')">
-                            </label>
-                        </div>
+                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Our Story Image
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'story.image')">
+                        </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Story Focus X: {{ content.story.imageFocusX }}%
                                 <input v-model.number="content.story.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
@@ -345,14 +330,9 @@
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Blurb</label>
                         <RichTextEditor v-model="content.details.venue.blurb" tone="secondary" />
 
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Details Image Path
-                                <input v-model="content.details.image" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                            </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Venue Image
-                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'details.image')">
-                            </label>
-                        </div>
+                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Venue Image
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'details.image')">
+                        </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Focus X: {{ content.details.imageFocusX }}%
                                 <input v-model.number="content.details.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
@@ -381,7 +361,7 @@
                         <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">7</span>
-                                <span class="font-heading text-3xl">Travel & RSVP CTA</span>
+                                <span class="font-heading text-3xl">Travel</span>
                             </h3>
                             <div class="section-toggle-row">
                                 <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('travel') }" @click="toggleSectionVisibility('travel')">
@@ -394,21 +374,6 @@
 
                             <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Travel Information</label>
                             <RichTextEditor v-model="content.details.travel" tone="primary" />
-
-                            <div class="mt-4 grid gap-4 md:grid-cols-2">
-                                <div class="space-y-4 md:col-span-1">
-                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Title
-                                        <input v-model="content.cta.title" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                                    </label>
-                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Button Label
-                                        <input v-model="content.cta.buttonLabel" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                                    </label>
-                                </div>
-                                <div class="md:col-span-1">
-                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP CTA Text</label>
-                                    <RichTextEditor v-model="content.cta.text" tone="primary" />
-                                </div>
-                            </div>
                         </div>
 
                         <div class="w-full py-8">
@@ -461,9 +426,8 @@
                                 <hr class="w-full border-t border-wedding-band/70">
                             </div>
 
-                            <h4 class="font-heading text-2xl">Build Your Menu</h4>
-
-                            <div class="mb-4 flex justify-end">
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                <h4 class="font-heading text-2xl">Build Your Menu</h4>
                                 <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="addMenuCourse">
                                     <span class="material-symbols-outlined btn-icon">add</span>
                                     Add Course
@@ -595,6 +559,32 @@
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div class="content-section-block content-section-odd">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">10</span>
+                                <span class="font-heading text-3xl">Final RSVP Request</span>
+                            </h3>
+
+                            <div class="mt-4 grid gap-4 md:grid-cols-3">
+                                <div class="space-y-4 md:col-span-1">
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP Request Title
+                                        <input v-model="content.cta.title" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                    </label>
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">RSVP Request Button Label
+                                        <input v-model="content.cta.buttonLabel" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                    </label>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Final RSVP Request Text</label>
+                                    <RichTextEditor v-model="content.cta.text" tone="primary" />
                                 </div>
                             </div>
                         </div>
@@ -1952,20 +1942,20 @@ function serialize(value) {
 }
 
 .admin-btn-active {
-    background: #22363a !important;
-    color: #ffffff !important;
+    background: #f2ece3 !important;
+    color: #0f1b1d !important;
     border-color: #22363a !important;
     border-bottom-width: 2px;
-    border-bottom-color: #466369 !important;
+    border-bottom-color: #22363a !important;
     pointer-events: none;
     cursor: default;
 }
 
 .admin-btn-active:hover {
-    background: #22363a !important;
+    background: #f2ece3 !important;
     border-color: #22363a !important;
-    border-bottom-color: #466369 !important;
-    color: #ffffff !important;
+    border-bottom-color: #22363a !important;
+    color: #0f1b1d !important;
 }
 
 .admin-btn-success {
