@@ -141,7 +141,7 @@ function panelHeading(panel) {
         return panel.label;
     }
 
-    if (props.rsvpSettings.meal_mode === 'options') {
+    if (props.rsvpSettings.meal_mode === 'options' && Array.isArray(panel.items) && panel.items.length > 1) {
         return `${panel.label} Options`;
     }
 

@@ -151,6 +151,11 @@ QUEUE_CONNECTION=sync
 - In `Guests choose meal options` mode:
   - Multiple options per course can be added.
 - If you try switching back to `set_menu` while any course has more than one item, the UI blocks the switch and shows a warning to remove extra items first.
+- Public menu headings show `Starter/Main/Dessert` by default and only show `... Options` when a course has more than one item.
+
+## Content Save Behaviour
+- Content list sections (timeline items, FAQs, menu courses/items) are persisted with list replacement semantics.
+- Deleting items in the content editor and clicking `Save Content` now keeps those deletions on reload (no fallback re-population of removed list entries).
 
 ## CSV Import Format
 Upload in Admin > Households.

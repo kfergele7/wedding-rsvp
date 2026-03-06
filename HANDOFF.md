@@ -1,16 +1,17 @@
 ## Current objective
-- Ship and verify preview-access/billing gating and menu-mode UX changes across customer and staff flows.
+- Finalise and ship content editor persistence fixes so deleted list items (timeline/FAQ/menu) never reappear after save.
 
 ## Next steps
-- [ ] Smoke test preview banner states in browser (owner preview, staff preview, guest coming soon).
-- [ ] Validate menu-mode guard rails in Admin > Content (set menu vs guests choose).
-- [ ] Push to remote after confirming CI/local tests.
+- [ ] Manual smoke test in Admin > Content: delete timeline/FAQ/menu items, save, reload, confirm deletions persist.
+- [ ] Verify menu heading labels show `Course` vs `Course Options` based on per-course item count.
+- [ ] Push latest bugfix/docs commit to remote.
 
 ## Auto-generated session snapshot
 This section is updated by `bash scripts/handoff.sh`. Do not edit manually.
 
 <!-- AUTO-GENERATED:START -->
 ### What changed today
+- ad15fa0 Add cross-machine handoff workflow and tighten preview/menu UX
 - 657be08 Polish content admin spacing, labels, and section layout
 - 78769e5 Polish admin content layout, labels, and drag controls
 - 2cc28bf Refine admin content UX, ordering, palette, and drag reordering
@@ -18,39 +19,29 @@ This section is updated by `bash scripts/handoff.sh`. Do not edit manually.
 
 ### Current branch + last commit hash
 - Branch: `main`
-- Last commit: `657be08` - Polish content admin spacing, labels, and section layout
+- Last commit: `ad15fa0` - Add cross-machine handoff workflow and tighten preview/menu UX
 
 ### Working tree status
 - Status: `dirty`
 
 ### Changed files
--  M .env.example
+-  M CODEX_CONTEXT.md
+-  M HANDOFF.md
 -  M README.md
 -  M app/Http/Controllers/Admin/ContentController.php
--  M app/Http/Controllers/PublicSiteController.php
--  M app/Http/Controllers/RsvpController.php
--  M composer.json
--  M config/wedding.php
--  M package-lock.json
--  M package.json
--  M resources/css/app.css
--  M resources/js/pages/AdminPage.vue
--  M resources/js/pages/HomePage.vue
--  M routes/web.php
--  M tests/Feature/PublicWeddingSlugRouteTest.php
-- ?? CODEX_CONTEXT.md
-- ?? HANDOFF.md
+-  M resources/js/components/public/DetailsSection.vue
 - ?? public/images/wedding/uploads/details-image-20260306211019.jpg
 - ?? public/images/wedding/uploads/hero-image-20260306205444.jpg
 - ?? public/images/wedding/uploads/story-image-20260306210814.jpg
 - ?? public/images/wedding/uploads/story-image-20260306210825.jpg
 - ?? public/images/wedding/uploads/welcome-image-20260306205836.jpg
-- ?? scripts/
+- ?? tests/Feature/ContentListReplacementTest.php
 
 ### Diffstat
-` 14 files changed, 384 insertions(+), 65 deletions(-)`
+` 5 files changed, 55 insertions(+), 9 deletions(-)`
 
 ### Recent commits (last 10)
+- ad15fa0 Add cross-machine handoff workflow and tighten preview/menu UX
 - 657be08 Polish content admin spacing, labels, and section layout
 - 78769e5 Polish admin content layout, labels, and drag controls
 - 2cc28bf Refine admin content UX, ordering, palette, and drag reordering

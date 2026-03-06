@@ -63,3 +63,4 @@
   - Customer: "Preview mode" + account button + subscribe CTA to `/app`.
 - Preview banner and controls are aligned to project palette and existing button system classes.
 - Admin content menu mode defaults to `set_menu`; switching from guests-choose back to set menu is blocked when any course has multiple items.
+- Content save/read merge behaviour now replaces list arrays (timeline, FAQs, menu courses/items) to prevent deleted items reappearing after save/reload.

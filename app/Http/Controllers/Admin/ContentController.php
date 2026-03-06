@@ -29,9 +29,18 @@ class ContentController extends Controller
     {
         $incomingContent = (array) $request->input('content', []);
         $existingContent = $this->resolvedContent();
-        $content = array_replace_recursive($existingContent, $incomingContent);
+        $content = $this->mergeReplacingLists($existingContent, $incomingContent);
         $incomingRsvpSettings = (array) $request->input('rsvp_settings', []);
-        $rsvpSettings = array_replace_recursive($this->resolvedRsvpSettings(), $incomingRsvpSettings);
+        $rsvpSettings = $this->mergeReplacingLists($this->resolvedRsvpSettings(), $incomingRsvpSettings);
+
+        // Replace list-like RSVP fields directly so removed course/items do not get merged back.
+        if (array_key_exists('menu_courses', $incomingRsvpSettings)) {
+            $rsvpSettings['menu_courses'] = $incomingRsvpSettings['menu_courses'];
+        }
+        if (array_key_exists('meal_options', $incomingRsvpSettings)) {
+            $rsvpSettings['meal_options'] = $incomingRsvpSettings['meal_options'];
+        }
+
         $rsvpSettings['meal_mode'] = in_array(($rsvpSettings['meal_mode'] ?? 'set_menu'), ['options', 'set_menu'], true)
             ? $rsvpSettings['meal_mode']
             : 'set_menu';
@@ -118,7 +127,7 @@ class ContentController extends Controller
             return $fallback;
         }
 
-        return array_replace_recursive($fallback, $saved->value);
+        return $this->mergeReplacingLists($fallback, $saved->value);
     }
 
     private function resolvedRsvpSettings(): array
@@ -134,7 +143,7 @@ class ContentController extends Controller
             return $fallback;
         }
 
-        $merged = array_replace_recursive($fallback, $saved->value);
+        $merged = $this->mergeReplacingLists($fallback, $saved->value);
         $merged['menu_courses'] = $this->normalizeCourseSections($saved->value['menu_courses'] ?? ($fallback['menu_courses'] ?? []));
 
         return $merged;
@@ -279,5 +288,36 @@ class ContentController extends Controller
             ['id' => 'main', 'name' => 'Main', 'items' => []],
             ['id' => 'dessert', 'name' => 'Dessert', 'items' => []],
         ];
+    }
+
+    /**
+     * Merge nested associative arrays while replacing list arrays outright.
+     *
+     * This prevents deleted list items (timeline rows, FAQs, menu items, etc.)
+     * from reappearing due to recursive index-based array merges.
+     */
+    private function mergeReplacingLists(array $base, array $incoming): array
+    {
+        if (array_is_list($incoming)) {
+            return $incoming;
+        }
+
+        $merged = $base;
+
+        foreach ($incoming as $key => $value) {
+            if (
+                array_key_exists($key, $base)
+                && is_array($base[$key])
+                && is_array($value)
+                && ! array_is_list($value)
+            ) {
+                $merged[$key] = $this->mergeReplacingLists($base[$key], $value);
+                continue;
+            }
+
+            $merged[$key] = $value;
+        }
+
+        return $merged;
     }
 }
