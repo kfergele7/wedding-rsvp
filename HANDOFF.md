@@ -6,6 +6,28 @@
 - [ ] Verify menu heading labels show `Course` vs `Course Options` based on per-course item count.
 - [ ] Push latest bugfix/docs commit to remote.
 
+## Mac Studio pickup (2026-03-09 11:01:58 GMT)
+- Current objective:
+  - Re-align Mac workspace with latest repo state from Windows session and verify local email/dev verification flow is present.
+- What was verified:
+  - Branch is `main`; local working tree is clean.
+  - `git fetch` / `git pull` from `origin/main` could not run in this environment due to DNS/network restriction (`Could not resolve host: github.com`).
+  - `HANDOFF.md`, `CODEX_CONTEXT.md`, and `README.md` are present and reviewed.
+  - Local email setup is implemented:
+    - `.env.example` defaults to `MAIL_MAILER=log` and `QUEUE_CONNECTION=sync`.
+    - README includes Local Email Testing docs for log mailer and Mailpit.
+  - Local-only developer verification/test routes are implemented in `routes/web.php`:
+    - `/dev/verify-email/{email}` (local only)
+    - `/dev/test-email` (+ `?type=reset`) (local only, auth protected).
+  - Dependency and test checks:
+    - `composer install --dry-run` reports lockfile consistent.
+    - `npm ci --dry-run` reports packages up to date.
+    - `php artisan test` passes (30 tests).
+- Recommended next steps:
+  - Run `git pull --rebase origin main` on Mac terminal with internet access before new feature work.
+  - Run `bash scripts/start.sh` to refresh session context and local startup guidance.
+  - Continue with manual content-editor persistence smoke test listed above.
+
 ## Auto-generated session snapshot
 This section is updated by `bash scripts/handoff.sh`. Do not edit manually.
 
