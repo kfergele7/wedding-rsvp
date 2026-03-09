@@ -24,6 +24,7 @@ use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\RsvpController;
 use App\Http\Controllers\Staff\AccountController as StaffAccountController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\TemplateManagementController as StaffTemplateManagementController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -148,6 +149,8 @@ Route::middleware('tenant.resolve')->group(function () {
         ->middleware(['auth', 'staff.auth'])
         ->group(function () {
             Route::get('/', StaffDashboardController::class)->name('dashboard');
+            Route::get('/template-management', [StaffTemplateManagementController::class, 'index'])->name('templates.index');
+            Route::put('/template-management/field-help', [StaffTemplateManagementController::class, 'updateFieldHelp'])->name('templates.field-help.update');
             Route::get('/accounts', [StaffAccountController::class, 'index'])->name('accounts.index');
             Route::get('/accounts/{account}', [StaffAccountController::class, 'show'])->name('accounts.show');
             Route::put('/accounts/{account}', [StaffAccountController::class, 'update'])->name('accounts.update');

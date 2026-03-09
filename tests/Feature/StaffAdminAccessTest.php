@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Account;
 use App\Models\Party;
+use App\Models\PlatformSetting;
 use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -34,6 +35,16 @@ class StaffAdminAccessTest extends TestCase
         $this->actingAs($staff)->get('/staff/accounts')
             ->assertOk()
             ->assertSee('Acme');
+    }
+
+    public function test_staff_user_can_view_template_management_page(): void
+    {
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->get(route('staff.templates.index'))
+            ->assertOk()
+            ->assertSee('Template Management');
     }
 
     public function test_staff_user_can_update_account_access_status_and_notes(): void
@@ -154,6 +165,34 @@ class StaffAdminAccessTest extends TestCase
                 'public_slug' => 'w-shouldnot',
             ])
             ->assertNotFound();
+    }
+
+    public function test_staff_user_can_update_global_admin_field_help_texts(): void
+    {
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.templates.field-help.update'), [
+                'field_help_texts' => [
+                    'hero.couple_names' => 'Use both first names, e.g. Kyle & Nicole.',
+                    'timeline.heading' => 'Keep this concise, e.g. The Big Day.',
+                ],
+            ])
+            ->assertRedirect();
+
+        $setting = PlatformSetting::query()
+            ->where('key', 'admin_field_help_texts')
+            ->first();
+
+        $this->assertNotNull($setting);
+        $this->assertSame('Use both first names, e.g. Kyle & Nicole.', $setting->value['hero.couple_names'] ?? null);
+        $this->assertSame('Keep this concise, e.g. The Big Day.', $setting->value['timeline.heading'] ?? null);
+
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'staff_user_id' => $staff->id,
+            'account_id' => null,
+            'action' => 'staff.platform.field_help.updated',
+        ]);
     }
 
     public function test_staff_user_can_launch_customer_admin_for_specific_site(): void

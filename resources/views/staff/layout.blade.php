@@ -18,6 +18,7 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('staff.dashboard') }}" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em]"><span class="material-symbols-outlined btn-icon">dashboard</span>Dashboard</a>
             <a href="{{ route('staff.accounts.index') }}" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em]"><span class="material-symbols-outlined btn-icon">groups</span>Accounts</a>
+            <a href="{{ route('staff.templates.index') }}" class="admin-btn inline-flex items-center gap-2 border border-soft bg-white px-4 py-2 text-xs uppercase tracking-[0.12em]"><span class="material-symbols-outlined btn-icon">tune</span>Template Management</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="button-dark inline-flex items-center gap-2 px-4 py-2"><span class="material-symbols-outlined btn-icon">logout</span>Logout</button>

@@ -4,10 +4,10 @@
             <h2 class="section-heading">{{ content.heading }}</h2>
             <p class="mt-3 font-script text-5xl text-white/75">{{ content.dateAccent }}</p>
 
-            <div class="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="timeline-items-grid mt-12 grid gap-4">
                 <article
-                    v-for="item in content.items"
-                    :key="item.title"
+                    v-for="(item, index) in content.items"
+                    :key="`${item.time || ''}-${item.title || ''}-${index}`"
                     class="border border-white/25 bg-white/5 px-6 py-8 text-left"
                 >
                     <p class="font-heading text-xl text-white/70">{{ item.time }}</p>
@@ -31,3 +31,9 @@ defineProps({
     },
 });
 </script>
+
+<style scoped>
+.timeline-items-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+</style>

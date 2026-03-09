@@ -52,7 +52,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="font-heading text-3xl">Content</h2>
                     </div>
-                    <p class="mt-2 text-wedding-muted">Update text, imagery, and colours shown on your single-page wedding website.</p>
+                    <p class="mt-2 text-wedding-muted">Update text, imagery, and colours shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.</p>
 
                     <div v-if="content" class="mt-8 space-y-6">
                         <div class="content-section-block content-section-even">
@@ -75,7 +75,7 @@
                                     </div>
                                 </label>
                             </div>
-                            <p class="mt-3 text-xs font-semibold text-wedding-muted">Use dark colours to maintain white text contrast.</p>
+                            <p class="mt-3 text-sm italic font-semibold text-wedding-danger">Important: Use dark colours to maintain white text contrast.</p>
                         </div>
 
                         <div class="w-full py-8">
@@ -112,10 +112,10 @@
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'hero.image')">
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Focus X: {{ content.hero.imageFocusX }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Image Horizontal Focus Point: {{ content.hero.imageFocusX }}%
                                 <input v-model.number="content.hero.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Focus Y: {{ content.hero.imageFocusY }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Hero Image Vertical Focus Point: {{ content.hero.imageFocusY }}%
                                 <input v-model.number="content.hero.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
@@ -166,10 +166,10 @@
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'welcome.image')">
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Focus X: {{ content.welcome.imageFocusX }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Image Horizontal Focus Point: {{ content.welcome.imageFocusX }}%
                                 <input v-model.number="content.welcome.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Focus Y: {{ content.welcome.imageFocusY }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Welcome Image Vertical Focus Point: {{ content.welcome.imageFocusY }}%
                                 <input v-model.number="content.welcome.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
@@ -193,7 +193,7 @@
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">4</span>
-                                    <span class="font-heading text-3xl">Timeline</span>
+                                    <span class="font-heading text-3xl">Wedding Timeline</span>
                                 </h3>
                                 <button type="button" class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMax" @click="addTimelineItem">
                                     <span class="material-symbols-outlined btn-icon">add</span>
@@ -223,21 +223,34 @@
                             </p>
 
                             <div class="mt-4 space-y-3">
+                                <div class="timeline-grid hidden border border-soft bg-wedding-secondary-light py-2 text-xs uppercase tracking-[0.12em] text-wedding-black md:grid">
+                                    <span class="px-3">Time</span>
+                                    <span class="px-3">Event</span>
+                                    <span class="px-3">Description</span>
+                                    <span class="text-center">Reorder</span>
+                                    <span class="text-center">Delete</span>
+                                </div>
                                 <div
                                     v-for="(item, index) in content.timeline.items"
                                     :id="`timeline-item-${index}`"
                                     :key="index"
-                                    class="grid gap-3 border border-soft bg-wedding-bg p-3 md:grid-cols-[1fr_1fr_3fr_auto]"
+                                    class="timeline-grid grid border border-soft bg-wedding-bg py-3 md:items-center"
                                     @dragover.prevent="onDragOver('timeline', index)"
                                     @drop="onDrop('timeline', index)"
                                 >
-                                    <input v-model="item.time" placeholder="Time" class="border border-soft bg-white px-3 py-2">
-                                    <input v-model="item.title" placeholder="Title" class="border border-soft bg-white px-3 py-2">
-                                    <input v-model="item.description" placeholder="Description" class="w-full border border-soft bg-white px-3 py-2">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="px-3">
+                                        <input v-model="item.time" placeholder="Time" class="w-full border border-soft bg-white px-3 py-2">
+                                    </div>
+                                    <div class="px-3">
+                                        <input v-model="item.title" placeholder="Title" class="w-full border border-soft bg-white px-3 py-2">
+                                    </div>
+                                    <div class="px-3">
+                                        <input v-model="item.description" placeholder="Description" class="w-full border border-soft bg-white px-3 py-2">
+                                    </div>
+                                    <div class="px-3">
                                         <button
                                             type="button"
-                                            class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                            class="admin-btn drag-handle inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
                                             draggable="true"
                                             @dragstart="onDragStart('timeline', index)"
                                             @dragend="onDragEnd"
@@ -245,7 +258,9 @@
                                             <span class="material-symbols-outlined btn-icon">drag_indicator</span>
                                             Move
                                         </button>
-                                        <button type="button" class="admin-btn admin-btn-danger inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMin" @click="removeTimelineItem(index)">
+                                    </div>
+                                    <div class="px-3">
+                                        <button type="button" class="admin-btn admin-btn-danger inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMin" @click="removeTimelineItem(index)">
                                             <span class="material-symbols-outlined btn-icon">{{ isTimelineAtMin ? 'block' : 'close' }}</span>
                                         </button>
                                     </div>
@@ -288,10 +303,10 @@
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'story.image')">
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Story Focus X: {{ content.story.imageFocusX }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Story Image Horizontal Focus Point: {{ content.story.imageFocusX }}%
                                 <input v-model.number="content.story.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Story Focus Y: {{ content.story.imageFocusY }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Story Image Vertical Focus Point: {{ content.story.imageFocusY }}%
                                 <input v-model.number="content.story.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
@@ -342,10 +357,10 @@
                             <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="file-input-field mt-2 w-full border border-soft bg-white px-4 py-3" @change="uploadContentImage($event, 'details.image')">
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Focus X: {{ content.details.imageFocusX }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Image Horizontal Focus Point: {{ content.details.imageFocusX }}%
                                 <input v-model.number="content.details.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
-                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Focus Y: {{ content.details.imageFocusY }}%
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Image Vertical Focus Point: {{ content.details.imageFocusY }}%
                                 <input v-model.number="content.details.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
                             </label>
                         </div>
@@ -1007,6 +1022,9 @@ const accountUrl = props.payload?.accountUrl || '';
 const adminBaseUrl = props.payload?.adminBaseUrl || '/admin';
 const apiBaseUrl = props.payload?.adminApiBaseUrl || '/admin/api';
 const previewUrl = props.payload?.previewUrl || '';
+const fieldHelpTexts = (props.payload?.fieldHelpTexts && typeof props.payload.fieldHelpTexts === 'object')
+    ? props.payload.fieldHelpTexts
+    : {};
 const globalMessage = ref('');
 const globalError = ref('');
 const lastSavedAt = ref('');
@@ -1172,6 +1190,9 @@ onMounted(async () => {
     if (parties.value.length > 0) {
         selectedPartyId.value = parties.value[0].id;
     }
+
+    await nextTick();
+    applyFieldHelpAttributes();
 });
 
 watch(
@@ -1913,6 +1934,236 @@ function moveInArray(list, fromIndex, toIndex) {
     list.splice(toIndex, 0, moved);
 }
 
+function applyFieldHelpAttributes() {
+    const labels = document.querySelectorAll('.content-section-block label');
+
+    labels.forEach((label) => {
+        const labelText = extractLabelText(label);
+        if (!labelText) {
+            return;
+        }
+
+        const help = buildFieldHelp(labelText);
+        if (!help) {
+            return;
+        }
+
+        label.classList.add('label-help');
+        label.setAttribute('data-help', help);
+        ensureLabelHelpHeader(label, labelText, help);
+    });
+}
+
+function extractLabelText(labelElement) {
+    const existingHeader = labelElement.querySelector(':scope > .label-help-header .label-help-title-text');
+    if (existingHeader) {
+        return (existingHeader.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    let text = '';
+    labelElement.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            text += ` ${node.textContent || ''}`;
+        }
+    });
+    return text.replace(/\s+/g, ' ').trim();
+}
+
+function ensureLabelHelpHeader(labelElement, labelText, helpText) {
+    let header = labelElement.querySelector(':scope > .label-help-header');
+    let title = header?.querySelector('.label-help-title-text');
+    let icon = header?.querySelector('.label-help-icon');
+
+    if (!header) {
+        const leadingTextNodes = [];
+        labelElement.childNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent && node.textContent.trim()) {
+                leadingTextNodes.push(node);
+            }
+        });
+
+        leadingTextNodes.forEach((node) => node.remove());
+
+        header = document.createElement('span');
+        header.className = 'label-help-header';
+
+        title = document.createElement('span');
+        title.className = 'label-help-title-text';
+        title.textContent = labelText;
+
+        icon = document.createElement('span');
+        icon.className = 'label-help-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 10.25V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.25" fill="currentColor"/></svg>';
+        icon.style.display = 'inline-flex';
+        icon.style.alignItems = 'center';
+        icon.style.justifyContent = 'center';
+        icon.style.marginLeft = '8px';
+        icon.style.width = '16px';
+        icon.style.height = '16px';
+        icon.style.lineHeight = '1';
+        icon.style.color = '#848484';
+        icon.style.verticalAlign = 'middle';
+        icon.style.position = 'relative';
+        icon.style.top = '-1px';
+        icon.style.cursor = 'help';
+
+        header.appendChild(title);
+        header.appendChild(icon);
+        labelElement.insertBefore(header, labelElement.firstChild);
+    }
+
+    if (title) {
+        title.textContent = labelText;
+    }
+
+    if (icon) {
+        icon.className = 'label-help-icon';
+        icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 10.25V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.25" fill="currentColor"/></svg>';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.style.display = 'inline-flex';
+        icon.style.alignItems = 'center';
+        icon.style.justifyContent = 'center';
+        icon.style.marginLeft = '8px';
+        icon.style.width = '16px';
+        icon.style.height = '16px';
+        icon.style.lineHeight = '1';
+        icon.style.color = '#848484';
+        icon.style.verticalAlign = 'middle';
+        icon.style.position = 'relative';
+        icon.style.top = '-1px';
+        icon.style.cursor = 'help';
+        icon.style.pointerEvents = 'auto';
+        icon.style.userSelect = 'none';
+        icon.style.zIndex = '1';
+
+        ensureHelpTooltip(icon, helpText);
+    }
+
+    header.setAttribute('data-help', helpText);
+}
+
+function ensureHelpTooltip(iconElement, helpText) {
+    let tooltip = iconElement.querySelector(':scope > .label-help-tooltip');
+
+    if (!tooltip) {
+        tooltip = document.createElement('span');
+        tooltip.className = 'label-help-tooltip';
+        tooltip.style.position = 'absolute';
+        tooltip.style.zIndex = '80';
+        tooltip.style.display = 'none';
+        tooltip.style.width = '320px';
+        tooltip.style.maxWidth = '72vw';
+        tooltip.style.border = '1px solid rgba(255,255,255,0.2)';
+        tooltip.style.borderRadius = '8px';
+        tooltip.style.background = '#0f1b1d';
+        tooltip.style.color = '#ffffff';
+        tooltip.style.padding = '0.55rem 0.7rem';
+        tooltip.style.fontSize = '12px';
+        tooltip.style.lineHeight = '1.4';
+        tooltip.style.fontWeight = '400';
+        tooltip.style.letterSpacing = '0';
+        tooltip.style.textTransform = 'none';
+        tooltip.style.whiteSpace = 'normal';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.boxShadow = '0 8px 18px rgba(15,27,29,0.25)';
+        iconElement.appendChild(tooltip);
+    }
+
+    tooltip.textContent = helpText;
+
+    const positionTooltip = () => {
+        if (window.innerWidth <= 900) {
+            tooltip.style.left = '0';
+            tooltip.style.top = 'calc(100% + 8px)';
+            tooltip.style.transform = 'none';
+        } else {
+            tooltip.style.left = 'calc(100% + 12px)';
+            tooltip.style.top = '50%';
+            tooltip.style.transform = 'translateY(-50%)';
+        }
+    };
+
+    const showTooltip = () => {
+        positionTooltip();
+        tooltip.style.display = 'block';
+    };
+
+    const hideTooltip = () => {
+        tooltip.style.display = 'none';
+    };
+
+    if (iconElement.dataset.helpBound !== '1') {
+        iconElement.addEventListener('mouseenter', showTooltip);
+        iconElement.addEventListener('mouseleave', hideTooltip);
+        iconElement.dataset.helpBound = '1';
+    }
+}
+
+function buildFieldHelp(labelText) {
+    const lower = labelText.toLowerCase();
+
+    if (lower.includes('primary section colour')) return resolveFieldHelpText('theme.primary_section_colour', 'Example: #22363A. Choose a dark section colour for strong white text contrast.');
+    if (lower.includes('button colour')) return resolveFieldHelpText('theme.button_colour', 'Example: #22363A. This controls dark action buttons across the page.');
+    if (lower.includes('couple names')) return resolveFieldHelpText('hero.couple_names', 'Example: Kyle & Nicole. This displays as the hero headline.');
+    if (lower.includes('hero kicker')) return resolveFieldHelpText('hero.kicker', 'Example: We are getting married. Keep this short and warm.');
+    if (lower.includes('wedding date')) return resolveFieldHelpText('hero.wedding_date', 'Example: 12 September 2026.');
+    if (lower.includes('location line')) return resolveFieldHelpText('hero.location_line', 'Example: Ayrshire, Scotland.');
+    if (lower.includes('hero rsvp button label')) return resolveFieldHelpText('hero.rsvp_button_label', 'Example: RSVP Now.');
+    if (lower.includes('upload hero image')) return resolveFieldHelpText('hero.upload_image', 'Upload your main hero photo (JPG/PNG/WEBP/SVG).');
+    if (lower.includes('hero focus x') || lower.includes('hero side to side') || lower.includes('hero image horizontal focus point')) return resolveFieldHelpText('hero.focus_x', 'Set horizontal focal point. 50% keeps the centre in view.');
+    if (lower.includes('hero focus y') || lower.includes('hero up and down') || lower.includes('hero image vertical focus point')) return resolveFieldHelpText('hero.focus_y', 'Set vertical focal point. 50% keeps the centre in view.');
+    if (lower.includes('welcome heading')) return resolveFieldHelpText('welcome.heading', 'Example: Dear Family & Friends.');
+    if (lower.includes('welcome signoff')) return resolveFieldHelpText('welcome.signoff', 'Example: Kyle & Nicole.');
+    if (lower.includes('welcome letter')) return resolveFieldHelpText('welcome.letter', 'Example: We are thrilled to celebrate with you on our wedding day.');
+    if (lower.includes('upload welcome image')) return resolveFieldHelpText('welcome.upload_image', 'Upload the image that appears beside the welcome letter.');
+    if (lower.includes('welcome focus x') || lower.includes('welcome side to side') || lower.includes('welcome image horizontal focus point')) return resolveFieldHelpText('welcome.focus_x', 'Adjust horizontal crop focus for the welcome image.');
+    if (lower.includes('welcome focus y') || lower.includes('welcome up and down') || lower.includes('welcome image vertical focus point')) return resolveFieldHelpText('welcome.focus_y', 'Adjust vertical crop focus for the welcome image.');
+    if (lower.includes('timeline heading')) return resolveFieldHelpText('timeline.heading', 'Example: The Big Day.');
+    if (lower.includes('timeline accent')) return resolveFieldHelpText('timeline.accent', 'Example: Saturday, 12 September 2026.');
+    if (lower === 'time') return resolveFieldHelpText('timeline.time', 'Example: 3:30 PM.');
+    if (lower === 'event') return resolveFieldHelpText('timeline.event', 'Example: Ceremony.');
+    if (lower === 'description') return resolveFieldHelpText('timeline.description', 'Example: Join us as we say “I do.”');
+    if (lower.includes('our story heading')) return resolveFieldHelpText('story.heading', 'Example: Our Story.');
+    if (lower.includes('our story accent')) return resolveFieldHelpText('story.accent', 'Example: March 2016.');
+    if (lower.includes('our story text')) return resolveFieldHelpText('story.text', 'Share a short story of how you met and your journey together.');
+    if (lower.includes('upload our story image')) return resolveFieldHelpText('story.upload_image', 'Upload the photo shown beside your story.');
+    if (lower.includes('story focus x') || lower.includes('story side to side') || lower.includes('story image horizontal focus point')) return resolveFieldHelpText('story.focus_x', 'Adjust horizontal crop focus for the story image.');
+    if (lower.includes('story focus y') || lower.includes('story up and down') || lower.includes('story image vertical focus point')) return resolveFieldHelpText('story.focus_y', 'Adjust vertical crop focus for the story image.');
+    if (lower.includes('venue name')) return resolveFieldHelpText('details.venue_name', 'Example: Lochgreen House Hotel.');
+    if (lower.includes('venue address')) return resolveFieldHelpText('details.venue_address', 'Example: Monktonhill Rd, Troon KA10 7EN.');
+    if (lower.includes('venue blurb')) return resolveFieldHelpText('details.venue_blurb', 'Example: Ceremony and reception are both onsite.');
+    if (lower.includes('upload venue image')) return resolveFieldHelpText('details.upload_image', 'Upload the image shown alongside venue/travel details.');
+    if (lower.includes('venue focus x') || lower.includes('venue side to side') || lower.includes('venue image horizontal focus point')) return resolveFieldHelpText('details.focus_x', 'Adjust horizontal crop focus for the venue image.');
+    if (lower.includes('venue focus y') || lower.includes('venue up and down') || lower.includes('venue image vertical focus point')) return resolveFieldHelpText('details.focus_y', 'Adjust vertical crop focus for the venue image.');
+    if (lower.includes('travel information')) return resolveFieldHelpText('details.travel_info', 'Example: Nearby hotels and transport details for out-of-town guests.');
+    if (lower.includes('menu section heading')) return resolveFieldHelpText('menu.section_heading', 'Example: Wedding Menu.');
+    if (lower.includes('select your rsvp meal type')) return resolveFieldHelpText('menu.meal_type', 'Choose between set menu and guest meal selections.');
+    if (lower.includes('menu intro text')) return resolveFieldHelpText('menu.intro_text', 'Short intro above menu cards. Example: We cannot wait to share this meal with you.');
+    if (lower.includes('menu notes card title')) return resolveFieldHelpText('menu.notes_title', 'Example: Dining Notes.');
+    if (lower.includes('menu notes card text')) return resolveFieldHelpText('menu.notes_text', 'Example: Please include allergies and dietary needs in your RSVP.');
+    if (lower.includes('course name')) return resolveFieldHelpText('menu.course_name', 'Example: Starter, Main, Dessert.');
+    if (lower.includes('dish title')) return resolveFieldHelpText('menu.dish_title', 'Example: Pan Seared Seabass.');
+    if (lower.includes('dish description')) return resolveFieldHelpText('menu.dish_description', 'Example: Served with whipped mash and tender-stem broccoli.');
+    if (lower.includes('set menu description')) return resolveFieldHelpText('menu.set_menu_description', 'Shown when set menu mode is enabled. Example: A chef-curated menu will be served.');
+    if (lower.includes('question')) return resolveFieldHelpText('faq.question', 'Example: Is there parking at the venue?');
+    if (lower.includes('answer')) return resolveFieldHelpText('faq.answer', 'Example: Yes, there is free onsite parking available.');
+    if (lower.includes('rsvp request title')) return resolveFieldHelpText('rsvp.title', 'Example: Ready to celebrate with us?');
+    if (lower.includes('rsvp request button label')) return resolveFieldHelpText('rsvp.button_label', 'Example: Go to RSVP.');
+    if (lower.includes('final rsvp request text')) return resolveFieldHelpText('rsvp.text', 'Example: Please RSVP using your invitation code.');
+
+    return '';
+}
+
+function resolveFieldHelpText(key, fallback) {
+    const custom = fieldHelpTexts?.[key];
+    if (typeof custom === 'string' && custom.trim().length > 0) {
+        return custom.trim();
+    }
+
+    return fallback;
+}
+
 function setMessage(message, durationMs = 3000) {
     globalMessage.value = message;
     clearError();
@@ -1982,6 +2233,7 @@ function serialize(value) {
 <style scoped>
 .admin-ui label {
     color: #0f1b1d;
+    font-weight: 500;
 }
 
 .admin-btn {
@@ -2081,6 +2333,25 @@ function serialize(value) {
 
 .content-section-block label {
     line-height: 1.4;
+}
+
+.content-section-block label.label-help {
+    position: relative;
+}
+
+.content-section-block .label-help-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 0.05rem;
+}
+
+.content-section-block .label-help-title-text {
+    display: inline-block;
+}
+
+.content-section-block .label-help-icon {
+    pointer-events: auto;
 }
 
 .content-section-block label > input,
@@ -2201,6 +2472,17 @@ function serialize(value) {
 
 .drag-handle:active {
     cursor: grabbing;
+}
+
+.timeline-grid {
+    gap: 0.75rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .timeline-grid {
+        grid-template-columns: 1fr 1fr 3fr 110px 90px;
+    }
 }
 
 input,

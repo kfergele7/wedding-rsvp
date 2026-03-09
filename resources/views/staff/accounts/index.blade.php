@@ -40,7 +40,7 @@
                         <td class="py-3 pr-4">{{ $account->sites->count() }}</td>
                         <td class="py-3 pr-4">{{ $account->created_at?->toDateString() }}</td>
                         <td class="py-3">
-                            <a href="{{ route('staff.accounts.show', $account) }}" class="admin-btn border border-soft bg-white px-3 py-2 text-xs uppercase tracking-[0.1em]">View</a>
+                            <a href="{{ route('staff.accounts.show', $account) }}" class="admin-btn border border-soft bg-white px-3 py-2 text-xs uppercase tracking-[0.1em]">View / Manage</a>
                         </td>
                     </tr>
                 @empty

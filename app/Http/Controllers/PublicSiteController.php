@@ -172,7 +172,7 @@ class PublicSiteController extends Controller
             return $fallback;
         }
 
-        return array_replace_recursive($fallback, $saved->value);
+        return $this->mergeReplacingLists($fallback, $saved->value);
     }
 
     private function rsvpSettings(): array
@@ -187,7 +187,34 @@ class PublicSiteController extends Controller
             return $fallback;
         }
 
-        return array_replace_recursive($fallback, $saved->value);
+        return $this->mergeReplacingLists($fallback, $saved->value);
     }
 
+    /**
+     * Merge nested associative arrays while replacing list arrays outright.
+     */
+    private function mergeReplacingLists(array $base, array $incoming): array
+    {
+        if (array_is_list($incoming)) {
+            return $incoming;
+        }
+
+        $merged = $base;
+
+        foreach ($incoming as $key => $value) {
+            if (
+                array_key_exists($key, $base)
+                && is_array($base[$key])
+                && is_array($value)
+                && ! array_is_list($value)
+            ) {
+                $merged[$key] = $this->mergeReplacingLists($base[$key], $value);
+                continue;
+            }
+
+            $merged[$key] = $value;
+        }
+
+        return $merged;
+    }
 }

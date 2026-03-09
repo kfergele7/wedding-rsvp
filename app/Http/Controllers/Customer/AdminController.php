@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlatformSetting;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -11,12 +13,14 @@ class AdminController extends Controller
     {
         $site = $this->currentSite();
         $rsvpSettings = $this->rsvpSettings();
+        $fieldHelpTexts = $this->fieldHelpTexts();
 
         return view('admin-app', [
             'page' => $section,
             'payload' => [
                 'mealOptions' => $rsvpSettings['meal_options'] ?? [],
                 'mealChoicesEnabled' => (($rsvpSettings['meal_mode'] ?? 'options') === 'options'),
+                'fieldHelpTexts' => $fieldHelpTexts,
                 'logoutUrl' => route('logout'),
                 'accountUrl' => route('customer.dashboard'),
                 'adminBaseUrl' => '/app/admin',
@@ -39,5 +43,33 @@ class AdminController extends Controller
         }
 
         return array_replace_recursive($fallback, $saved->value);
+    }
+
+    private function fieldHelpTexts(): array
+    {
+        $defaults = collect(config('wedding.admin_field_help_texts', []))
+            ->map(fn (mixed $definition) => (string) ($definition['default'] ?? ''))
+            ->all();
+
+        if (! Schema::hasTable('platform_settings')) {
+            return $defaults;
+        }
+
+        $saved = PlatformSetting::query()
+            ->where('key', 'admin_field_help_texts')
+            ->first();
+
+        if (! $saved || ! is_array($saved->value)) {
+            return $defaults;
+        }
+
+        $overrides = collect($saved->value)
+            ->mapWithKeys(function (mixed $value, mixed $key) {
+                return [(string) $key => is_string($value) ? trim($value) : ''];
+            })
+            ->filter(fn (string $value) => $value !== '')
+            ->all();
+
+        return array_replace($defaults, $overrides);
     }
 }

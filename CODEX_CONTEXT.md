@@ -25,6 +25,7 @@
 
 ## Key models
 - `Account`, `Site`, `SiteSetting`
+- `PlatformSetting`
 - `Party`, `Guest`, `Rsvp`
 - `User`
 - `StripeWebhookEvent`
@@ -58,6 +59,17 @@
 - Avoid reusing generic/template placeholder content for product-facing text.
 
 ## Recent implementation notes
+- Staff template management:
+  - Global content-help text editor moved to dedicated staff tab: `/staff/template-management`.
+  - Changes apply platform-wide to all customer content editors.
+  - Uses `platform_settings` table key: `admin_field_help_texts`.
+- Public content merge now uses list replacement semantics in `PublicSiteController` to prevent deleted list items (timeline/FAQ/menu) from reappearing.
+- Public timeline cards use responsive auto-fit grid and stable list keys.
+- Admin content UX updates:
+  - timeline section label renamed to `Wedding Timeline`
+  - image focus labels renamed to `Image Horizontal Focus Point` / `Image Vertical Focus Point`
+  - info-tooltip popovers now open to the right of icons (mobile fallback below)
+  - rich text toolbar includes Undo/Redo icon buttons.
 - Preview banner is fixed at top in unpublished preview mode with role-specific messaging:
   - Staff: "Staff preview mode" + staff dashboard button.
   - Customer: "Preview mode" + account button + subscribe CTA to `/app`.

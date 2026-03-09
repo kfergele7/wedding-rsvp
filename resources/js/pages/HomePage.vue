@@ -101,7 +101,7 @@ const fallbackContent = {
         imageFocusY: 50,
     },
     timeline: {
-        heading: 'The Big Day',
+        heading: 'Wedding Timeline',
         dateAccent: 'September 12, 2026',
         items: [
             { time: '3:30 PM', title: 'Ceremony', description: 'Join us as we say “I do.”' },

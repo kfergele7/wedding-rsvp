@@ -6,6 +6,35 @@
 - [ ] Verify menu heading labels show `Course` vs `Course Options` based on per-course item count.
 - [ ] Push latest bugfix/docs commit to remote.
 
+## Cross-machine handoff (2026-03-09 16:35 GMT)
+- Objective completed:
+  - Added staff-managed global template help text editing and continued content/admin UX polish.
+- Key implementation updates:
+  - New staff tab/page: `/staff/template-management` for global info-icon help text editing.
+  - Added global settings model/table for template-wide settings:
+    - `PlatformSetting` model
+    - migration: `2026_03_09_160000_create_platform_settings_table.php`
+  - Customer content tooltips now read global platform help text with safe fallback when table is missing.
+  - Public content merge now uses list-replacement logic (not recursive index merge) so deleted timeline/FAQ/menu items do not reappear.
+  - Timeline/public refinements:
+    - responsive timeline grid for 2–5 cards
+    - safer v-for keys to avoid stale rendering after delete/reorder
+    - admin section title changed to `Wedding Timeline`
+  - Content editor UX:
+    - info icon popovers open to the right of icon (mobile fallback below)
+    - image focus labels renamed to `Image Horizontal Focus Point` / `Image Vertical Focus Point`
+    - rich text toolbar now has Undo/Redo icon buttons at the end.
+- Files likely needing extra review on next pickup:
+  - `resources/js/pages/AdminPage.vue`
+  - `resources/js/components/admin/RichTextEditor.vue`
+  - `resources/js/components/public/TimelineSection.vue`
+  - `app/Http/Controllers/PublicSiteController.php`
+  - `app/Http/Controllers/Staff/TemplateManagementController.php`
+  - `routes/web.php`
+  - `config/wedding.php`
+- Important local step (if not already run):
+  - `php artisan migrate` (required for `platform_settings` table).
+
 ## Mac Studio pickup (2026-03-09 11:01:58 GMT)
 - Current objective:
   - Re-align Mac workspace with latest repo state from Windows session and verify local email/dev verification flow is present.

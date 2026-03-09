@@ -9,6 +9,12 @@
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="openLinkModal('link')">Link</button>
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="openLinkModal('button')">Button Link</button>
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="clearFormatting">Clear</button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" :disabled="!canUndo" @click="runCommand('undo')" aria-label="Undo" title="Undo">
+                <span class="material-symbols-outlined format-icon">undo</span>
+            </button>
+            <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" :disabled="!canRedo" @click="runCommand('redo')" aria-label="Redo" title="Redo">
+                <span class="material-symbols-outlined format-icon">redo</span>
+            </button>
         </div>
 
         <div
@@ -18,6 +24,8 @@
             contenteditable="true"
             @input="syncToModel"
             @blur="syncToModel"
+            @keyup="refreshHistoryState"
+            @mouseup="refreshHistoryState"
         ></div>
 
         <div v-if="linkModalOpen" class="fixed inset-0 z-[80] bg-black/40 p-4" @click.self="closeLinkModal">
@@ -63,7 +71,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     modelValue: {
@@ -95,11 +103,20 @@ const linkModalError = ref('');
 const toolbarClass = ref('toolbar-secondary');
 const editorClass = ref('editor-white');
 const formatButtonClass = ref('format-btn-offwhite');
+const canUndo = ref(false);
+const canRedo = ref(false);
 
 onMounted(() => {
     if (editor.value) {
         editor.value.innerHTML = props.modelValue || '';
     }
+
+    refreshHistoryState();
+    document.addEventListener('selectionchange', refreshHistoryState);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('selectionchange', refreshHistoryState);
 });
 
 watch(
@@ -143,6 +160,7 @@ function runCommand(command, value = null) {
     focusEditor();
     document.execCommand(command, false, value);
     syncToModel();
+    refreshHistoryState();
 }
 
 function insertLineBreak() {
@@ -196,10 +214,16 @@ function clearFormatting() {
 
 function syncToModel() {
     emit('update:modelValue', editor.value?.innerHTML || '');
+    refreshHistoryState();
 }
 
 function focusEditor() {
     editor.value?.focus();
+}
+
+function refreshHistoryState() {
+    canUndo.value = document.queryCommandEnabled('undo');
+    canRedo.value = document.queryCommandEnabled('redo');
 }
 
 function escapeHtml(value) {
@@ -226,6 +250,18 @@ function escapeAttribute(value) {
     background: #f7f5f2;
     border-color: #466369;
     color: #0f1b1d;
+}
+
+.format-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.format-btn:disabled {
+    background: #848484;
+    border-color: #848484;
+    color: #ffffff;
+    cursor: not-allowed;
 }
 
 .format-btn-offwhite {
