@@ -8,7 +8,7 @@
                     <p class="mt-3 text-wedding-muted">Enter your invitation code to view and update your response.</p>
                 </div>
                 <button
-                    class="admin-btn border border-red-300 px-3 py-2 text-xs uppercase tracking-[0.12em] text-red-700 transition hover:border-red-400 hover:bg-red-50"
+                    class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]"
                     type="button"
                     @click="$emit('close')"
                 >
@@ -117,7 +117,7 @@
                         {{ savingRsvp ? 'Saving...' : 'Save RSVP' }}
                     </button>
                     <button
-                        class="admin-btn border border-red-300 px-6 py-3 text-sm uppercase tracking-[0.15em] text-red-700 transition hover:border-red-400 hover:bg-red-50"
+                        class="admin-btn admin-btn-danger px-6 py-3 text-sm uppercase tracking-[0.15em]"
                         type="button"
                         @click="$emit('close')"
                     >

@@ -15,6 +15,8 @@ class RsvpController extends Controller
         $parties = Party::query()
             ->forSite($this->currentSiteId())
             ->with(['rsvp', 'guests'])
+            ->withCount('rsvpEmailLogs')
+            ->withMax('rsvpEmailLogs', 'sent_at')
             ->orderBy('display_name')
             ->get();
 
@@ -25,6 +27,9 @@ class RsvpController extends Controller
                 'code' => $party->code,
                 'max_guests' => $party->max_guests,
                 'guest_count' => $party->guests->count(),
+                'rsvp_email_sent' => ((int) ($party->rsvp_email_logs_count ?? 0)) > 0,
+                'rsvp_email_sent_at' => $party->rsvp_email_logs_max_sent_at,
+                'rsvp_email_sent_count' => (int) ($party->rsvp_email_logs_count ?? 0),
                 'rsvp' => $party->rsvp ? [
                     'status' => $party->rsvp->status,
                     'attending_count' => $party->rsvp->attending_count,

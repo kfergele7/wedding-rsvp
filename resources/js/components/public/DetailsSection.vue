@@ -46,11 +46,6 @@
                     </article>
                 </div>
 
-                <div
-                    v-if="rsvpSettings.meal_mode === 'set_menu'"
-                    class="cms-rich mt-6 border border-white/25 bg-white/10 p-5 leading-relaxed text-white/80"
-                    v-html="rsvpSettings.set_menu_description"
-                ></div>
             </div>
 
             <div v-if="sectionVisibility.faqs" class="card-frame">

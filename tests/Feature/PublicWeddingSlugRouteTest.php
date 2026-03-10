@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Account;
 use App\Models\Party;
+use App\Models\PlatformSetting;
 use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -112,6 +113,22 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'STAFF'])
             ->assertOk()
             ->assertJsonPath('party.display_name', 'Staff Household');
+    }
+
+    public function test_demo_route_uses_selected_demo_source_site_content(): void
+    {
+        $siteA = $this->makeSite('demo-account-a', 'demo-site-a', true, 'Demo A Couple');
+        $siteB = $this->makeSite('demo-account-b', 'demo-site-b', true, 'Demo B Couple');
+
+        PlatformSetting::query()->create([
+            'key' => 'demo_template_source',
+            'value' => ['site_id' => $siteB->id],
+        ]);
+
+        $this->get('/demo')
+            ->assertOk()
+            ->assertSee('Demo B Couple')
+            ->assertDontSee('Demo A Couple');
     }
 
     private function makeSite(string $accountSlug, string $siteSlug, bool $published, string $names): Site

@@ -29,6 +29,7 @@ class UpdatePartyRequest extends FormRequest
 
         return [
             'display_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email:rfc,dns', 'max:255'],
             'code' => [
                 'required',
                 'string',

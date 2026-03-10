@@ -26,6 +26,10 @@ class AdminController extends Controller
                 'adminBaseUrl' => '/app/admin',
                 'adminApiBaseUrl' => '/app/admin/api',
                 'previewUrl' => route('wedding.public', ['public_slug' => $site->public_slug]),
+                'siteTitle' => $site->title,
+                'siteSettingsUpdateUrl' => route('customer.site.settings.update'),
+                'sitePublished' => (bool) $site->is_published,
+                'sitePublishUrl' => route('customer.site.publish'),
             ],
         ]);
     }

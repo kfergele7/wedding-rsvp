@@ -8,11 +8,14 @@ use App\Http\Requests\StoreGuestRequest;
 use App\Http\Requests\StorePartyRequest;
 use App\Http\Requests\UpdateGuestRequest;
 use App\Http\Requests\UpdatePartyRequest;
+use App\Mail\PartyRsvpInviteMail;
 use App\Models\Guest;
 use App\Models\Party;
+use App\Models\RsvpEmailLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class PartyController extends Controller
 {
@@ -30,6 +33,8 @@ class PartyController extends Controller
         $parties = Party::query()
             ->forSite($this->currentSiteId())
             ->with(['guests', 'rsvp'])
+            ->withCount('rsvpEmailLogs')
+            ->withMax('rsvpEmailLogs', 'sent_at')
             ->orderBy('display_name')
             ->get();
 
@@ -42,6 +47,29 @@ class PartyController extends Controller
     {
         $data = $request->validated();
         $siteId = $this->currentSiteId();
+        $guests = collect($data['guests'] ?? [])
+            ->filter(function ($guest) {
+                $firstName = trim((string) ($guest['first_name'] ?? ''));
+                $lastName = trim((string) ($guest['last_name'] ?? ''));
+
+                return $firstName !== '' && $lastName !== '';
+            })
+            ->map(function ($guest) use ($siteId) {
+                return [
+                    'site_id' => $siteId,
+                    'first_name' => trim((string) ($guest['first_name'] ?? '')),
+                    'last_name' => trim((string) ($guest['last_name'] ?? '')),
+                    'is_child' => (bool) ($guest['is_child'] ?? false),
+                    'allow_plus_one' => (bool) ($guest['allow_plus_one'] ?? false),
+                ];
+            })
+            ->values();
+
+        $computedInvitedSeats = $guests->count() + $guests->where('allow_plus_one', true)->count();
+        $maxGuests = max(
+            (int) ($data['max_guests'] ?? 1),
+            $computedInvitedSeats > 0 ? $computedInvitedSeats : 1
+        );
         $code = isset($data['code']) && $data['code'] !== ''
             ? strtoupper(trim($data['code']))
             : Party::generateCode($siteId, 4);
@@ -49,12 +77,19 @@ class PartyController extends Controller
         $party = Party::query()->create([
             'site_id' => $siteId,
             'display_name' => $data['display_name'],
+            'email' => $data['email'] ?? null,
             'code' => $code,
-            'max_guests' => $data['max_guests'],
+            'max_guests' => $maxGuests,
             'notes' => $data['notes'] ?? null,
         ]);
 
-        $party->load(['guests', 'rsvp']);
+        if ($guests->isNotEmpty()) {
+            $party->guests()->createMany($guests->all());
+        }
+
+        $party->load(['guests', 'rsvp'])
+            ->loadCount('rsvpEmailLogs')
+            ->loadMax('rsvpEmailLogs', 'sent_at');
 
         return response()->json([
             'message' => 'Party created.',
@@ -64,7 +99,9 @@ class PartyController extends Controller
 
     public function show(Party $party): JsonResponse
     {
-        $party->load(['guests', 'rsvp']);
+        $party->load(['guests', 'rsvp'])
+            ->loadCount('rsvpEmailLogs')
+            ->loadMax('rsvpEmailLogs', 'sent_at');
 
         return response()->json(['party' => $this->partyPayload($party)]);
     }
@@ -75,12 +112,15 @@ class PartyController extends Controller
 
         $party->update([
             'display_name' => $data['display_name'],
+            'email' => $data['email'] ?? null,
             'code' => strtoupper(trim($data['code'])),
-            'max_guests' => $data['max_guests'],
+            'max_guests' => max($data['max_guests'], $this->minimumSeatsForParty($party)),
             'notes' => $data['notes'] ?? null,
         ]);
 
-        $party->load(['guests', 'rsvp']);
+        $party->load(['guests', 'rsvp'])
+            ->loadCount('rsvpEmailLogs')
+            ->loadMax('rsvpEmailLogs', 'sent_at');
 
         return response()->json([
             'message' => 'Party updated.',
@@ -101,6 +141,7 @@ class PartyController extends Controller
             ...$request->validated(),
             'site_id' => $party->site_id,
         ]);
+        $this->syncPartySeatLimit($party);
 
         return response()->json([
             'message' => 'Guest added.',
@@ -111,6 +152,7 @@ class PartyController extends Controller
     public function updateGuest(UpdateGuestRequest $request, Guest $guest): JsonResponse
     {
         $guest->update($request->validated());
+        $this->syncPartySeatLimit($guest->party);
 
         return response()->json([
             'message' => 'Guest updated.',
@@ -120,7 +162,9 @@ class PartyController extends Controller
 
     public function destroyGuest(Guest $guest): JsonResponse
     {
+        $party = $guest->party;
         $guest->delete();
+        $this->syncPartySeatLimit($party);
 
         return response()->json(['message' => 'Guest removed.']);
     }
@@ -166,6 +210,7 @@ class PartyController extends Controller
                     [
                         'site_id' => $siteId,
                         'display_name' => $payload['party_display_name'],
+                        'email' => $payload['email'] !== '' ? strtolower($payload['email']) : null,
                         'max_guests' => max(1, (int) ($payload['max_guests'] ?: 1)),
                         'notes' => $payload['notes'] ?: null,
                     ]
@@ -181,6 +226,7 @@ class PartyController extends Controller
                         'first_name' => $payload['first_name'],
                         'last_name' => $payload['last_name'],
                         'is_child' => in_array(strtolower((string) ($payload['is_child'] ?? '')), ['1', 'true', 'yes', 'y'], true),
+                        'allow_plus_one' => in_array(strtolower((string) ($payload['allow_plus_one'] ?? '')), ['1', 'true', 'yes', 'y'], true),
                     ]);
                     $createdGuests++;
                 }
@@ -205,7 +251,7 @@ class PartyController extends Controller
 
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['party_display_name', 'code', 'max_guests', 'notes', 'first_name', 'last_name', 'is_child']);
+            fputcsv($handle, ['party_display_name', 'email', 'code', 'max_guests', 'notes', 'first_name', 'last_name', 'is_child', 'allow_plus_one']);
 
             Party::query()
                 ->forSite($this->currentSiteId())
@@ -214,19 +260,21 @@ class PartyController extends Controller
                 ->chunk(200, function ($parties) use ($handle) {
                 foreach ($parties as $party) {
                     if ($party->guests->isEmpty()) {
-                        fputcsv($handle, [$party->display_name, $party->code, $party->max_guests, $party->notes, '', '', '']);
+                        fputcsv($handle, [$party->display_name, $party->email, $party->code, $party->max_guests, $party->notes, '', '', '', '']);
                         continue;
                     }
 
                     foreach ($party->guests as $guest) {
                         fputcsv($handle, [
                             $party->display_name,
+                            $party->email,
                             $party->code,
                             $party->max_guests,
                             $party->notes,
                             $guest->first_name,
                             $guest->last_name,
                             $guest->is_child ? 'yes' : 'no',
+                            $guest->allow_plus_one ? 'yes' : 'no',
                         ]);
                     }
                 }
@@ -236,11 +284,78 @@ class PartyController extends Controller
         }, 200, $headers);
     }
 
+    public function sendRsvpEmails(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'party_ids' => ['required', 'array', 'min:1'],
+            'party_ids.*' => ['required', 'integer'],
+        ]);
+
+        $site = $this->currentSite();
+        $siteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
+
+        $parties = Party::query()
+            ->forSite($this->currentSiteId())
+            ->whereIn('id', $validated['party_ids'])
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->get();
+
+        if ($parties->isEmpty()) {
+            return response()->json(['message' => 'No parties with valid email addresses were selected.'], 422);
+        }
+
+        foreach ($parties as $party) {
+            $rsvpUrl = route('wedding.public', ['public_slug' => $site->public_slug]).'?code='.$party->code;
+
+            Mail::to($party->email)->send(new PartyRsvpInviteMail(
+                partyName: $party->display_name,
+                rsvpCode: $party->code,
+                websiteUrl: $siteUrl,
+                rsvpUrl: $rsvpUrl,
+            ));
+
+            RsvpEmailLog::query()->create([
+                'site_id' => $party->site_id,
+                'party_id' => $party->id,
+                'sent_by_user_id' => auth()->id(),
+                'sent_to_email' => $party->email,
+                'sent_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'RSVP request emails sent.',
+            'sent' => $parties->count(),
+        ]);
+    }
+
+    public function emailHistory(Party $party): JsonResponse
+    {
+        $logs = $party->rsvpEmailLogs()
+            ->orderByDesc('sent_at')
+            ->limit(100)
+            ->get()
+            ->map(fn (RsvpEmailLog $log) => [
+                'id' => $log->id,
+                'sent_to_email' => $log->sent_to_email,
+                'sent_at' => $log->sent_at?->toDateTimeString(),
+            ])
+            ->values();
+
+        return response()->json([
+            'party_id' => $party->id,
+            'party_name' => $party->display_name,
+            'history' => $logs,
+        ]);
+    }
+
     private function partyPayload(Party $party): array
     {
         return [
             'id' => $party->id,
             'display_name' => $party->display_name,
+            'email' => $party->email,
             'code' => $party->code,
             'max_guests' => $party->max_guests,
             'notes' => $party->notes,
@@ -249,6 +364,7 @@ class PartyController extends Controller
                 'first_name' => $guest->first_name,
                 'last_name' => $guest->last_name,
                 'is_child' => $guest->is_child,
+                'allow_plus_one' => $guest->allow_plus_one,
             ])->values(),
             'rsvp' => $party->rsvp ? [
                 'status' => $party->rsvp->status,
@@ -258,6 +374,32 @@ class PartyController extends Controller
                 'message' => $party->rsvp->message,
                 'updated_at' => $party->rsvp->updated_at?->toDateTimeString(),
             ] : null,
+            'rsvp_email_sent' => ((int) ($party->rsvp_email_logs_count ?? 0)) > 0,
+            'rsvp_email_sent_at' => $party->rsvp_email_logs_max_sent_at,
+            'rsvp_email_sent_count' => (int) ($party->rsvp_email_logs_count ?? 0),
         ];
+    }
+
+    private function syncPartySeatLimit(?Party $party): void
+    {
+        if (! $party) {
+            return;
+        }
+
+        $minimumSeats = $this->minimumSeatsForParty($party);
+        if ($party->max_guests < $minimumSeats) {
+            $party->update([
+                'max_guests' => $minimumSeats,
+            ]);
+        }
+    }
+
+    private function minimumSeatsForParty(Party $party): int
+    {
+        $party->loadMissing('guests');
+        $guestCount = $party->guests->count();
+        $plusOneCount = $party->guests->where('allow_plus_one', true)->count();
+
+        return max(1, $guestCount + $plusOneCount);
     }
 }

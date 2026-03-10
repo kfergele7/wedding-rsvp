@@ -40,21 +40,76 @@
         </div>
 
         <main class="site-shell py-10">
-            <section v-if="section === 'dashboard'" class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
-                <article v-for="card in dashboardCards" :key="card.label" class="card-frame bg-white text-center">
-                    <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">{{ card.label }}</p>
-                    <p class="mt-2 font-heading text-4xl">{{ card.value }}</p>
+            <section v-if="section === 'dashboard'" class="space-y-6">
+                <div class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+                    <article v-for="card in dashboardCards" :key="card.label" class="card-frame bg-white text-center">
+                        <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">{{ card.label }}</p>
+                        <p class="mt-2 font-heading text-4xl">{{ card.value }}</p>
+                    </article>
+                </div>
+
+                <article class="content-section-block content-section-even">
+                    <h2 class="font-heading text-3xl">Site Information</h2>
+
+                    <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Public URL</p>
+                    <p class="mt-1 text-lg">
+                        <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="text-wedding-band underline decoration-wedding-band/50 underline-offset-4 hover:decoration-wedding-band">
+                            {{ previewUrl }}
+                        </a>
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]">
+                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                            Preview Site
+                        </a>
+                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="copyPublicUrl">
+                            <span class="material-symbols-outlined btn-icon">{{ copyLinkCopied ? 'check' : 'content_copy' }}</span>
+                            {{ copyLinkCopied ? 'Link Copied' : 'Copy Link' }}
+                        </button>
+                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="sharePublicUrl">
+                            <span class="material-symbols-outlined btn-icon">share</span>
+                            Share
+                        </button>
+                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="openQrModal">
+                            <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+                            Generate QR Code
+                        </button>
+                    </div>
+
+                    <p class="mt-8 text-sm uppercase tracking-[0.14em] text-wedding-muted">Site Visibility</p>
+                    <p class="mt-1 text-lg">{{ sitePublished ? 'Published' : 'Draft' }}</p>
+
+                    <button type="button" class="admin-btn admin-btn-success mt-6 inline-flex items-center gap-2 px-6 py-4 text-sm uppercase tracking-[0.14em]" @click="toggleSitePublished">
+                        <span class="material-symbols-outlined btn-icon">{{ sitePublished ? 'visibility_off' : 'publish' }}</span>
+                        {{ sitePublished ? 'Move To Draft' : 'Publish Site' }}
+                    </button>
                 </article>
             </section>
 
             <section v-if="section === 'content'" class="space-y-8 pb-32">
                 <article class="card-frame bg-white">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <h2 class="font-heading text-3xl">Content</h2>
+                        <h2 class="font-heading text-3xl">Create your website</h2>
                     </div>
-                    <p class="mt-2 text-wedding-muted">Update text, imagery, and colours shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.</p>
+                    <p class="mt-2 text-wedding-muted">
+                        Update text, imagery, and colours shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.
+                        If you would like to see a completed demo version of the website to reference, then
+                        <a href="/demo" target="_blank" rel="noopener noreferrer" class="underline decoration-wedding-band underline-offset-2">click here</a>.
+                    </p>
 
                     <div v-if="content" class="mt-8 space-y-6">
+                        <div class="content-section-block content-section-odd">
+                            <h3 class="font-heading text-3xl">Website Title</h3>
+                            <label class="mt-3 block text-sm uppercase tracking-[0.12em] text-wedding-muted">
+                                Website Title
+                                <input v-model="siteTitle" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="e.g. Kyle & Nicole's Wedding">
+                            </label>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
                         <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">1</span>
@@ -350,7 +405,7 @@
                             </label>
                         </div>
 
-                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Blurb</label>
+                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Venue Information</label>
                         <RichTextEditor v-model="content.details.venue.blurb" class="mt-2" tone="secondary" />
 
                         <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Upload Venue Image
@@ -439,16 +494,6 @@
                                 <RichTextEditor v-model="rsvpSettings.menu_intro" class="mt-2" tone="secondary" />
                             </div>
 
-                            <div class="mt-4 grid gap-4 md:grid-cols-3">
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted md:col-span-1">Menu Notes Card Title
-                                    <input v-model="rsvpSettings.menu_note_title" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="Dining Notes">
-                                </label>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Notes Card Text</label>
-                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" class="mt-2" tone="secondary" />
-                                </div>
-                            </div>
-
                             <div class="menu-courses-divider">
                                 <hr class="w-full border-t border-wedding-band/70">
                             </div>
@@ -490,7 +535,11 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <input v-model="course.name" class="w-full border border-soft bg-white px-4 py-3" placeholder="Starter">
+                                        <input
+                                            v-model="course.name"
+                                            class="w-full border border-soft bg-white px-4 py-3"
+                                            placeholder="e.g. Starter, Main or Dessert"
+                                        >
                                     </div>
 
                                     <div class="mb-4 mt-5 flex items-center justify-between">
@@ -535,6 +584,16 @@
                             <div v-if="rsvpSettings.meal_mode === 'set_menu'" class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Set Menu Description</label>
                                 <RichTextEditor v-model="rsvpSettings.set_menu_description" class="mt-2" tone="secondary" />
+                            </div>
+
+                            <div class="mt-6 grid gap-4 md:grid-cols-3">
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted md:col-span-1">Menu Notes Card Title
+                                    <input v-model="rsvpSettings.menu_note_title" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="Dining Notes">
+                                </label>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Menu Notes Card Text</label>
+                                    <RichTextEditor v-model="rsvpSettings.menu_note_text" class="mt-2" tone="secondary" />
+                                </div>
                             </div>
                         </div>
 
@@ -629,24 +688,32 @@
                 </article>
             </section>
 
-            <section v-if="section === 'parties'" class="grid items-start gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-                <article class="card-frame bg-white">
-                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <h2 class="font-heading text-3xl">Households</h2>
-                        <div class="flex flex-wrap gap-2">
-                            <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" :href="partiesExportUrl">Export CSV</a>
-                            <label class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]">
-                                Import CSV
-                                <input type="file" class="hidden" accept=".csv" @change="importParties">
-                            </label>
-                        </div>
+            <section v-if="section === 'parties'" class="card-frame bg-white space-y-6 guest-help-scope">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-heading text-3xl">Guest List</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <a class="admin-btn px-4 py-3 text-xs uppercase tracking-[0.12em]" :href="partiesExportUrl">Export CSV</a>
+                        <label class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                            <span class="material-symbols-outlined btn-icon">upload</span>
+                            Import CSV
+                            <input type="file" class="hidden" accept=".csv" @change="importParties">
+                        </label>
                     </div>
+                </div>
 
-                    <h3 class="font-heading text-2xl">Create Household</h3>
-                    <div class="mt-3 grid gap-3 md:grid-cols-2">
+                <div class="content-section-block content-section-even">
+                    <h3 class="font-heading text-2xl">Create a Party</h3>
+                    <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                         <div>
-                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Display Name</label>
-                            <input v-model="newParty.display_name" placeholder="Display name" class="w-full border border-soft px-4 py-3">
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Party Name</label>
+                            <input v-model="newParty.display_name" placeholder="Party name" class="w-full border border-soft px-4 py-3">
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                EMAIL
+                                <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(only required if sending via email)</span>
+                            </label>
+                            <input v-model="newParty.email" type="email" placeholder="party@example.com" class="w-full border border-soft px-4 py-3 normal-case tracking-normal">
                         </div>
                         <div class="flex items-end gap-2">
                             <div class="w-full">
@@ -658,31 +725,108 @@
                                 Generate
                             </button>
                         </div>
-                        <div>
-                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
-                            <input v-model.number="newParty.max_guests" type="number" min="1" max="20" placeholder="Max guests" class="w-full border border-soft px-4 py-3">
-                        </div>
-                        <div>
-                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Notes</label>
-                            <input v-model="newParty.notes" placeholder="Notes" class="w-full border border-soft px-4 py-3">
-                        </div>
                     </div>
-                    <button class="admin-btn admin-btn-success mt-4 inline-flex items-center gap-2" type="button" @click="createParty">
-                        <span class="material-symbols-outlined btn-icon">add</span>
-                        Create Household
+
+                    <div class="mt-4 rounded border border-soft bg-wedding-bg p-4">
+                        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                            <h4 class="font-heading text-xl">Guests for this party</h4>
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                Invited seats: <span class="font-semibold text-wedding-black">{{ createPartyInvitedSeats }}</span>
+                            </p>
+                        </div>
+                        <div class="space-y-3">
+                            <div
+                                v-for="(guestRow, index) in newPartyGuests"
+                                :key="`new-party-guest-${index}`"
+                                class="guest-row-grid grid gap-2 border border-soft bg-white p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(190px,0.75fr)_170px]"
+                            >
+                                <input v-model="guestRow.first_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2" placeholder="First name">
+                                <input v-model="guestRow.last_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2" placeholder="Last name">
+                                <label class="guest-option-control leading-none">
+                                    <input v-model="guestRow.is_child" class="guest-option-checkbox bg-white" type="checkbox">
+                                    Is this a Child?
+                                </label>
+                                <button
+                                    type="button"
+                                    class="admin-btn admin-btn-danger guest-row-button inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                    :disabled="newPartyGuests.length <= 1"
+                                    @click="removeNewPartyGuestRow(index)"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">{{ newPartyGuests.length <= 1 ? 'block' : 'close' }}</span>
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+
+                    <button class="admin-btn admin-btn-success mt-3 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addNewPartyGuestRow">
+                        <span class="material-symbols-outlined btn-icon">person_add</span>
+                        Add Guest
                     </button>
-                    <p v-if="globalMessage" class="mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    <button class="admin-btn mt-3 ml-2 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addAnonymousPlusOneRow">
+                        <span class="material-symbols-outlined btn-icon">person_add</span>
+                        Add Anonymous +1
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Additional notes for this party</label>
+                    <input v-model="newParty.notes" placeholder="Additional notes for this party" class="w-full border border-soft px-4 py-3">
+                </div>
+
+                    <button class="admin-btn admin-btn-success mt-4 inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="createParty">
+                        <span class="material-symbols-outlined btn-icon">add</span>
+                        Create this Party
+                    </button>
+                </div>
+
+                <div class="content-section-block content-section-odd">
+                    <p v-if="globalMessage" class="mb-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                         {{ globalMessage }}
                     </p>
-                    <p v-if="globalError" class="mt-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <p v-if="globalError" class="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         {{ globalError }}
                     </p>
 
-                    <hr class="my-6 border-t-2 border-wedding-band">
+                    <div class="mb-4 border-b border-soft pb-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <h3 class="font-heading text-2xl">Your Guests</h3>
+                            <div class="flex flex-wrap items-center justify-end gap-3">
+                                <p class="text-sm text-wedding-muted">Select parties below to action</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button
+                                        class="admin-btn inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                        type="button"
+                                        :disabled="filteredParties.length === 0"
+                                        @click="toggleSelectAllFilteredParties"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">{{ areAllFilteredPartiesSelected ? 'deselect' : 'select_all' }}</span>
+                                        {{ areAllFilteredPartiesSelected ? 'Clear selected' : 'Select all' }}
+                                    </button>
+                                    <button
+                                        class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                        type="button"
+                                        :disabled="selectedEmailableParties.length === 0"
+                                        @click="openSendRsvpConfirmModal()"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">mail</span>
+                                        Send Email RSVP
+                                    </button>
+                                    <button
+                                        class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                        type="button"
+                                        :disabled="selectedPartyIdsForEmail.length === 0"
+                                        @click="deleteSelectedParties"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="mb-3 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
                         <label class="block text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                            Search Households
+                            Search Parties
                             <input
                                 v-model="partySearchTerm"
                                 type="text"
@@ -693,124 +837,248 @@
                         <p class="text-sm text-wedding-muted">Showing {{ filteredParties.length }} of {{ parties.length }}</p>
                     </div>
 
-                    <div class="max-h-[620px] overflow-x-auto overflow-y-auto border border-soft/60">
+                    <div class="your-guests-table max-h-[620px] overflow-x-auto overflow-y-auto border border-soft/60 bg-white">
                         <table class="min-w-full text-left text-sm">
                             <thead class="sticky top-0 bg-white">
                                 <tr class="border-b border-soft text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                    <th class="px-3 py-2">Select</th>
                                     <th class="px-3 py-2">Party</th>
+                                    <th class="px-3 py-2">Email</th>
+                                    <th class="px-3 py-2">Email Sent</th>
                                     <th class="px-3 py-2">Code</th>
-                                    <th class="px-3 py-2">Guests</th>
+                                    <th class="px-3 py-2">Seats</th>
+                                    <th class="px-3 py-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="partyItem in filteredParties"
+                                    v-for="(partyItem, partyIndex) in filteredParties"
                                     :key="partyItem.id"
-                                    class="cursor-pointer border-b border-soft/60"
-                                    :class="selectedParty?.id === partyItem.id ? 'bg-wedding-bg' : ''"
-                                    @click="selectParty(partyItem.id)"
+                                    class="border-b border-soft/60"
+                                    :class="partyIndex % 2 === 0 ? 'bg-white' : 'bg-[#F7F7F7]'"
                                 >
-                                    <td class="px-3 py-2">{{ partyItem.display_name }}</td>
+                                    <td class="px-3 py-2">
+                                    <input
+                                        type="checkbox"
+                                        :checked="selectedPartyIdsForEmail.includes(partyItem.id)"
+                                        :title="partyItem.email ? 'Select for email or delete action' : 'Select for delete action (no email set)'"
+                                        @change="togglePartyEmailSelection(partyItem)"
+                                    >
+                                </td>
+                                    <td class="px-3 py-2">
+                                        <p class="font-medium">{{ partyItem.display_name }}</p>
+                                        <p v-if="partyItem.guests.length" class="mt-1 text-xs text-wedding-muted">
+                                            Guests: {{ partyItem.guests.map((guest) => `${guest.first_name} ${guest.last_name}`.trim()).join(', ') }}
+                                        </p>
+                                    </td>
+                                    <td class="px-3 py-2 normal-case tracking-normal text-wedding-muted">{{ partyItem.email || '—' }}</td>
+                                    <td class="px-3 py-2">
+                                        <button
+                                            v-if="partyItem.rsvp_email_sent"
+                                            type="button"
+                                            class="admin-btn admin-btn-success inline-flex items-center gap-1 px-2 py-1 text-xs normal-case tracking-normal"
+                                            @click="openPartyEmailHistory(partyItem.id, partyItem.display_name)"
+                                        >
+                                            Yes
+                                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                                        </button>
+                                        <span v-else class="text-red-700">No</span>
+                                    </td>
                                     <td class="px-3 py-2 uppercase">{{ partyItem.code }}</td>
-                                    <td class="px-3 py-2">{{ partyItem.guests.length }}</td>
+                                    <td class="px-3 py-2">{{ partyItem.max_guests }}</td>
+                                    <td class="px-3 py-2">
+                                        <div class="flex flex-wrap gap-2">
+                                            <button class="admin-btn admin-btn-view inline-flex items-center px-2 py-2 text-xs" type="button" title="View" @click="openEditPartyModal(partyItem.id)">
+                                                <span class="material-symbols-outlined btn-icon">visibility</span>
+                                            </button>
+                                            <button class="admin-btn inline-flex items-center px-2 py-2 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
+                                                <span class="material-symbols-outlined btn-icon">edit</span>
+                                            </button>
+                                            <button class="admin-btn admin-btn-success inline-flex items-center px-2 py-2 text-xs" type="button" title="Email RSVP" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
+                                                <span class="material-symbols-outlined btn-icon">mail</span>
+                                            </button>
+                                            <button class="admin-btn admin-btn-danger inline-flex items-center px-2 py-2 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
+                                                <span class="material-symbols-outlined btn-icon">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </article>
+                </div>
+            </section>
 
-                <article class="card-frame bg-white">
-                    <template v-if="selectedParty">
-                        <h3 class="font-heading text-3xl">Edit {{ selectedParty.display_name }}</h3>
-                        <div class="mt-4 grid gap-3">
-                            <div>
-                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Display Name</label>
-                                <input v-model="selectedParty.display_name" class="w-full border border-soft px-4 py-3">
+            <div v-if="editPartyModalOpen && selectedParty" class="fixed inset-0 z-[80] bg-black/40 p-4 md:p-8" @click.self="closeEditPartyModal">
+                <div class="guest-help-scope mx-auto mt-6 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:mt-12 md:p-8">
+                    <div class="flex items-start justify-between gap-3">
+                        <h3 class="font-heading text-3xl">Edit Party · {{ selectedParty.display_name }}</h3>
+                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeEditPartyModal">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Close
+                        </button>
+                    </div>
+                    <p class="mt-3 text-sm text-wedding-muted">
+                        RSVP request sent:
+                        <button
+                            v-if="selectedParty.rsvp_email_sent"
+                            type="button"
+                            class="admin-btn admin-btn-success ml-1 inline-flex items-center gap-1 px-2 py-1 text-xs normal-case tracking-normal"
+                            @click="openPartyEmailHistory(selectedParty.id, selectedParty.display_name)"
+                        >
+                            Yes · {{ formatDateTime(selectedParty.rsvp_email_sent_at) }}
+                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                        </button>
+                        <span v-else class="ml-1 text-red-700">No</span>
+                    </p>
+
+                    <div class="mt-4 grid gap-3 md:grid-cols-2">
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Party Name</label>
+                            <input v-model="selectedParty.display_name" class="w-full border border-soft px-4 py-3">
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                EMAIL
+                                <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(only required if sending via email)</span>
+                            </label>
+                            <input v-model="selectedParty.email" type="email" class="w-full border border-soft px-4 py-3 normal-case tracking-normal">
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <div class="w-full">
+                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP Code</label>
+                                <input v-model="selectedParty.code" placeholder="RSVP Code" class="h-12 w-full border border-soft px-4 py-3 uppercase">
                             </div>
-                            <div class="flex items-end gap-2">
-                                <div class="w-full">
-                                    <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP Code</label>
-                                    <input v-model="selectedParty.code" placeholder="RSVP Code" class="h-12 w-full border border-soft px-4 py-3 uppercase">
-                                </div>
-                                <button class="admin-btn h-12 inline-flex items-center gap-2 px-3 text-xs uppercase tracking-[0.12em]" type="button" @click="generateCodeForSelectedParty">
-                                    <span class="material-symbols-outlined btn-icon">autorenew</span>
-                                    Generate
+                            <button class="admin-btn h-12 inline-flex items-center gap-2 px-3 text-xs uppercase tracking-[0.12em]" type="button" @click="generateCodeForSelectedParty">
+                                <span class="material-symbols-outlined btn-icon">autorenew</span>
+                                Generate
+                            </button>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
+                            <input v-model.number="selectedParty.max_guests" type="number" min="1" max="20" class="w-full border border-soft px-4 py-3">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Notes</label>
+                            <textarea v-model="selectedParty.notes" rows="3" class="w-full border border-soft px-4 py-3" placeholder="Notes"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <button class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="updateParty">
+                            <span class="material-symbols-outlined btn-icon">save</span>
+                            Save Party
+                        </button>
+                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="deleteParty">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Remove Party
+                        </button>
+                    </div>
+
+                    <h4 class="mt-8 font-heading text-2xl">Guests</h4>
+                    <div class="mt-3 space-y-2">
+                        <div v-for="guest in selectedParty.guests" :key="guest.id" class="guest-row-grid grid gap-2 border border-soft p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(190px,0.75fr)_170px]">
+                            <input v-model="guest.first_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
+                            <input v-model="guest.last_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
+                            <label class="guest-option-control leading-none">
+                                <input v-model="guest.is_child" class="guest-option-checkbox bg-white" type="checkbox">
+                                Is this a Child?
+                            </label>
+                            <div class="flex gap-2">
+                                <button class="admin-btn guest-row-button inline-flex items-center gap-1 px-3 py-2 text-xs" type="button" @click="updateGuest(guest)">
+                                    <span class="material-symbols-outlined btn-icon">save</span>
+                                    Save
+                                </button>
+                                <button class="admin-btn admin-btn-danger guest-row-button inline-flex items-center gap-1 px-3 py-2 text-xs" type="button" @click="deleteGuest(guest)">
+                                    <span class="material-symbols-outlined btn-icon">close</span>
+                                    Remove
                                 </button>
                             </div>
-                            <div>
-                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
-                                <input v-model.number="selectedParty.max_guests" type="number" min="1" max="20" class="w-full border border-soft px-4 py-3">
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Notes</label>
-                                <textarea v-model="selectedParty.notes" rows="3" class="w-full border border-soft px-4 py-3" placeholder="Notes"></textarea>
-                            </div>
                         </div>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <button class="admin-btn inline-flex items-center gap-2" type="button" @click="updateParty">
-                                <span class="material-symbols-outlined btn-icon">save</span>
-                                Save Party
-                            </button>
-                            <button class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="deleteParty">
-                                <span class="material-symbols-outlined btn-icon">close</span>
-                                Remove Household
-                            </button>
-                        </div>
+                    </div>
 
-                        <h4 class="mt-8 font-heading text-2xl">Guests</h4>
-                        <div class="mt-3 space-y-2">
-                            <div v-for="guest in selectedParty.guests" :key="guest.id" class="grid gap-2 border border-soft p-3 md:grid-cols-[1fr_1fr_auto_auto]">
-                                <input v-model="guest.first_name" class="border border-soft px-3 py-2">
-                                <input v-model="guest.last_name" class="border border-soft px-3 py-2">
-                                <label class="inline-flex items-center gap-2 px-2 text-sm">
-                                    <input v-model="guest.is_child" type="checkbox">
-                                    Child
-                                </label>
-                                <div class="flex gap-2">
-                                    <button class="admin-btn inline-flex items-center gap-1 px-3 text-xs" type="button" @click="updateGuest(guest)">
-                                        <span class="material-symbols-outlined btn-icon">save</span>
-                                        Save
-                                    </button>
-                                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 text-xs" type="button" @click="deleteGuest(guest)">
-                                        <span class="material-symbols-outlined btn-icon">close</span>
-                                        Remove
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="mt-4 grid items-end gap-2 md:grid-cols-4">
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">First Name</label>
+                            <input v-model="newGuest.first_name" placeholder="First name" class="w-full border border-soft bg-white px-3 py-2">
                         </div>
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Last Name</label>
+                            <input v-model="newGuest.last_name" placeholder="Last name" class="w-full border border-soft bg-white px-3 py-2">
+                        </div>
+                        <label class="guest-option-control h-12">
+                            <input v-model="newGuest.is_child" class="guest-option-checkbox bg-white" type="checkbox">
+                            Is this a Child?
+                        </label>
+                        <button class="admin-btn admin-btn-success h-12 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addGuest">
+                            <span class="material-symbols-outlined btn-icon">person_add</span>
+                            Add Guest
+                        </button>
+                        <button class="admin-btn h-12 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addAnonymousPlusOneGuest">
+                            <span class="material-symbols-outlined btn-icon">person_add</span>
+                            Add Anonymous +1
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="mt-4 grid items-end gap-2 md:grid-cols-4">
-                            <div>
-                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">First Name</label>
-                                <input v-model="newGuest.first_name" placeholder="First name" class="w-full border border-soft px-3 py-2">
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Last Name</label>
-                                <input v-model="newGuest.last_name" placeholder="Last name" class="w-full border border-soft px-3 py-2">
-                            </div>
-                            <label class="inline-flex h-12 items-center gap-2 border border-soft bg-white px-3 py-2 text-sm">
-                                <input v-model="newGuest.is_child" type="checkbox">
-                                Child
-                            </label>
-                            <button class="admin-btn admin-btn-success h-12 inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="addGuest">
-                                <span class="material-symbols-outlined btn-icon">person_add</span>
-                                Add Guest
-                            </button>
-                        </div>
-                        <p v-if="globalMessage" class="mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                            {{ globalMessage }}
-                        </p>
-                        <p v-if="globalError" class="mt-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            {{ globalError }}
-                        </p>
-                    </template>
-                    <p v-else class="text-wedding-muted">Select a household to edit party and guests.</p>
-                </article>
-            </section>
+            <div v-if="sendRsvpConfirmModal.open" class="fixed inset-0 z-[82] bg-black/40 p-4 md:p-8" @click.self="closeSendRsvpConfirmModal">
+                <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
+                    <div class="flex items-start justify-between gap-3">
+                        <h3 class="font-heading text-3xl">Send Email RSVP Request</h3>
+                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeSendRsvpConfirmModal">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Close
+                        </button>
+                    </div>
+                    <p class="mt-3 text-wedding-muted">Are you sure you want to send an RSVP request to the selected parties below?</p>
+                    <div class="mt-4 max-h-64 overflow-y-auto border border-soft bg-wedding-bg p-3">
+                        <ul class="space-y-2 text-sm">
+                            <li v-for="party in selectedEmailableParties" :key="party.id" class="border border-soft bg-white px-3 py-2">
+                                <p class="font-medium">{{ party.display_name }}</p>
+                                <p class="text-xs text-wedding-muted normal-case tracking-normal">{{ party.email }}</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-5 flex justify-end gap-3">
+                        <button class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="closeSendRsvpConfirmModal">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Cancel
+                        </button>
+                        <button class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="sendRsvpEmailsToSelected">
+                            <span class="material-symbols-outlined btn-icon">send</span>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="emailHistoryModal.open" class="fixed inset-0 z-[83] bg-black/40 p-4 md:p-8" @click.self="closePartyEmailHistory">
+                <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
+                    <div class="flex items-start justify-between gap-3">
+                        <h3 class="font-heading text-3xl">RSVP Request History · {{ emailHistoryModal.partyName }}</h3>
+                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closePartyEmailHistory">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Close
+                        </button>
+                    </div>
+                    <div class="mt-4 max-h-72 overflow-y-auto border border-soft bg-wedding-bg p-3">
+                        <p v-if="emailHistoryModal.loading" class="text-sm text-wedding-muted">Loading history...</p>
+                        <p v-else-if="emailHistoryModal.error" class="text-sm text-red-700">{{ emailHistoryModal.error }}</p>
+                        <ul v-else-if="emailHistoryModal.history.length" class="space-y-2">
+                            <li v-for="entry in emailHistoryModal.history" :key="entry.id" class="border border-soft bg-white px-3 py-2 text-sm">
+                                <p class="font-medium normal-case tracking-normal">{{ entry.sent_to_email }}</p>
+                                <p class="text-xs text-wedding-muted">{{ formatDateTime(entry.sent_at) }}</p>
+                            </li>
+                        </ul>
+                        <p v-else class="text-sm text-wedding-muted">No RSVP email history found for this party.</p>
+                    </div>
+                </div>
+            </div>
 
             <section v-if="section === 'rsvps'" class="card-frame bg-white">
                 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="font-heading text-3xl">RSVP Responses</h2>
+                    <h2 class="font-heading text-3xl">RSVP Requests</h2>
                     <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" :href="rsvpsExportUrl">Export RSVP CSV</a>
                 </div>
 
@@ -820,14 +1088,14 @@
                         <input
                             v-model="rsvpSearchTerm"
                             type="text"
-                            placeholder="Search by household name or code"
+                            placeholder="Search by guest list name or code"
                             class="mt-1 w-full border border-soft bg-white px-3 py-2 text-sm normal-case tracking-normal text-wedding-text"
                         >
                     </label>
                     <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
                         Response Filter
                         <select v-model="rsvpResponseFilter" class="mt-1 w-full border border-soft bg-white px-3 py-2 text-sm normal-case tracking-normal text-wedding-text">
-                            <option value="all">All Households</option>
+                            <option value="all">All Guest Lists</option>
                             <option value="responded">Responded</option>
                             <option value="no_response">No Response</option>
                         </select>
@@ -841,7 +1109,7 @@
                         </select>
                     </label>
                     <div class="flex items-end text-sm text-wedding-muted">
-                        Showing {{ filteredRsvpRows.length }} of {{ rsvpRows.length }} households
+                        Showing {{ filteredRsvpRows.length }} of {{ rsvpRows.length }} guest lists
                     </div>
                 </div>
 
@@ -878,9 +1146,24 @@
                             </span>
                             <span class="ml-2">· Attending: {{ row.rsvp?.attending_count || 0 }} / {{ row.max_guests }}</span>
                         </p>
+                        <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
+                            <span>Email RSVP request sent:</span>
+                            <template v-if="row.rsvp_email_sent">
+                                <span class="text-emerald-700">Yes · {{ formatDateTime(row.rsvp_email_sent_at) }}</span>
+                                <button
+                                    type="button"
+                                    class="admin-btn admin-btn-success inline-flex items-center justify-center px-2 py-2 text-xs"
+                                    title="View RSVP email history"
+                                    @click="openPartyEmailHistory(row.party_id, row.party_name)"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">visibility</span>
+                                </button>
+                            </template>
+                            <span v-else class="text-red-700">No</span>
+                        </div>
                     </article>
                     <p v-if="filteredRsvpRows.length === 0" class="border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
-                        No households match the selected filters.
+                        No guest lists match the selected filters.
                     </p>
                 </div>
 
@@ -895,6 +1178,21 @@
                         <span class="material-symbols-outlined btn-icon">close</span>
                         Close
                     </button>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
+                    <span>Email RSVP request sent:</span>
+                    <template v-if="editingRsvp.rsvp_email_sent">
+                        <span class="text-emerald-700">Yes · {{ formatDateTime(editingRsvp.rsvp_email_sent_at) }}</span>
+                        <button
+                            type="button"
+                            class="admin-btn admin-btn-success inline-flex items-center justify-center px-2 py-2 text-xs"
+                            title="View RSVP email history"
+                            @click="openPartyEmailHistory(editingRsvp.party_id, editingRsvp.party_name)"
+                        >
+                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                        </button>
+                    </template>
+                    <span v-else class="text-red-700">No</span>
                 </div>
 
                 <div class="mt-5 grid gap-3 md:grid-cols-2">
@@ -930,6 +1228,42 @@
                 <p v-if="globalError" class="mt-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                     {{ globalError }}
                 </p>
+            </div>
+        </div>
+
+        <div v-if="qrModalOpen" class="fixed inset-0 z-[88] bg-black/50 p-4 md:p-8" @click.self="closeQrModal">
+            <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-white p-6 shadow-soft md:mt-16">
+                <div class="flex items-start justify-between gap-3">
+                    <h3 class="font-heading text-3xl">Share QR Code</h3>
+                    <button type="button" class="admin-btn admin-btn-danger inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="closeQrModal">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Close
+                    </button>
+                </div>
+                <p class="mt-2 text-sm text-wedding-muted">Download, share digitally, or print your invitation QR code.</p>
+
+                <div class="mt-5 flex justify-center">
+                    <img :src="qrImageUrl" alt="Public URL QR code" class="h-72 w-72 border border-soft object-contain">
+                </div>
+
+                <div class="mt-5 flex flex-wrap justify-center gap-2">
+                    <a
+                        :href="qrImageUrl"
+                        :download="`${qrDownloadName}-qr.png`"
+                        class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]"
+                    >
+                        <span class="material-symbols-outlined btn-icon">download</span>
+                        Download
+                    </a>
+                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="shareQrImage">
+                        <span class="material-symbols-outlined btn-icon">share</span>
+                        Share Image
+                    </button>
+                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="printQrImage">
+                        <span class="material-symbols-outlined btn-icon">print</span>
+                        Print
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1005,7 +1339,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import RichTextEditor from '../components/admin/RichTextEditor.vue';
 
 const props = defineProps({
@@ -1022,14 +1356,19 @@ const accountUrl = props.payload?.accountUrl || '';
 const adminBaseUrl = props.payload?.adminBaseUrl || '/admin';
 const apiBaseUrl = props.payload?.adminApiBaseUrl || '/admin/api';
 const previewUrl = props.payload?.previewUrl || '';
+const siteSettingsUpdateUrl = props.payload?.siteSettingsUpdateUrl || '';
+const sitePublishUrl = props.payload?.sitePublishUrl || '';
 const fieldHelpTexts = (props.payload?.fieldHelpTexts && typeof props.payload.fieldHelpTexts === 'object')
     ? props.payload.fieldHelpTexts
     : {};
+const siteTitle = ref(props.payload?.siteTitle || '');
+const sitePublished = ref(Boolean(props.payload?.sitePublished ?? false));
 const globalMessage = ref('');
 const globalError = ref('');
 const lastSavedAt = ref('');
 const lastSavedContentSnapshot = ref('');
 const lastSavedRsvpSnapshot = ref('');
+const lastSavedSiteTitle = ref(siteTitle.value);
 const timelineMinItems = 2;
 const timelineMaxItems = 5;
 const confirmResolve = ref(null);
@@ -1043,6 +1382,9 @@ const noticeModal = reactive({
     title: '',
     message: '',
 });
+const qrModalOpen = ref(false);
+const copyLinkCopied = ref(false);
+let copyLinkResetTimer = null;
 const dragState = reactive({
     type: '',
     fromIndex: -1,
@@ -1079,6 +1421,19 @@ const rsvpSettings = ref({
 const parties = ref([]);
 const partySearchTerm = ref('');
 const selectedPartyId = ref(null);
+const editPartyModalOpen = ref(false);
+const selectedPartyIdsForEmail = ref([]);
+const sendRsvpConfirmModal = reactive({
+    open: false,
+});
+const emailHistoryModal = reactive({
+    open: false,
+    partyId: null,
+    partyName: '',
+    history: [],
+    loading: false,
+    error: '',
+});
 const rsvpRows = ref([]);
 const rsvpResponseFilter = ref('all');
 const rsvpStatusFilter = ref('all');
@@ -1095,18 +1450,28 @@ const rsvpForm = reactive({
 
 const newParty = reactive({
     display_name: '',
+    email: '',
     code: '',
-    max_guests: 2,
+    max_guests: 1,
     notes: '',
 });
+const newPartyGuests = ref([createEmptyGuestRow()]);
 
 const newGuest = reactive({
     first_name: '',
     last_name: '',
     is_child: false,
+    allow_plus_one: false,
 });
 
 const selectedParty = computed(() => parties.value.find((party) => party.id === selectedPartyId.value) || null);
+const selectedEmailableParties = computed(() =>
+    parties.value.filter((party) => selectedPartyIdsForEmail.value.includes(party.id) && Boolean((party.email || '').trim()))
+);
+const createPartyInvitedSeats = computed(() => {
+    const guests = newPartyGuests.value || [];
+    return guests.length;
+});
 const filteredParties = computed(() => {
     const term = partySearchTerm.value.trim().toLowerCase();
     if (!term) {
@@ -1123,17 +1488,34 @@ const filteredParties = computed(() => {
         return partyName.includes(term) || partyCode.includes(term) || guestNames.includes(term);
     });
 });
+const areAllFilteredPartiesSelected = computed(() =>
+    filteredParties.value.length > 0
+    && filteredParties.value.every((party) => selectedPartyIdsForEmail.value.includes(party.id))
+);
 const hasUnsavedChanges = computed(() => {
     if (!content.value) {
         return false;
     }
 
     return serialize(content.value) !== lastSavedContentSnapshot.value
-        || serialize(rsvpSettings.value) !== lastSavedRsvpSnapshot.value;
+        || serialize(rsvpSettings.value) !== lastSavedRsvpSnapshot.value
+        || siteTitle.value !== lastSavedSiteTitle.value;
 });
 const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
 const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
 const canAddMenuOptions = computed(() => rsvpSettings.value?.meal_mode === 'options');
+const qrImageUrl = computed(() =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&format=png&data=${encodeURIComponent(previewUrl)}`
+);
+const qrDownloadName = computed(() => {
+    try {
+        const pathname = new URL(previewUrl).pathname || '';
+        const maybeSlug = pathname.split('/').filter(Boolean).pop() || 'wedding';
+        return maybeSlug.replace(/[^a-z0-9-_]/gi, '-').toLowerCase() || 'wedding';
+    } catch {
+        return 'wedding';
+    }
+});
 const filteredRsvpRows = computed(() =>
     rsvpRows.value.filter((row) => {
         const searchTerm = rsvpSearchTerm.value.trim().toLowerCase();
@@ -1164,7 +1546,7 @@ const filteredRsvpRows = computed(() =>
 );
 
 const dashboardCards = computed(() => [
-    { label: 'Total Households', value: stats.value.total_households },
+    { label: 'Total Guest Lists', value: stats.value.total_households },
     { label: 'Invited Guests', value: stats.value.invited_guests },
     { label: 'Attending', value: stats.value.attending },
     { label: 'Not Attending', value: stats.value.not_attending },
@@ -1173,9 +1555,9 @@ const dashboardCards = computed(() => [
 
 const navItems = [
     { key: 'dashboard', label: 'Dashboard', href: adminBaseUrl, icon: 'dashboard' },
-    { key: 'parties', label: 'Households', href: `${adminBaseUrl}/parties`, icon: 'groups' },
-    { key: 'rsvps', label: 'RSVPs', href: `${adminBaseUrl}/rsvps`, icon: 'event_note' },
-    { key: 'content', label: 'Content', href: `${adminBaseUrl}/content`, icon: 'edit_note' },
+    { key: 'content', label: 'Create your website', href: `${adminBaseUrl}/content`, icon: 'edit_note' },
+    { key: 'parties', label: 'Guest List', href: `${adminBaseUrl}/parties`, icon: 'groups' },
+    { key: 'rsvps', label: 'RSVP Requests', href: `${adminBaseUrl}/rsvps`, icon: 'event_note' },
 ];
 const partiesExportUrl = `${apiBaseUrl}/parties/export`;
 const rsvpsExportUrl = `${apiBaseUrl}/rsvps/export`;
@@ -1191,6 +1573,17 @@ onMounted(async () => {
         selectedPartyId.value = parties.value[0].id;
     }
 
+    await nextTick();
+    applyFieldHelpAttributes();
+});
+
+onBeforeUnmount(() => {
+    if (copyLinkResetTimer) {
+        clearTimeout(copyLinkResetTimer);
+    }
+});
+
+watch(section, async () => {
     await nextTick();
     applyFieldHelpAttributes();
 });
@@ -1251,9 +1644,22 @@ async function loadContent() {
 async function loadParties() {
     try {
         const response = await window.axios.get(`${apiBaseUrl}/parties`);
-        parties.value = response.data.parties;
+        parties.value = (response.data.parties || []).map((party) => ({
+            ...party,
+            guests: (party.guests || []).map((guest) => ({
+                ...guest,
+                allow_plus_one: Boolean(guest.allow_plus_one),
+            })),
+        }));
+        selectedPartyIdsForEmail.value = selectedPartyIdsForEmail.value.filter((id) =>
+            parties.value.some((party) => party.id === id)
+        );
+
+        if (selectedPartyId.value && !parties.value.some((party) => party.id === selectedPartyId.value)) {
+            selectedPartyId.value = parties.value.length > 0 ? parties.value[0].id : null;
+        }
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not load households.'));
+        setError(extractErrorMessage(error, 'Could not load parties.'));
     }
 }
 
@@ -1268,6 +1674,234 @@ async function loadRsvps() {
 
 function selectParty(partyId) {
     selectedPartyId.value = partyId;
+}
+
+function createEmptyGuestRow() {
+    return {
+        first_name: '',
+        last_name: '',
+        is_child: false,
+        allow_plus_one: false,
+    };
+}
+
+function addNewPartyGuestRow() {
+    if (newPartyGuests.value.length >= 20) {
+        setError('A party can include up to 20 named guests.');
+        return;
+    }
+
+    newPartyGuests.value.push(createEmptyGuestRow());
+}
+
+function addAnonymousPlusOneRow() {
+    if (newPartyGuests.value.length >= 20) {
+        setError('A party can include up to 20 named guests.');
+        return;
+    }
+
+    newPartyGuests.value.push({
+        first_name: 'Anonymous',
+        last_name: '+1',
+        is_child: false,
+        allow_plus_one: false,
+    });
+}
+
+function removeNewPartyGuestRow(index) {
+    if (newPartyGuests.value.length <= 1) {
+        return;
+    }
+    newPartyGuests.value.splice(index, 1);
+}
+
+function openEditPartyModal(partyId) {
+    selectedPartyId.value = partyId;
+    editPartyModalOpen.value = true;
+    clearError();
+    nextTick(() => applyFieldHelpAttributes());
+}
+
+function closeEditPartyModal() {
+    editPartyModalOpen.value = false;
+}
+
+function togglePartyEmailSelection(partyItem) {
+    if (selectedPartyIdsForEmail.value.includes(partyItem.id)) {
+        selectedPartyIdsForEmail.value = selectedPartyIdsForEmail.value.filter((id) => id !== partyItem.id);
+        return;
+    }
+
+    selectedPartyIdsForEmail.value = [...selectedPartyIdsForEmail.value, partyItem.id];
+}
+
+function toggleSelectAllFilteredParties() {
+    const visibleIds = filteredParties.value.map((party) => party.id);
+    if (visibleIds.length === 0) {
+        return;
+    }
+
+    if (areAllFilteredPartiesSelected.value) {
+        selectedPartyIdsForEmail.value = selectedPartyIdsForEmail.value.filter((id) => !visibleIds.includes(id));
+        return;
+    }
+
+    const merged = new Set([...selectedPartyIdsForEmail.value, ...visibleIds]);
+    selectedPartyIdsForEmail.value = Array.from(merged);
+}
+
+async function openPartyEmailHistory(partyId, partyName = '') {
+    emailHistoryModal.open = true;
+    emailHistoryModal.partyId = partyId;
+    emailHistoryModal.partyName = partyName || 'Party';
+    emailHistoryModal.history = [];
+    emailHistoryModal.error = '';
+    emailHistoryModal.loading = true;
+
+    try {
+        const response = await window.axios.get(`${apiBaseUrl}/parties/${partyId}/email-history`);
+        emailHistoryModal.partyName = response.data?.party_name || emailHistoryModal.partyName;
+        emailHistoryModal.history = response.data?.history || [];
+    } catch (error) {
+        emailHistoryModal.error = extractErrorMessage(error, 'Could not load RSVP email history.');
+    } finally {
+        emailHistoryModal.loading = false;
+    }
+}
+
+function closePartyEmailHistory() {
+    emailHistoryModal.open = false;
+    emailHistoryModal.partyId = null;
+    emailHistoryModal.partyName = '';
+    emailHistoryModal.history = [];
+    emailHistoryModal.loading = false;
+    emailHistoryModal.error = '';
+}
+
+function openSendRsvpConfirmModal(partyIds = null) {
+    clearError();
+    if (Array.isArray(partyIds)) {
+        selectedPartyIdsForEmail.value = partyIds;
+    }
+
+    if (selectedEmailableParties.value.length === 0) {
+        setError('Select at least one party with an email address.');
+        return;
+    }
+
+    sendRsvpConfirmModal.open = true;
+}
+
+function closeSendRsvpConfirmModal() {
+    sendRsvpConfirmModal.open = false;
+}
+
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        setMessage('Link copied to clipboard.');
+        return true;
+    } catch (error) {
+        window.prompt('Copy this link:', text);
+        return false;
+    }
+}
+
+async function copyPublicUrl() {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+    const copied = await copyToClipboard(previewUrl);
+    if (copied) {
+        copyLinkCopied.value = true;
+        if (copyLinkResetTimer) {
+            clearTimeout(copyLinkResetTimer);
+        }
+        copyLinkResetTimer = setTimeout(() => {
+            copyLinkCopied.value = false;
+        }, 2500);
+    }
+}
+
+async function sharePublicUrl() {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: 'Wedding Website', url: previewUrl });
+            setMessage('Share sheet opened.');
+            return;
+        } catch {
+            // fall back to copy
+        }
+    }
+
+    await copyToClipboard(previewUrl);
+}
+
+function openQrModal() {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+    qrModalOpen.value = true;
+}
+
+function closeQrModal() {
+    qrModalOpen.value = false;
+}
+
+async function shareQrImage() {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+
+    if (navigator.share && navigator.canShare) {
+        try {
+            const response = await fetch(qrImageUrl.value);
+            const blob = await response.blob();
+            const file = new File([blob], `${qrDownloadName.value}-qr.png`, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ title: 'Wedding QR Code', text: previewUrl, files: [file] });
+                setMessage('QR code shared.');
+                return;
+            }
+        } catch {
+            // fall through
+        }
+    }
+
+    await copyToClipboard(previewUrl);
+}
+
+function printQrImage() {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        setError('Pop-up blocked. Please allow pop-ups and try again.');
+        return;
+    }
+
+    printWindow.document.write(`
+        <html>
+        <head><title>Print QR Code</title></head>
+        <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+            <img src="${qrImageUrl.value}" alt="Wedding QR Code" style="width:420px;height:420px;object-fit:contain;" />
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
 }
 
 function formatStatus(status) {
@@ -1326,6 +1960,16 @@ async function saveContent() {
     }
 
     try {
+        if (siteSettingsUpdateUrl && siteTitle.value.trim()) {
+            await window.axios.put(siteSettingsUpdateUrl, {
+                title: siteTitle.value.trim(),
+            }, {
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+        }
+
         const response = await window.axios.put(`${apiBaseUrl}/content`, {
             content: content.value,
             rsvp_settings: rsvpSettings.value,
@@ -1349,6 +1993,30 @@ async function saveContent() {
     }
 }
 
+async function toggleSitePublished() {
+    clearError();
+
+    if (!sitePublishUrl) {
+        setError('Site publishing endpoint is not configured.');
+        return;
+    }
+
+    try {
+        const response = await window.axios.put(sitePublishUrl, {
+            is_published: !sitePublished.value,
+        }, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        sitePublished.value = Boolean(response.data?.is_published ?? !sitePublished.value);
+        setMessage(response.data?.message || (sitePublished.value ? 'Site published.' : 'Site moved to draft.'));
+    } catch (error) {
+        setError(extractErrorMessage(error, 'Could not update site visibility.'));
+    }
+}
+
 function addMenuCourse() {
     if (!Array.isArray(rsvpSettings.value.menu_courses)) {
         rsvpSettings.value.menu_courses = [];
@@ -1356,7 +2024,7 @@ function addMenuCourse() {
 
     rsvpSettings.value.menu_courses.push({
         id: `course-${Date.now()}`,
-        name: `Course ${rsvpSettings.value.menu_courses.length + 1}`,
+        name: '',
         items: [{ title: '', description: '' }],
     });
     const courseIndex = rsvpSettings.value.menu_courses.length - 1;
@@ -1608,8 +2276,32 @@ async function createParty() {
         return;
     }
 
-    if (newParty.max_guests < 1 || newParty.max_guests > 20) {
-        setError('Max guests must be between 1 and 20.');
+    if (newParty.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newParty.email.trim())) {
+        setError('Enter a valid email address for the party.');
+        return;
+    }
+
+    if (!Array.isArray(newPartyGuests.value) || newPartyGuests.value.length === 0) {
+        setError('Add at least one guest for this party.');
+        return;
+    }
+
+    const guestsPayload = newPartyGuests.value.map((guest) => ({
+        first_name: guest.first_name?.trim() || '',
+        last_name: guest.last_name?.trim() || '',
+        is_child: Boolean(guest.is_child),
+        allow_plus_one: Boolean(guest.allow_plus_one),
+    }));
+
+    const hasIncompleteGuest = guestsPayload.some((guest) => !guest.first_name || !guest.last_name);
+    if (hasIncompleteGuest) {
+        setError('Every guest row must include first and last name.');
+        return;
+    }
+
+    const invitedSeats = guestsPayload.length + guestsPayload.filter((guest) => guest.allow_plus_one).length;
+    if (invitedSeats < 1 || invitedSeats > 20) {
+        setError('Invited seats must be between 1 and 20.');
         return;
     }
 
@@ -1619,23 +2311,29 @@ async function createParty() {
     }
 
     try {
-        await window.axios.post(`${apiBaseUrl}/parties`, newParty);
+        await window.axios.post(`${apiBaseUrl}/parties`, {
+            ...newParty,
+            guests: guestsPayload,
+            max_guests: invitedSeats,
+        });
         newParty.display_name = '';
-        newParty.max_guests = 2;
+        newParty.email = '';
+        newParty.max_guests = 1;
         newParty.notes = '';
+        newPartyGuests.value = [createEmptyGuestRow()];
         await generateCodeForCreate(false);
         await loadParties();
         await loadStats();
-        setMessage('Household created successfully.');
+        setMessage('Party created successfully.');
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not create household.'));
+        setError(extractErrorMessage(error, 'Could not create party.'));
     }
 }
 
 async function updateParty() {
     clearError();
     if (!selectedParty.value) {
-        setError('Select a household to update.');
+        setError('Select a party to update.');
         return;
     }
 
@@ -1646,6 +2344,11 @@ async function updateParty() {
 
     if (!selectedParty.value.code?.trim()) {
         setError('RSVP code is required.');
+        return;
+    }
+
+    if (selectedParty.value.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedParty.value.email.trim())) {
+        setError('Enter a valid email address for the party.');
         return;
     }
 
@@ -1663,9 +2366,9 @@ async function updateParty() {
         await window.axios.put(`${apiBaseUrl}/parties/${selectedParty.value.id}`, selectedParty.value);
         await loadParties();
         await loadStats();
-        setMessage('Household updated successfully.');
+        setMessage('Party updated successfully.');
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not update household.'));
+        setError(extractErrorMessage(error, 'Could not update party.'));
     }
 }
 
@@ -1685,7 +2388,7 @@ async function generateCodeForCreate(showMessage = true) {
 async function generateCodeForSelectedParty() {
     clearError();
     if (!selectedParty.value) {
-        setError('Select a household to generate a code.');
+        setError('Select a party to generate a code.');
         return;
     }
 
@@ -1701,13 +2404,13 @@ async function generateCodeForSelectedParty() {
 async function deleteParty() {
     clearError();
     if (!selectedParty.value) {
-        setError('Select a household to delete.');
+        setError('Select a party to delete.');
         return;
     }
 
     const confirmed = await openConfirmModal(
-        'Remove Household',
-        'Are you sure you want to remove this household and all guests/RSVP data?'
+        'Remove Party',
+        'Are you sure you want to remove this party and all guests/RSVP data?'
     );
     if (!confirmed) {
         return;
@@ -1715,21 +2418,77 @@ async function deleteParty() {
 
     try {
         await window.axios.delete(`${apiBaseUrl}/parties/${selectedParty.value.id}`);
+        closeEditPartyModal();
         selectedPartyId.value = null;
         await Promise.all([loadParties(), loadStats(), loadRsvps()]);
         if (parties.value.length > 0) {
             selectedPartyId.value = parties.value[0].id;
         }
-        setMessage('Household deleted successfully.');
+        selectedPartyIdsForEmail.value = selectedPartyIdsForEmail.value.filter((id) =>
+            parties.value.some((party) => party.id === id)
+        );
+        setMessage('Party deleted successfully.');
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not delete household.'));
+        setError(extractErrorMessage(error, 'Could not delete party.'));
+    }
+}
+
+async function deletePartyById(partyId, partyName = 'this party') {
+    clearError();
+
+    const confirmed = await openConfirmModal(
+        'Remove Party',
+        `Are you sure you want to remove ${partyName} and all guests/RSVP data?`
+    );
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        await window.axios.delete(`${apiBaseUrl}/parties/${partyId}`);
+        selectedPartyIdsForEmail.value = selectedPartyIdsForEmail.value.filter((id) => id !== partyId);
+        await Promise.all([loadParties(), loadStats(), loadRsvps()]);
+        setMessage('Party deleted successfully.');
+    } catch (error) {
+        setError(extractErrorMessage(error, 'Could not delete party.'));
+    }
+}
+
+async function deleteSelectedParties() {
+    clearError();
+    const selectedIds = [...selectedPartyIdsForEmail.value];
+    if (selectedIds.length === 0) {
+        setError('Select at least one party to delete.');
+        return;
+    }
+
+    const selectedNames = parties.value
+        .filter((party) => selectedIds.includes(party.id))
+        .map((party) => party.display_name)
+        .join(', ');
+
+    const confirmed = await openConfirmModal(
+        'Delete Selected Parties',
+        `Are you sure you want to delete: ${selectedNames}?`
+    );
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        await Promise.all(selectedIds.map((partyId) => window.axios.delete(`${apiBaseUrl}/parties/${partyId}`)));
+        selectedPartyIdsForEmail.value = [];
+        await Promise.all([loadParties(), loadStats(), loadRsvps()]);
+        setMessage('Selected parties deleted successfully.');
+    } catch (error) {
+        setError(extractErrorMessage(error, 'Could not delete selected parties.'));
     }
 }
 
 async function addGuest() {
     clearError();
     if (!selectedParty.value) {
-        setError('Select a household before adding a guest.');
+        setError('Select a party before adding a guest.');
         return;
     }
 
@@ -1743,11 +2502,25 @@ async function addGuest() {
         newGuest.first_name = '';
         newGuest.last_name = '';
         newGuest.is_child = false;
+        newGuest.allow_plus_one = false;
         await Promise.all([loadParties(), loadStats()]);
         setMessage('Guest added successfully.');
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not add guest.'));
     }
+}
+
+async function addAnonymousPlusOneGuest() {
+    if (!selectedParty.value) {
+        setError('Select a party before adding a guest.');
+        return;
+    }
+
+    newGuest.first_name = 'Anonymous';
+    newGuest.last_name = '+1';
+    newGuest.is_child = false;
+    newGuest.allow_plus_one = false;
+    await addGuest();
 }
 
 async function updateGuest(guest) {
@@ -1849,6 +2622,29 @@ async function importParties(event) {
     }
 }
 
+async function sendRsvpEmailsToSelected() {
+    clearError();
+
+    const partyIds = selectedEmailableParties.value.map((party) => party.id);
+    if (partyIds.length === 0) {
+        setError('Select at least one party with an email address.');
+        closeSendRsvpConfirmModal();
+        return;
+    }
+
+    try {
+        const response = await window.axios.post(`${apiBaseUrl}/parties/send-rsvp-emails`, {
+            party_ids: partyIds,
+        });
+        await Promise.all([loadParties(), loadRsvps()]);
+        closeSendRsvpConfirmModal();
+        selectedPartyIdsForEmail.value = [];
+        setMessage(response.data?.message || 'RSVP emails sent successfully.');
+    } catch (error) {
+        setError(extractErrorMessage(error, 'Could not send RSVP emails.'));
+    }
+}
+
 function openConfirmModal(title, message) {
     confirmModal.title = title;
     confirmModal.message = message;
@@ -1935,7 +2731,7 @@ function moveInArray(list, fromIndex, toIndex) {
 }
 
 function applyFieldHelpAttributes() {
-    const labels = document.querySelectorAll('.content-section-block label');
+    const labels = document.querySelectorAll('.content-section-block label, .guest-help-scope label');
 
     labels.forEach((label) => {
         const labelText = extractLabelText(label);
@@ -2132,7 +2928,7 @@ function buildFieldHelp(labelText) {
     if (lower.includes('story focus y') || lower.includes('story up and down') || lower.includes('story image vertical focus point')) return resolveFieldHelpText('story.focus_y', 'Adjust vertical crop focus for the story image.');
     if (lower.includes('venue name')) return resolveFieldHelpText('details.venue_name', 'Example: Lochgreen House Hotel.');
     if (lower.includes('venue address')) return resolveFieldHelpText('details.venue_address', 'Example: Monktonhill Rd, Troon KA10 7EN.');
-    if (lower.includes('venue blurb')) return resolveFieldHelpText('details.venue_blurb', 'Example: Ceremony and reception are both onsite.');
+    if (lower.includes('venue blurb') || lower.includes('venue information')) return resolveFieldHelpText('details.venue_blurb', 'Example: Ceremony and reception are both onsite.');
     if (lower.includes('upload venue image')) return resolveFieldHelpText('details.upload_image', 'Upload the image shown alongside venue/travel details.');
     if (lower.includes('venue focus x') || lower.includes('venue side to side') || lower.includes('venue image horizontal focus point')) return resolveFieldHelpText('details.focus_x', 'Adjust horizontal crop focus for the venue image.');
     if (lower.includes('venue focus y') || lower.includes('venue up and down') || lower.includes('venue image vertical focus point')) return resolveFieldHelpText('details.focus_y', 'Adjust vertical crop focus for the venue image.');
@@ -2151,6 +2947,17 @@ function buildFieldHelp(labelText) {
     if (lower.includes('rsvp request title')) return resolveFieldHelpText('rsvp.title', 'Example: Ready to celebrate with us?');
     if (lower.includes('rsvp request button label')) return resolveFieldHelpText('rsvp.button_label', 'Example: Go to RSVP.');
     if (lower.includes('final rsvp request text')) return resolveFieldHelpText('rsvp.text', 'Example: Please RSVP using your invitation code.');
+    if (lower.includes('website title')) return resolveFieldHelpText('site.website_title', 'Example: Kyle & Nicole\'s Wedding. This appears in account/site areas and identifies your wedding site.');
+    if (lower.includes('party name')) return resolveFieldHelpText('party.name', 'Example: The Kane Party. This is what you and guests will see.');
+    if (lower === 'email' || lower.includes('email (only required if sending via email)') || lower.includes('email address')) {
+        return resolveFieldHelpText('party.email', 'Optional. Add an email only if you plan to send digital RSVP invitations.');
+    }
+    if (lower.includes('rsvp code')) return resolveFieldHelpText('party.rsvp_code', 'Short unique code printed on invitations. Guests use this code to RSVP.');
+    if (lower.includes('additional notes for this party')) return resolveFieldHelpText('party.notes', 'Internal notes for your planning only (not shown publicly).');
+    if (lower.includes('first name')) return resolveFieldHelpText('guest.first_name', 'Example: Emma. Add each invited person by name.');
+    if (lower.includes('last name')) return resolveFieldHelpText('guest.last_name', 'Example: Kane.');
+    if (lower.includes('is this a child?')) return resolveFieldHelpText('guest.is_child', 'Turn on if this guest is a child so your guest breakdown stays accurate.');
+    if (lower.includes('max guests')) return resolveFieldHelpText('party.max_guests', 'Total seats available for this party. Keep this equal to your intended invite count.');
 
     return '';
 }
@@ -2219,6 +3026,7 @@ function formatDateTime(value) {
 function captureSavedSnapshots() {
     lastSavedContentSnapshot.value = serialize(content.value);
     lastSavedRsvpSnapshot.value = serialize(rsvpSettings.value);
+    lastSavedSiteTitle.value = siteTitle.value;
 }
 
 function serialize(value) {
@@ -2289,6 +3097,26 @@ function serialize(value) {
     color: #ffffff !important;
 }
 
+.admin-btn-view {
+    border-color: #f2ece3 !important;
+    background-color: #f2ece3 !important;
+    color: #0f1b1d !important;
+}
+
+.admin-btn-view .btn-icon {
+    color: #0f1b1d !important;
+}
+
+.admin-btn-view:hover {
+    border-color: #22363a !important;
+    background-color: #22363a !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-view:hover .btn-icon {
+    color: #ffffff !important;
+}
+
 .admin-btn-danger {
     border: 1px solid #e66363;
     background-color: #e66363 !important;
@@ -2337,6 +3165,10 @@ function serialize(value) {
 
 .content-section-block label.label-help {
     position: relative;
+}
+
+.your-guests-table .admin-btn {
+    box-shadow: none !important;
 }
 
 .content-section-block .label-help-header {
@@ -2464,6 +3296,69 @@ function serialize(value) {
 
 .menu-courses-divider {
     margin: 2.6rem 0 2.2rem;
+}
+
+.guest-name-input {
+    min-width: 0;
+}
+
+.guest-row-grid {
+    align-items: center;
+}
+
+.guest-row-grid > .guest-option-control {
+    margin-top: 0 !important;
+}
+
+.guest-row-input {
+    height: 2.5rem;
+    background-color: #ffffff !important;
+}
+
+.guest-row-button {
+    height: 2.5rem;
+    width: 100%;
+}
+
+.guest-option-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: #0f1b1d;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.guest-option-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #22363a;
+    background-color: #ffffff !important;
+    border: 1px solid #848484;
+    border-radius: 0.2rem;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.guest-row-grid input[type='text'],
+.guest-row-grid input[type='email'],
+.guest-row-grid input[type='number'] {
+    background-color: #ffffff !important;
+}
+
+.guest-option-control > .guest-option-checkbox {
+    margin-top: 0 !important;
 }
 
 .drag-handle {

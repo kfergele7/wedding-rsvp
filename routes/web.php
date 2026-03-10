@@ -121,6 +121,8 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::post('/app/admin/api/parties', [PartyController::class, 'store'])->name('customer.admin.api.parties.store');
         Route::get('/app/admin/api/parties/export', [PartyController::class, 'export'])->name('customer.admin.api.parties.export');
         Route::post('/app/admin/api/parties/import', [PartyController::class, 'import'])->name('customer.admin.api.parties.import');
+        Route::post('/app/admin/api/parties/send-rsvp-emails', [PartyController::class, 'sendRsvpEmails'])->name('customer.admin.api.parties.send-rsvp-emails');
+        Route::get('/app/admin/api/parties/{party}/email-history', [PartyController::class, 'emailHistory'])->name('customer.admin.api.parties.email-history');
         Route::get('/app/admin/api/parties/{party}', [PartyController::class, 'show'])->name('customer.admin.api.parties.show');
         Route::put('/app/admin/api/parties/{party}', [PartyController::class, 'update'])->name('customer.admin.api.parties.update');
         Route::delete('/app/admin/api/parties/{party}', [PartyController::class, 'destroy'])->name('customer.admin.api.parties.destroy');
@@ -142,6 +144,7 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::post('/app/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
         Route::put('/app/account/profile', [AccountSettingsController::class, 'updateProfile'])->name('customer.account.profile.update');
         Route::put('/app/account/password', [AccountSettingsController::class, 'updatePassword'])->name('customer.account.password.update');
+        Route::delete('/app/account', [AccountSettingsController::class, 'destroyAccount'])->name('customer.account.destroy');
     });
 
     Route::prefix('staff')
@@ -151,6 +154,7 @@ Route::middleware('tenant.resolve')->group(function () {
             Route::get('/', StaffDashboardController::class)->name('dashboard');
             Route::get('/template-management', [StaffTemplateManagementController::class, 'index'])->name('templates.index');
             Route::put('/template-management/field-help', [StaffTemplateManagementController::class, 'updateFieldHelp'])->name('templates.field-help.update');
+            Route::put('/template-management/demo-source', [StaffTemplateManagementController::class, 'updateDemoSource'])->name('templates.demo-source.update');
             Route::get('/accounts', [StaffAccountController::class, 'index'])->name('accounts.index');
             Route::get('/accounts/{account}', [StaffAccountController::class, 'show'])->name('accounts.show');
             Route::put('/accounts/{account}', [StaffAccountController::class, 'update'])->name('accounts.update');
@@ -162,7 +166,7 @@ Route::middleware('tenant.resolve')->group(function () {
     Route::post('/w/{public_slug}/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup.slug');
     Route::post('/w/{public_slug}/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save.slug');
 
-    Route::get('/demo', [PublicSiteController::class, 'home'])->name('home');
+    Route::get('/demo', [PublicSiteController::class, 'demo'])->name('home');
     Route::get('/rsvp/{code?}', [PublicSiteController::class, 'rsvp'])->name('rsvp.page');
     Route::post('/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup');
     Route::post('/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save');
@@ -187,6 +191,8 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::post('/api/parties', [PartyController::class, 'store'])->name('api.parties.store');
         Route::get('/api/parties/export', [PartyController::class, 'export'])->name('api.parties.export');
         Route::post('/api/parties/import', [PartyController::class, 'import'])->name('api.parties.import');
+        Route::post('/api/parties/send-rsvp-emails', [PartyController::class, 'sendRsvpEmails'])->name('api.parties.send-rsvp-emails');
+        Route::get('/api/parties/{party}/email-history', [PartyController::class, 'emailHistory'])->name('api.parties.email-history');
         Route::get('/api/parties/{party}', [PartyController::class, 'show'])->name('api.parties.show');
         Route::put('/api/parties/{party}', [PartyController::class, 'update'])->name('api.parties.update');
         Route::delete('/api/parties/{party}', [PartyController::class, 'destroy'])->name('api.parties.destroy');

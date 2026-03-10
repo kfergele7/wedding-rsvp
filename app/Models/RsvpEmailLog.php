@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Guest extends Model
+class RsvpEmailLog extends Model
 {
     use BelongsToSite;
     use HasFactory;
@@ -15,19 +15,22 @@ class Guest extends Model
     protected $fillable = [
         'site_id',
         'party_id',
-        'first_name',
-        'last_name',
-        'is_child',
-        'allow_plus_one',
+        'sent_by_user_id',
+        'sent_to_email',
+        'sent_at',
     ];
 
     protected $casts = [
-        'is_child' => 'boolean',
-        'allow_plus_one' => 'boolean',
+        'sent_at' => 'datetime',
     ];
 
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
+    }
+
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sent_by_user_id');
     }
 }

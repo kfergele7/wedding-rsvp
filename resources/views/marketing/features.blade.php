@@ -12,8 +12,8 @@
         <p class="mt-2 text-wedding-muted">Manage names, dates, timeline, story, venue details, travel info, menu details, and FAQs from one admin area.</p>
     </article>
     <article class="card-frame bg-white">
-        <h2 class="font-heading text-3xl">Households + RSVP Codes</h2>
-        <p class="mt-2 text-wedding-muted">Generate and manage invitation codes per household. Guests can RSVP without account sign-up.</p>
+        <h2 class="font-heading text-3xl">Guest Lists + RSVP Codes</h2>
+        <p class="mt-2 text-wedding-muted">Generate and manage invitation codes per guest list. Guests can RSVP without account sign-up.</p>
     </article>
     <article class="card-frame bg-white">
         <h2 class="font-heading text-3xl">Support-Friendly RSVP Tools</h2>

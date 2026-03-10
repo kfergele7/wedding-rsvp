@@ -17,6 +17,7 @@ class UpdateGuestRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:120'],
             'is_child' => ['nullable', 'boolean'],
+            'allow_plus_one' => ['nullable', 'boolean'],
         ];
     }
 }

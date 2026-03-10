@@ -1,4 +1,4 @@
-@extends('staff.layout', ['title' => 'Accounts'])
+@extends('staff.layout', ['title' => 'Accounts', 'activeTab' => 'accounts'])
 
 @section('content')
 <section class="card-frame bg-white">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PlatformSetting;
+use App\Models\Site;
 use App\Models\StaffAuditLog;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ class TemplateManagementController extends Controller
     {
         return view('staff.templates.index', [
             'fieldHelpDefinitions' => $this->fieldHelpDefinitions(),
+            'sites' => Site::query()->orderBy('title')->get(['id', 'title', 'public_slug']),
+            'selectedDemoSiteId' => $this->selectedDemoSiteId(),
         ]);
     }
 
@@ -63,6 +66,38 @@ class TemplateManagementController extends Controller
         ]);
 
         return back()->with('status', 'Global content help text updated for all accounts.');
+    }
+
+    public function updateDemoSource(Request $request): RedirectResponse
+    {
+        if (! Schema::hasTable('platform_settings')) {
+            return back()->with('status', 'Platform settings table not found yet. Run migrations first.');
+        }
+
+        $validated = $request->validate([
+            'demo_site_id' => ['required', 'integer', 'exists:sites,id'],
+        ]);
+
+        $beforeSetting = PlatformSetting::query()->where('key', 'demo_template_source')->first();
+        $before = is_array($beforeSetting?->value) ? $beforeSetting->value : [];
+        $after = ['site_id' => (int) $validated['demo_site_id']];
+
+        PlatformSetting::query()->updateOrCreate(
+            ['key' => 'demo_template_source'],
+            ['value' => $after]
+        );
+
+        StaffAuditLog::query()->create([
+            'staff_user_id' => $request->user()->id,
+            'account_id' => null,
+            'action' => 'staff.platform.demo_source.updated',
+            'payload' => [
+                'before' => $before,
+                'after' => $after,
+            ],
+        ]);
+
+        return back()->with('status', 'Demo template source updated.');
     }
 
     private function fieldHelpDefinitions(): array
@@ -116,5 +151,19 @@ class TemplateManagementController extends Controller
             ->map(fn (mixed $definition) => (string) ($definition['default'] ?? ''))
             ->all();
     }
-}
 
+    private function selectedDemoSiteId(): ?int
+    {
+        if (! Schema::hasTable('platform_settings')) {
+            return null;
+        }
+
+        $setting = PlatformSetting::query()
+            ->where('key', 'demo_template_source')
+            ->first();
+
+        $siteId = is_array($setting?->value) ? ($setting->value['site_id'] ?? null) : null;
+
+        return is_numeric($siteId) ? (int) $siteId : null;
+    }
+}

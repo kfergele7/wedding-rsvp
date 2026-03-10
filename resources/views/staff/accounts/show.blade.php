@@ -1,4 +1,4 @@
-@extends('staff.layout', ['title' => 'Account: '.$account->name])
+@extends('staff.layout', ['title' => 'Account: '.$account->name, 'activeTab' => 'accounts'])
 
 @section('content')
 <section class="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
@@ -43,7 +43,7 @@
                         <a href="{{ route('wedding.public', ['public_slug' => $site->public_slug]) }}" target="_blank" rel="noopener noreferrer" class="admin-btn border border-soft bg-white px-3 py-2 text-xs uppercase tracking-[0.1em]">Open Public Site</a>
                         <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site]) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Dashboard</a>
                         <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'content']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Content</a>
-                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'parties']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Households</a>
+                        <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'parties']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit Guest List</a>
                         <a href="{{ route('staff.accounts.sites.launch-admin', [$account, $site, 'section' => 'rsvps']) }}" class="button-dark px-3 py-2 text-xs uppercase tracking-[0.1em]">Edit RSVPs</a>
                     </div>
 
@@ -53,7 +53,7 @@
 
         <h3 class="mt-6 font-heading text-2xl">Support Metrics</h3>
         <div class="mt-3 grid gap-3 md:grid-cols-2">
-            <div class="rounded border border-soft p-3 text-sm"><span class="font-medium">Households:</span> {{ $metrics['households'] }}</div>
+            <div class="rounded border border-soft p-3 text-sm"><span class="font-medium">Guest Lists:</span> {{ $metrics['households'] }}</div>
             <div class="rounded border border-soft p-3 text-sm"><span class="font-medium">Guests:</span> {{ $metrics['guests'] }}</div>
             <div class="rounded border border-soft p-3 text-sm"><span class="font-medium">RSVP Responses:</span> {{ $metrics['rsvp_responses'] }}</div>
             <div class="rounded border border-soft p-3 text-sm"><span class="font-medium">Last RSVP Activity:</span> {{ $metrics['last_rsvp_at'] ?? '—' }}</div>

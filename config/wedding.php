@@ -232,7 +232,7 @@ return [
             'default' => 'Example: Monktonhill Rd, Troon KA10 7EN.',
         ],
         'details.venue_blurb' => [
-            'label' => 'Venue - Venue Blurb',
+            'label' => 'Venue - Venue Information',
             'default' => 'Example: Ceremony and reception are both onsite.',
         ],
         'details.upload_image' => [

@@ -17,6 +17,7 @@ class Party extends Model
         'site_id',
         'code',
         'display_name',
+        'email',
         'max_guests',
         'notes',
     ];
@@ -29,6 +30,11 @@ class Party extends Model
     public function rsvp(): HasOne
     {
         return $this->hasOne(Rsvp::class);
+    }
+
+    public function rsvpEmailLogs(): HasMany
+    {
+        return $this->hasMany(RsvpEmailLog::class);
     }
 
     public static function generateCode(int $siteId, int $length = 5): string

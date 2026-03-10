@@ -4,7 +4,7 @@
 <section class="card-frame bg-white">
     <p class="text-xs uppercase tracking-[0.2em] text-wedding-muted">Wedding Website + RSVP Platform</p>
     <h1 class="mt-4 font-heading text-6xl leading-tight">Launch your wedding site and RSVP management in minutes.</h1>
-    <p class="mt-4 max-w-3xl text-wedding-muted">Create a beautiful wedding page, manage households and guests, collect RSVPs with invitation codes, and keep everything in one place.</p>
+    <p class="mt-4 max-w-3xl text-wedding-muted">Create a beautiful wedding page, manage guest lists and guests, collect RSVPs with invitation codes, and keep everything in one place.</p>
 
     <div class="mt-8 flex flex-wrap gap-3">
         <a href="{{ route('register') }}" class="button-dark">Start Now</a>
@@ -19,7 +19,7 @@
     </article>
     <article class="card-frame bg-white">
         <h2 class="font-heading text-2xl">Guest + Party Manager</h2>
-        <p class="mt-2 text-sm text-wedding-muted">Organize households, guest names, max seats, notes, and unique RSVP codes.</p>
+        <p class="mt-2 text-sm text-wedding-muted">Organize guest lists, guest names, max seats, notes, and unique RSVP codes.</p>
     </article>
     <article class="card-frame bg-white">
         <h2 class="font-heading text-2xl">RSVP Operations</h2>
@@ -42,7 +42,7 @@
         <article class="rounded border border-soft p-4">
             <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Step 2</p>
             <h3 class="mt-2 font-heading text-2xl">Subscribe + Configure</h3>
-            <p class="mt-2 text-sm text-wedding-muted">Choose the monthly plan, then edit content and upload your guest/household list.</p>
+            <p class="mt-2 text-sm text-wedding-muted">Choose the monthly plan, then edit content and upload your guest list.</p>
         </article>
         <article class="rounded border border-soft p-4">
             <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Step 3</p>

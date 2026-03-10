@@ -195,6 +195,44 @@ class StaffAdminAccessTest extends TestCase
         ]);
     }
 
+    public function test_staff_user_can_update_demo_template_source_site(): void
+    {
+        $account = Account::query()->create([
+            'name' => 'Demo Source Account',
+            'slug' => 'demo-source-account',
+            'status' => Account::STATUS_ACTIVE,
+            'access_status' => 'active',
+        ]);
+
+        $site = Site::query()->create([
+            'account_id' => $account->id,
+            'title' => 'Demo Source Site',
+            'public_slug' => 'demo-source-site',
+            'is_published' => true,
+        ]);
+
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.templates.demo-source.update'), [
+                'demo_site_id' => $site->id,
+            ])
+            ->assertRedirect();
+
+        $setting = PlatformSetting::query()
+            ->where('key', 'demo_template_source')
+            ->first();
+
+        $this->assertNotNull($setting);
+        $this->assertSame($site->id, (int) ($setting->value['site_id'] ?? 0));
+
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'staff_user_id' => $staff->id,
+            'account_id' => null,
+            'action' => 'staff.platform.demo_source.updated',
+        ]);
+    }
+
     public function test_staff_user_can_launch_customer_admin_for_specific_site(): void
     {
         [$owner, $site] = $this->makeTenant('launch-acc', 'launch-site');

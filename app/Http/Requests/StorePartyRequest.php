@@ -28,6 +28,7 @@ class StorePartyRequest extends FormRequest
 
         return [
             'display_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email:rfc,dns', 'max:255'],
             'code' => [
                 'nullable',
                 'string',
@@ -36,8 +37,13 @@ class StorePartyRequest extends FormRequest
                 'max:10',
                 Rule::unique('parties', 'code')->where(fn ($query) => $query->where('site_id', $siteId)),
             ],
-            'max_guests' => ['required', 'integer', 'min:1', 'max:20'],
+            'max_guests' => ['nullable', 'integer', 'min:1', 'max:20'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'guests' => ['nullable', 'array', 'max:20'],
+            'guests.*.first_name' => ['required_with:guests', 'string', 'max:120'],
+            'guests.*.last_name' => ['required_with:guests', 'string', 'max:120'],
+            'guests.*.is_child' => ['nullable', 'boolean'],
+            'guests.*.allow_plus_one' => ['nullable', 'boolean'],
         ];
     }
 }

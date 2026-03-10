@@ -1,4 +1,4 @@
-@extends('staff.layout', ['title' => 'Staff Dashboard'])
+@extends('staff.layout', ['title' => 'Staff Dashboard', 'activeTab' => 'dashboard'])
 
 @section('content')
 <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
