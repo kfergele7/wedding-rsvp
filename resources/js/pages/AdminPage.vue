@@ -3,13 +3,22 @@
         <header class="border-b border-soft bg-white/90">
             <div class="site-shell py-6">
                 <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Wedding Admin</p>
-                <h1 class="font-heading text-4xl">Content & Guest Management</h1>
+                <h1 class="font-heading text-2xl md:text-4xl">Content & Guest Management</h1>
             </div>
         </header>
 
         <div class="admin-sticky-nav sticky top-0 z-40 border-y border-soft bg-white/95 backdrop-blur">
-            <div class="site-shell flex flex-wrap items-center justify-between gap-3 py-3">
-                <nav class="flex flex-wrap gap-2">
+            <div class="site-shell flex items-center justify-between gap-3 py-3">
+                <button
+                    type="button"
+                    class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.14em] xl:hidden"
+                    @click="mobileNavOpen = true"
+                >
+                    <span class="material-symbols-outlined btn-icon">menu</span>
+                    Menu
+                </button>
+
+                <nav class="hidden flex-wrap gap-2 xl:flex">
                     <a
                         v-for="item in navItems"
                         :key="item.key"
@@ -22,7 +31,7 @@
                     </a>
                 </nav>
 
-                <div class="flex flex-wrap items-center gap-2 border-l border-soft pl-4">
+                <div class="hidden flex-wrap items-center gap-2 border-l border-soft pl-4 xl:flex">
                     <a
                         v-if="accountUrl"
                         :href="accountUrl"
@@ -39,7 +48,7 @@
             </div>
         </div>
 
-        <main class="site-shell py-10">
+        <main class="admin-main-shell pb-10 pt-4 md:py-10">
             <section v-if="section === 'dashboard'" class="space-y-6">
                 <div class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
                     <article v-for="card in dashboardCards" :key="card.label" class="card-frame bg-white text-center">
@@ -290,8 +299,6 @@
                                     :id="`timeline-item-${index}`"
                                     :key="index"
                                     class="timeline-grid grid border border-soft bg-wedding-bg py-3 md:items-center"
-                                    @dragover.prevent="onDragOver('timeline', index)"
-                                    @drop="onDrop('timeline', index)"
                                 >
                                     <div class="px-3">
                                         <input v-model="item.time" placeholder="Time" class="w-full border border-soft bg-white px-3 py-2">
@@ -303,16 +310,26 @@
                                         <input v-model="item.description" placeholder="Description" class="w-full border border-soft bg-white px-3 py-2">
                                     </div>
                                     <div class="px-3">
-                                        <button
-                                            type="button"
-                                            class="admin-btn drag-handle inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                            draggable="true"
-                                            @dragstart="onDragStart('timeline', index)"
-                                            @dragend="onDragEnd"
-                                        >
-                                            <span class="material-symbols-outlined btn-icon">drag_indicator</span>
-                                            Move
-                                        </button>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                :disabled="index === 0"
+                                                title="Move up"
+                                                @click="moveTimelineItem(index, -1)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">arrow_upward</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                :disabled="index === content.timeline.items.length - 1"
+                                                title="Move down"
+                                                @click="moveTimelineItem(index, 1)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">arrow_downward</span>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="px-3">
                                         <button type="button" class="admin-btn admin-btn-danger inline-flex w-full items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]" :disabled="isTimelineAtMin" @click="removeTimelineItem(index)">
@@ -512,8 +529,6 @@
                                     :id="`menu-course-${courseIndex}`"
                                     :key="course.id || `course-${courseIndex}`"
                                     class="border border-soft bg-wedding-bg p-4"
-                                    @dragover.prevent="onDragOver('courses', courseIndex)"
-                                    @drop="onDrop('courses', courseIndex)"
                                 >
                                     <div class="grid gap-3">
                                         <div class="flex items-center justify-between gap-3">
@@ -521,13 +536,21 @@
                                             <div class="flex items-center gap-2">
                                                 <button
                                                     type="button"
-                                                    class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                                    draggable="true"
-                                                    @dragstart="onDragStart('courses', courseIndex)"
-                                                    @dragend="onDragEnd"
+                                                    class="admin-btn inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                    :disabled="courseIndex === 0"
+                                                    title="Move up"
+                                                    @click="moveMenuCourse(courseIndex, -1)"
                                                 >
-                                                    <span class="material-symbols-outlined btn-icon">drag_indicator</span>
-                                                    Move
+                                                    <span class="material-symbols-outlined btn-icon">arrow_upward</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="admin-btn inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                    :disabled="courseIndex === rsvpSettings.menu_courses.length - 1"
+                                                    title="Move down"
+                                                    @click="moveMenuCourse(courseIndex, 1)"
+                                                >
+                                                    <span class="material-symbols-outlined btn-icon">arrow_downward</span>
                                                 </button>
                                                 <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeMenuCourse(courseIndex)">
                                                     <span class="material-symbols-outlined btn-icon">close</span>
@@ -627,8 +650,6 @@
                                     :id="`faq-item-${index}`"
                                     :key="index"
                                     class="rounded border border-soft bg-wedding-bg p-3"
-                                    @dragover.prevent="onDragOver('faqs', index)"
-                                    @drop="onDrop('faqs', index)"
                                 >
                                     <div class="grid gap-3 md:grid-cols-3">
                                         <input v-model="faq.question" placeholder="Question" class="border border-soft bg-white px-3 py-2 md:col-span-1">
@@ -640,13 +661,21 @@
                                         <div class="flex items-center gap-2">
                                             <button
                                                 type="button"
-                                                class="admin-btn drag-handle inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                                draggable="true"
-                                                @dragstart="onDragStart('faqs', index)"
-                                                @dragend="onDragEnd"
+                                                class="admin-btn inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                :disabled="index === 0"
+                                                title="Move up"
+                                                @click="moveFaqItem(index, -1)"
                                             >
-                                                <span class="material-symbols-outlined btn-icon">drag_indicator</span>
-                                                Move
+                                                <span class="material-symbols-outlined btn-icon">arrow_upward</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex items-center justify-center px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                                :disabled="index === content.details.faqs.length - 1"
+                                                title="Move down"
+                                                @click="moveFaqItem(index, 1)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">arrow_downward</span>
                                             </button>
                                             <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeFaqItem(index)">
                                                 <span class="material-symbols-outlined btn-icon">close</span>
@@ -1299,8 +1328,8 @@
 
         <div v-if="section === 'content'" class="fixed bottom-0 left-0 right-0 z-50">
             <div class="w-full border-t border-soft bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:px-8">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex flex-wrap items-center gap-4">
+                <div class="flex flex-col items-center justify-center gap-3 text-center md:flex-row md:justify-between md:text-left">
+                    <div class="flex flex-col items-center gap-2 md:flex-row md:items-center md:gap-4">
                         <p class="text-sm text-wedding-muted">
                             <span class="uppercase tracking-[0.12em]">Last Saved:</span>
                             <span class="ml-2">{{ lastSavedAt || 'Not yet saved' }}</span>
@@ -1313,25 +1342,80 @@
                             </span>
                         </p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <p v-if="globalMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
-                            {{ globalMessage }}
-                        </p>
-                        <p v-if="globalError" class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-                            {{ globalError }}
-                        </p>
-                        <a
-                            v-if="previewUrl"
-                            :href="previewUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="admin-btn inline-flex items-center justify-center gap-2 border px-8 py-4 text-xs uppercase tracking-[0.2em]"
-                        >
-                            <span class="material-symbols-outlined btn-icon">visibility</span>
-                            Open Preview
-                        </a>
-                        <button class="admin-btn button-dark admin-btn-success inline-flex items-center gap-2" type="button" @click="saveContent"><span class="material-symbols-outlined btn-icon">save</span>Save Content</button>
+                    <div class="w-full md:w-auto">
+                        <div class="mb-2 flex flex-wrap items-center justify-center gap-2 md:mb-0 md:justify-end">
+                            <p v-if="globalMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
+                                {{ globalMessage }}
+                            </p>
+                            <p v-if="globalError" class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+                                {{ globalError }}
+                            </p>
+                        </div>
+                        <div class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:justify-end md:gap-3">
+                            <a
+                                v-if="previewUrl"
+                                :href="previewUrl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="admin-btn inline-flex items-center justify-center gap-1 border px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:px-8 md:py-4 md:text-xs md:tracking-[0.2em]"
+                            >
+                                <span class="material-symbols-outlined btn-icon">visibility</span>
+                                Open Preview
+                            </a>
+                            <button class="admin-btn button-dark admin-btn-success inline-flex items-center justify-center gap-1 px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:text-xs md:tracking-[0.2em]" type="button" @click="saveContent">
+                                <span class="material-symbols-outlined btn-icon">save</span>
+                                <span class="hidden md:inline">Save Content</span>
+                                <span class="md:hidden">Save</span>
+                            </button>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="mobileNavOpen" class="fixed inset-0 z-[100] bg-black/50 p-0 xl:hidden" @click.self="mobileNavOpen = false">
+            <div class="h-full w-full bg-white p-6">
+                <div class="flex items-center justify-between border-b border-soft pb-4">
+                    <h2 class="font-heading text-3xl">Menu</h2>
+                    <button
+                        type="button"
+                        class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                        @click="mobileNavOpen = false"
+                    >
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Close
+                    </button>
+                </div>
+
+                <nav class="mt-5 grid gap-2">
+                    <a
+                        v-for="item in navItems"
+                        :key="`mobile-${item.key}`"
+                        :href="item.href"
+                        class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.15em]"
+                        :class="section === item.key ? 'admin-btn-active' : ''"
+                    >
+                        <span class="material-symbols-outlined btn-icon">{{ item.icon }}</span>
+                        {{ item.label }}
+                    </a>
+                </nav>
+
+                <div class="mt-5 border-t border-soft pt-5">
+                    <a
+                        v-if="accountUrl"
+                        :href="accountUrl"
+                        class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.14em]"
+                    >
+                        <span class="material-symbols-outlined btn-icon">person</span>
+                        My Account
+                    </a>
+                    <form :action="logoutUrl" method="POST" class="mt-2">
+                        <input type="hidden" name="_token" :value="csrfToken">
+                        <button class="admin-btn admin-btn-danger-solid inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.16em]" type="submit">
+                            <span class="material-symbols-outlined btn-icon">logout</span>
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -1385,10 +1469,7 @@ const noticeModal = reactive({
 const qrModalOpen = ref(false);
 const copyLinkCopied = ref(false);
 let copyLinkResetTimer = null;
-const dragState = reactive({
-    type: '',
-    fromIndex: -1,
-});
+const mobileNavOpen = ref(false);
 
 const stats = ref({
     total_households: 0,
@@ -2684,43 +2765,6 @@ function scrollToElementById(elementId) {
     });
 }
 
-function onDragStart(type, index) {
-    dragState.type = type;
-    dragState.fromIndex = index;
-}
-
-function onDragOver(type, index) {
-    if (dragState.type !== type || dragState.fromIndex === index) {
-        return;
-    }
-}
-
-function onDrop(type, toIndex) {
-    if (dragState.type !== type || dragState.fromIndex < 0 || dragState.fromIndex === toIndex) {
-        onDragEnd();
-        return;
-    }
-
-    if (type === 'timeline' && content.value?.timeline?.items) {
-        moveInArray(content.value.timeline.items, dragState.fromIndex, toIndex);
-    }
-
-    if (type === 'courses' && Array.isArray(rsvpSettings.value?.menu_courses)) {
-        moveInArray(rsvpSettings.value.menu_courses, dragState.fromIndex, toIndex);
-    }
-
-    if (type === 'faqs' && content.value?.details?.faqs) {
-        moveInArray(content.value.details.faqs, dragState.fromIndex, toIndex);
-    }
-
-    onDragEnd();
-}
-
-function onDragEnd() {
-    dragState.type = '';
-    dragState.fromIndex = -1;
-}
-
 function moveInArray(list, fromIndex, toIndex) {
     if (!Array.isArray(list) || fromIndex < 0 || toIndex < 0 || fromIndex >= list.length || toIndex >= list.length) {
         return;
@@ -2728,6 +2772,33 @@ function moveInArray(list, fromIndex, toIndex) {
 
     const [moved] = list.splice(fromIndex, 1);
     list.splice(toIndex, 0, moved);
+}
+
+function moveTimelineItem(index, offset) {
+    const items = content.value?.timeline?.items;
+    if (!Array.isArray(items)) {
+        return;
+    }
+    const targetIndex = index + offset;
+    moveInArray(items, index, targetIndex);
+}
+
+function moveMenuCourse(index, offset) {
+    const courses = rsvpSettings.value?.menu_courses;
+    if (!Array.isArray(courses)) {
+        return;
+    }
+    const targetIndex = index + offset;
+    moveInArray(courses, index, targetIndex);
+}
+
+function moveFaqItem(index, offset) {
+    const faqs = content.value?.details?.faqs;
+    if (!Array.isArray(faqs)) {
+        return;
+    }
+    const targetIndex = index + offset;
+    moveInArray(faqs, index, targetIndex);
 }
 
 function applyFieldHelpAttributes() {
@@ -3042,6 +3113,23 @@ function serialize(value) {
 .admin-ui label {
     color: #0f1b1d;
     font-weight: 500;
+}
+
+.admin-main-shell {
+    max-width: none;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+@media (min-width: 768px) {
+    .admin-main-shell {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
 }
 
 .admin-btn {
@@ -3359,14 +3447,6 @@ function serialize(value) {
 
 .guest-option-control > .guest-option-checkbox {
     margin-top: 0 !important;
-}
-
-.drag-handle {
-    cursor: grab;
-}
-
-.drag-handle:active {
-    cursor: grabbing;
 }
 
 .timeline-grid {
