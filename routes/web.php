@@ -37,6 +37,8 @@ Route::post('/stripe/webhook', StripeWebhookController::class)
 Route::get('/', [MarketingController::class, 'home'])->name('marketing.home');
 Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
 Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
+Route::get('/how-it-works', [MarketingController::class, 'howItWorks'])->name('marketing.how');
+Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
 
 if (app()->environment('local')) {
     Route::get('/dev/verify-email/{email}', function (string $email) {
@@ -166,7 +168,7 @@ Route::middleware('tenant.resolve')->group(function () {
     Route::post('/w/{public_slug}/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup.slug');
     Route::post('/w/{public_slug}/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save.slug');
 
-    Route::get('/demo', [PublicSiteController::class, 'demo'])->name('home');
+    Route::get('/demo', [PublicSiteController::class, 'demo'])->name('demo');
     Route::get('/rsvp/{code?}', [PublicSiteController::class, 'rsvp'])->name('rsvp.page');
     Route::post('/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup');
     Route::post('/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save');

@@ -18,7 +18,7 @@
         <article class="card-frame bg-white">
             <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Start Free in Draft Mode</p>
             <h1 class="mt-3 font-heading text-5xl">Create your wedding account</h1>
-            <p class="mt-3 text-wedding-muted">We create your account and default wedding site instantly. After email verification, subscribe to publish and go live.</p>
+            <p class="mt-3 text-wedding-muted">Create your account to get started. You will be signed in immediately, then verify your email before publishing.</p>
 
             <form class="mt-8 space-y-5" method="POST" action="{{ route('register') }}">
                 @csrf
@@ -58,8 +58,8 @@
         <aside class="card-frame bg-white">
             <h2 class="font-heading text-3xl">What happens next</h2>
             <ol class="mt-4 space-y-3 text-sm text-wedding-muted">
-                <li>1. Verify your email</li>
-                <li>2. Open dashboard (draft mode)</li>
+                <li>1. Create account and sign in</li>
+                <li>2. Verify your email</li>
                 <li>3. Subscribe monthly</li>
                 <li>4. Publish your /w/{slug} site</li>
             </ol>

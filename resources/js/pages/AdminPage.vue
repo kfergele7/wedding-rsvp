@@ -93,6 +93,62 @@
                         {{ sitePublished ? 'Move To Draft' : 'Publish Site' }}
                     </button>
                 </article>
+
+                <article class="content-section-block content-section-odd">
+                    <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Recommended process</p>
+                    <h2 class="mt-2 font-heading text-3xl">Use Magic Invitation in 3 easy steps</h2>
+                    <p class="mt-3 text-wedding-muted">Follow this order for the smoothest setup and best guest experience.</p>
+
+                    <div class="mt-7 grid gap-5 lg:grid-cols-3">
+                        <article class="content-section-block content-section-even h-full">
+                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 1</p>
+                            <h3 class="mt-2 font-heading text-2xl">Create your website</h3>
+                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Update couple names, date, and venue details</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Add story, timeline, menu, and FAQs</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Upload imagery and preview before publishing</li>
+                            </ul>
+                            <div class="mt-5">
+                                <a :href="`${adminBaseUrl}/content`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                    <span class="material-symbols-outlined btn-icon">draw</span>
+                                    Create your website
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="content-section-block content-section-even h-full">
+                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 2</p>
+                            <h3 class="mt-2 font-heading text-2xl">Build your guest list</h3>
+                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Create parties and add named guests</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Set invited seats and add notes per party</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Generate invite codes and send RSVP emails</li>
+                            </ul>
+                            <div class="mt-5">
+                                <a :href="`${adminBaseUrl}/parties`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                    <span class="material-symbols-outlined btn-icon">groups</span>
+                                    Open guest list
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="content-section-block content-section-even h-full">
+                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 3</p>
+                            <h3 class="mt-2 font-heading text-2xl">View and manage RSVPs</h3>
+                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Track attending, not attending, and no response</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Review meal choices and dietary requirements</li>
+                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Update RSVPs manually and export CSV anytime</li>
+                            </ul>
+                            <div class="mt-5">
+                                <a :href="`${adminBaseUrl}/rsvps`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                    <span class="material-symbols-outlined btn-icon">fact_check</span>
+                                    Manage RSVPs
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                </article>
             </section>
 
             <section v-if="section === 'content'" class="space-y-8 pb-32">
@@ -771,7 +827,7 @@
                             >
                                 <input v-model="guestRow.first_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2" placeholder="First name">
                                 <input v-model="guestRow.last_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2" placeholder="Last name">
-                                <label class="guest-option-control leading-none">
+                                <label class="guest-option-control guest-row-input">
                                     <input v-model="guestRow.is_child" class="guest-option-checkbox bg-white" type="checkbox">
                                     Is this a Child?
                                 </label>
@@ -1009,7 +1065,7 @@
                         <div v-for="guest in selectedParty.guests" :key="guest.id" class="guest-row-grid grid gap-2 border border-soft p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(190px,0.75fr)_170px]">
                             <input v-model="guest.first_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
                             <input v-model="guest.last_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
-                            <label class="guest-option-control leading-none">
+                            <label class="guest-option-control guest-row-input">
                                 <input v-model="guest.is_child" class="guest-option-checkbox bg-white" type="checkbox">
                                 Is this a Child?
                             </label>
@@ -1035,7 +1091,7 @@
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Last Name</label>
                             <input v-model="newGuest.last_name" placeholder="Last name" class="w-full border border-soft bg-white px-3 py-2">
                         </div>
-                        <label class="guest-option-control h-12">
+                        <label class="guest-option-control guest-row-input">
                             <input v-model="newGuest.is_child" class="guest-option-checkbox bg-white" type="checkbox">
                             Is this a Child?
                         </label>
@@ -3411,14 +3467,14 @@ function serialize(value) {
 .guest-option-control {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
     width: 100%;
     height: 2.5rem;
-    border: 0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 0;
-    background: transparent;
-    padding: 0;
+    background: #ffffff;
+    padding: 0 0.75rem;
     font-size: 0.82rem;
     font-weight: 500;
     letter-spacing: 0.02em;

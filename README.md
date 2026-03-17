@@ -206,6 +206,20 @@ Replace only local files in:
 - `public/images/wedding/story-couple.svg`
 - `public/images/wedding/venue-map.svg`
 
+Marketing placeholders use local files in:
+- `public/images/marketing/hero.jpg`
+- `public/images/marketing/collage-1.jpg`
+- `public/images/marketing/collage-2.jpg`
+- `public/images/marketing/collage-3.jpg`
+- `public/images/marketing/rsvp-flow.jpg`
+- `public/images/marketing/template-1.jpg`
+- `public/images/marketing/template-2.jpg`
+- `public/images/marketing/template-3.jpg`
+- `public/images/brand/logo-dark.svg`
+- `public/images/brand/logo-white.svg`
+
+Replace these with optimised `.jpg/.png/.webp` assets (same filenames) to keep Core Web Vitals healthy.
+
 You can replace with `.jpg/.png/.webp`; then update corresponding image paths in Admin > Content (or defaults in `config/wedding.php`).
 
 ## Important Routes
@@ -218,6 +232,8 @@ You can replace with `.jpg/.png/.webp`; then update corresponding image paths in
 - `POST /rsvp/{code}`
 - `GET /pricing`
 - `GET /features`
+- `GET /how-it-works`
+- `GET /faq`
 - `GET /w/{public_slug}`
 - `POST /w/{public_slug}/rsvp/lookup`
 - `POST /w/{public_slug}/rsvp/{code}`

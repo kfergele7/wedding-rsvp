@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'staff.auth' => EnsureStaffUser::class,
             'tenant.resolve' => ResolveTenantContext::class,
         ]);
+        $middleware->redirectUsersTo('/app');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
