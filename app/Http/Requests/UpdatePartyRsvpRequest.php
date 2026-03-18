@@ -21,6 +21,8 @@ class UpdatePartyRsvpRequest extends FormRequest
             'meal_choices' => ['nullable', 'array'],
             'meal_choices.*.guest_name' => ['required_with:meal_choices', 'string', 'max:120'],
             'meal_choices.*.meal' => ['required_with:meal_choices', 'string', 'max:60'],
+            'meal_choices.*.selections' => ['nullable', 'array'],
+            'meal_choices.*.selections.*' => ['nullable', 'string', 'max:120'],
             'dietary_restrictions' => ['nullable', 'string', 'max:1200'],
             'message' => ['nullable', 'string', 'max:1200'],
         ];

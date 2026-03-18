@@ -28,15 +28,19 @@ class RsvpController extends Controller
         return response()->json([
             'party' => $this->partyPayload($party),
             'mealOptions' => $this->mealOptionsFromSettings($rsvpSettings),
+            'mealCourses' => $this->mealCoursesFromSettings($rsvpSettings),
+            'kidsMenuItems' => $this->kidsMenuItemsFromSettings($rsvpSettings),
             'mealChoicesEnabled' => (($rsvpSettings['meal_mode'] ?? 'options') === 'options'),
             'rsvpSettings' => $rsvpSettings,
+            'saveUrl' => $this->saveUrlForParty($party),
         ]);
     }
 
-    public function save(SaveRsvpRequest $request, string $code): JsonResponse
+    public function save(SaveRsvpRequest $request): JsonResponse
     {
         $this->ensureRsvpIsAccessible($request);
 
+        $code = (string) $request->route('code');
         $party = $this->findParty($code);
 
         if (! $party) {
@@ -146,51 +150,85 @@ class RsvpController extends Controller
 
     private function mealOptionsFromSettings(array $rsvpSettings): array
     {
+        return collect($this->mealCoursesFromSettings($rsvpSettings))
+            ->pluck('items')
+            ->flatten(1)
+            ->merge($this->kidsMenuItemsFromSettings($rsvpSettings))
+            ->pluck('title')
+            ->map(fn ($title) => trim((string) $title))
+            ->filter(fn ($title) => $title !== '')
+            ->values()
+            ->all();
+    }
+
+    private function mealCoursesFromSettings(array $rsvpSettings): array
+    {
         $courseSections = $rsvpSettings['menu_courses'] ?? [];
 
         if (! is_array($courseSections)) {
-            $courseSections = [];
+            return [];
         }
 
         if (! array_is_list($courseSections)) {
             $courseSections = collect($courseSections)->map(function ($items, $name) {
                 return [
+                    'id' => strtolower(trim((string) $name)),
                     'name' => ucfirst((string) $name),
                     'items' => is_array($items) ? $items : [],
                 ];
             })->values()->all();
         }
 
-        $mainLike = collect($courseSections)->first(function ($section) {
-            $name = strtolower(trim((string) ($section['name'] ?? '')));
-            return str_contains($name, 'main') || str_contains($name, 'entree');
-        });
-
-        $sourceItems = [];
-        if (is_array($mainLike) && count($mainLike['items'] ?? []) > 0) {
-            $sourceItems = $mainLike['items'];
-        } elseif (isset($courseSections[1]['items']) && is_array($courseSections[1]['items']) && count($courseSections[1]['items']) > 0) {
-            $sourceItems = $courseSections[1]['items'];
-        } elseif (isset($courseSections[0]['items']) && is_array($courseSections[0]['items']) && count($courseSections[0]['items']) > 0) {
-            $sourceItems = $courseSections[0]['items'];
-        }
-
-        $mainCourseTitles = collect($sourceItems)
-            ->pluck('title')
-            ->map(fn ($title) => trim((string) $title))
-            ->filter(fn ($title) => $title !== '')
+        return collect($courseSections)
+            ->map(function ($section, $index) {
+                return [
+                    'id' => trim((string) ($section['id'] ?? 'course-'.($index + 1))),
+                    'name' => trim((string) ($section['name'] ?? 'Course')),
+                    'items' => collect($section['items'] ?? [])
+                        ->map(fn ($item) => [
+                            'title' => trim((string) ($item['title'] ?? '')),
+                            'description' => trim((string) ($item['description'] ?? '')),
+                        ])
+                        ->filter(fn ($item) => $item['title'] !== '')
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->filter(fn ($section) => count($section['items']) > 0)
             ->values()
             ->all();
+    }
 
-        if (count($mainCourseTitles) > 0) {
-            return $mainCourseTitles;
+    private function kidsMenuItemsFromSettings(array $rsvpSettings): array
+    {
+        if (! ($rsvpSettings['kids_menu_enabled'] ?? false)) {
+            return [];
         }
 
-        return collect($rsvpSettings['meal_options'] ?? [])
-            ->map(fn ($option) => trim((string) $option))
-            ->filter(fn ($option) => $option !== '')
+        return collect($rsvpSettings['kids_menu_items'] ?? [])
+            ->map(fn ($item) => [
+                'title' => trim((string) ($item['title'] ?? '')),
+                'description' => trim((string) ($item['description'] ?? '')),
+            ])
+            ->filter(fn ($item) => $item['title'] !== '')
             ->values()
             ->all();
+    }
+
+    private function saveUrlForParty(Party $party): string
+    {
+        $site = $this->currentSite();
+
+        if ($site?->public_slug) {
+            return route('rsvp.save.slug', [
+                'public_slug' => $site->public_slug,
+                'code' => $party->code,
+            ], false);
+        }
+
+        return route('rsvp.save', [
+            'code' => $party->code,
+        ], false);
     }
 
     private function ensureRsvpIsAccessible(Request $request): void

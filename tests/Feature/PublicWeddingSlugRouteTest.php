@@ -86,6 +86,38 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->assertJsonPath('party.display_name', 'Draft Household');
     }
 
+    public function test_public_slug_rsvp_save_uses_code_route_parameter_not_slug(): void
+    {
+        $site = $this->makeSite('save-route-account', 'save-route-site', true, 'Save Route Couple');
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Kane',
+            'code' => 'VQVA',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/VQVA', [
+            'status' => 'attending',
+            'attending_count' => 2,
+            'meal_choices' => [
+                ['guest_name' => 'Jonny Kane', 'meal' => 'Starter: Tart | Main: Beef | Dessert: Lemon', 'selections' => [
+                    'starter' => 'Heirloom Tomato Tart',
+                    'main' => 'Beef Fillet',
+                    'dessert' => 'Lemon Posset',
+                ]],
+                ['guest_name' => 'Ellie Kane', 'meal' => 'Starter: Tart | Main: Seabass | Dessert: Lemon', 'selections' => [
+                    'starter' => 'Heirloom Tomato Tart',
+                    'main' => 'Seabass',
+                    'dessert' => 'Lemon Posset',
+                ]],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('party.code', 'VQVA')
+            ->assertJsonPath('party.rsvp.status', 'attending')
+            ->assertJsonPath('party.rsvp.attending_count', 2);
+    }
+
     public function test_staff_user_can_preview_any_unpublished_site_and_use_rsvp_lookup(): void
     {
         $site = $this->makeSite('staff-preview-account', 'staff-preview-site', false, 'Staff Preview Couple');

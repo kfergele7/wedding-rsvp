@@ -228,6 +228,8 @@ const fallbackRsvpSettings = {
     menu_note_title: 'Dining Notes',
     menu_note_text: '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
     meal_options: [],
+    kids_menu_enabled: false,
+    kids_menu_items: [],
     menu_courses: [
         {
             id: 'starter',
@@ -271,6 +273,8 @@ const rsvpSettings = computed(() => {
         ...incoming,
         meal_mode: mealMode,
         meal_options: incoming.meal_options?.length ? incoming.meal_options : fallbackRsvpSettings.meal_options,
+        kids_menu_enabled: Boolean(incoming.kids_menu_enabled),
+        kids_menu_items: Array.isArray(incoming.kids_menu_items) ? incoming.kids_menu_items : fallbackRsvpSettings.kids_menu_items,
         menu_courses: normalizeMenuCourses(incoming.menu_courses),
     };
 });

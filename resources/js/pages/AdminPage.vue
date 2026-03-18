@@ -1,14 +1,14 @@
 <template>
     <div class="admin-ui min-h-screen bg-wedding-bg">
         <header class="border-b border-soft bg-white/90">
-            <div class="site-shell py-6">
+            <div class="admin-shell py-6">
                 <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Wedding Admin</p>
                 <h1 class="font-heading text-2xl md:text-4xl">Content & Guest Management</h1>
             </div>
         </header>
 
         <div class="admin-sticky-nav sticky top-0 z-40 border-y border-soft bg-white/95 backdrop-blur">
-            <div class="site-shell flex items-center justify-between gap-3 py-3">
+            <div class="admin-shell flex items-center justify-between gap-3 py-3">
                 <button
                     type="button"
                     class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.14em] xl:hidden"
@@ -163,7 +163,7 @@
                     </p>
 
                     <div v-if="content" class="mt-8 space-y-6">
-                        <div class="content-section-block content-section-odd">
+                        <div id="menu-settings-section" class="content-section-block content-section-odd">
                             <h3 class="font-heading text-3xl">Website Title</h3>
                             <label class="mt-3 block text-sm uppercase tracking-[0.12em] text-wedding-muted">
                                 Website Title
@@ -195,7 +195,7 @@
                                     </div>
                                 </label>
                             </div>
-                            <p class="mt-3 text-sm italic font-semibold text-wedding-danger">Important: Use dark colours to maintain white text contrast.</p>
+                            <p class="mt-3 text-sm italic text-wedding-muted">Tip: keep colour contrast in mind so your text stays easy to read.</p>
                         </div>
 
                         <div class="w-full py-8">
@@ -557,7 +557,7 @@
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Select your RSVP Meal Type
                                     <select v-model="rsvpSettings.meal_mode" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                                         <option value="set_menu">Set menu for all guests</option>
-                                        <option value="options">Guests choose meal options</option>
+                                        <option value="options">Guests choose their own</option>
                                     </select>
                                 </label>
                             </div>
@@ -626,8 +626,7 @@
                                         <button
                                             type="button"
                                             class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                            :disabled="!canAddMenuOptions"
-                                            @click="addMenuCourseItem(courseIndex)"
+                                            @click="addMenuCourseItem(courseIndex, canAddMenuOptions)"
                                         >
                                             <span class="material-symbols-outlined btn-icon">add</span>
                                             Add {{ course.name || 'Course' }}
@@ -650,19 +649,71 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <p v-if="courseIndex === 1" class="mt-3 text-xs text-wedding-muted">
-                                        Main-like course titles are used automatically as RSVP meal choices when guests choose options.
-                                    </p>
                                 </div>
                             </div>
 
                             <p v-if="!canAddMenuOptions" class="mt-4 text-xs text-wedding-muted">
-                                Set menu allows one option per course. Switch to "Guests choose meal options" to add extra options within a course.
+                                Set menu allows one option per course. Switch to "Guests choose their own" to add extra options within a course.
                             </p>
 
                             <div v-if="rsvpSettings.meal_mode === 'set_menu'" class="mt-4">
                                 <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Set Menu Description</label>
                                 <RichTextEditor v-model="rsvpSettings.set_menu_description" class="mt-2" tone="secondary" />
+                            </div>
+
+                            <div class="menu-courses-divider">
+                                <hr class="w-full border-t border-wedding-band/70">
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <h4 class="font-heading text-2xl">Do you need to add a kids menu?</h4>
+                                    <button type="button" class="section-toggle" :class="{ 'is-active': rsvpSettings.kids_menu_enabled }" @click="rsvpSettings.kids_menu_enabled = !rsvpSettings.kids_menu_enabled">
+                                        <span class="section-toggle-thumb">
+                                            <span v-if="rsvpSettings.kids_menu_enabled" class="material-symbols-outlined">check</span>
+                                        </span>
+                                    </button>
+                                    <span class="section-toggle-note">Turn this on only if children should have separate meal choices.</span>
+                                </div>
+
+                                <div v-if="rsvpSettings.kids_menu_enabled">
+                                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                        <h4 class="font-heading text-2xl">Kids Menu</h4>
+                                        <button
+                                            type="button"
+                                            class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                            @click="addKidsMenuItem"
+                                        >
+                                            <span class="material-symbols-outlined btn-icon">add</span>
+                                            Add Kids Menu Item
+                                        </button>
+                                    </div>
+
+                                    <div v-if="rsvpSettings.kids_menu_items.length === 0" class="rounded border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
+                                        Add a kids menu only if you want children to have a separate meal choice.
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <div
+                                            v-for="(item, itemIndex) in rsvpSettings.kids_menu_items"
+                                            :id="`kids-menu-item-${itemIndex}`"
+                                            :key="`kids-menu-${itemIndex}`"
+                                            class="grid gap-3 border border-soft bg-white p-3"
+                                        >
+                                            <input v-model="item.title" class="border border-soft bg-white px-3 py-2" placeholder="Kids dish title">
+                                            <input v-model="item.description" class="border border-soft bg-white px-3 py-2" placeholder="Kids dish description">
+                                            <div class="flex justify-end">
+                                                <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="removeKidsMenuItem(itemIndex)">
+                                                    <span class="material-symbols-outlined btn-icon">close</span>
+                                                    Remove Kids Menu Item
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else class="rounded border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
+                                    Leave this off if children will eat from the main wedding menu.
+                                </div>
                             </div>
 
                             <div class="mt-6 grid gap-4 md:grid-cols-3">
@@ -1373,6 +1424,7 @@
             <div class="mx-auto mt-24 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
                 <h3 class="font-heading text-3xl">{{ noticeModal.title }}</h3>
                 <p class="mt-3 text-wedding-muted">{{ noticeModal.message }}</p>
+                <p v-if="noticeModal.note" class="mt-2 text-sm italic text-wedding-muted">{{ noticeModal.note }}</p>
                 <div class="mt-6 flex justify-end">
                     <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="closeNoticeModal">
                         <span class="material-symbols-outlined btn-icon">check</span>
@@ -1408,20 +1460,18 @@
                             </p>
                         </div>
                         <div class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:justify-end md:gap-3">
-                            <a
+                            <button class="admin-btn admin-btn-success inline-flex items-center justify-center gap-1 px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:text-xs md:tracking-[0.2em]" type="button" @click="saveContent(false)">
+                                <span class="material-symbols-outlined btn-icon">save</span>
+                                Save
+                            </button>
+                            <button
                                 v-if="previewUrl"
-                                :href="previewUrl"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="admin-btn inline-flex items-center justify-center gap-1 border px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:px-8 md:py-4 md:text-xs md:tracking-[0.2em]"
+                                class="admin-btn inline-flex items-center justify-center gap-1 px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:px-8 md:py-4 md:text-xs md:tracking-[0.2em]"
+                                type="button"
+                                @click="saveContent(true)"
                             >
                                 <span class="material-symbols-outlined btn-icon">visibility</span>
-                                Open Preview
-                            </a>
-                            <button class="admin-btn button-dark admin-btn-success inline-flex items-center justify-center gap-1 px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:text-xs md:tracking-[0.2em]" type="button" @click="saveContent">
-                                <span class="material-symbols-outlined btn-icon">save</span>
-                                <span class="hidden md:inline">Save Content</span>
-                                <span class="md:hidden">Save</span>
+                                Save and Preview
                             </button>
                         </div>
                     </div>
@@ -1521,6 +1571,8 @@ const noticeModal = reactive({
     open: false,
     title: '',
     message: '',
+    note: '',
+    scrollTarget: '',
 });
 const qrModalOpen = ref(false);
 const copyLinkCopied = ref(false);
@@ -1550,6 +1602,8 @@ const rsvpSettings = ref({
     menu_note_title: 'Dining Notes',
     menu_note_text: '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
     meal_options: [],
+    kids_menu_enabled: false,
+    kids_menu_items: [],
     menu_courses: defaultMenuCourses.map((course) => ({
         ...course,
         items: course.items.map((item) => ({ ...item })),
@@ -1770,6 +1824,8 @@ async function loadContent() {
             meal_options: response.data.rsvp_settings?.meal_options?.length
                 ? response.data.rsvp_settings.meal_options
                 : [],
+            kids_menu_enabled: Boolean(response.data.rsvp_settings?.kids_menu_enabled),
+            kids_menu_items: normalizeCourseItems(response.data.rsvp_settings?.kids_menu_items),
             menu_courses: normalizeMenuCourses(response.data.rsvp_settings?.menu_courses),
         };
         captureSavedSnapshots();
@@ -2084,7 +2140,7 @@ async function removeFaqItem(index) {
     content.value.details.faqs.splice(index, 1);
 }
 
-async function saveContent() {
+async function saveContent(openPreviewAfterSave = false) {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
         await nextTick();
@@ -2093,6 +2149,12 @@ async function saveContent() {
     clearError();
     if (!content.value?.hero?.names?.trim()) {
         setError('Couple names are required.');
+        return;
+    }
+
+    const menuValidationError = validateMenuSettings();
+    if (menuValidationError) {
+        openNoticeModal('More menu items needed', menuValidationError.message, menuValidationError.note, 'menu-settings-section');
         return;
     }
 
@@ -2125,6 +2187,9 @@ async function saveContent() {
         lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
         captureSavedSnapshots();
         setMessage('Content Saved, make sure to refresh your preview page to see changes made', 7000);
+        if (openPreviewAfterSave && previewUrl) {
+            window.open(previewUrl, '_blank', 'noopener,noreferrer');
+        }
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not save content.'));
     }
@@ -2182,11 +2247,11 @@ async function removeMenuCourse(courseIndex) {
     rsvpSettings.value.menu_courses.splice(courseIndex, 1);
 }
 
-function addMenuCourseItem(courseIndex) {
-    if (!canAddMenuOptions.value) {
+function addMenuCourseItem(courseIndex, force = false) {
+    if (!canAddMenuOptions.value && !force) {
         openNoticeModal(
             'Set menu active',
-            'Switch to "Guests choose meal options" to add multiple options within a course.'
+            'Switch to "Guests choose their own" to add multiple options within a course.'
         );
         return;
     }
@@ -2204,6 +2269,25 @@ function addMenuCourseItem(courseIndex) {
     rsvpSettings.value.menu_courses[courseIndex].items.push({ title: '', description: '' });
     const itemIndex = rsvpSettings.value.menu_courses[courseIndex].items.length - 1;
     scrollToElementById(`menu-course-${courseIndex}-item-${itemIndex}`);
+}
+
+function addKidsMenuItem() {
+    if (!Array.isArray(rsvpSettings.value.kids_menu_items)) {
+        rsvpSettings.value.kids_menu_items = [];
+    }
+
+    rsvpSettings.value.kids_menu_items.push({ title: '', description: '' });
+    const itemIndex = rsvpSettings.value.kids_menu_items.length - 1;
+    scrollToElementById(`kids-menu-item-${itemIndex}`);
+}
+
+async function removeKidsMenuItem(itemIndex) {
+    const confirmed = await openConfirmModal('Remove Kids Menu Item', 'Are you sure you want to remove this kids menu item?');
+    if (!confirmed) {
+        return;
+    }
+
+    rsvpSettings.value.kids_menu_items.splice(itemIndex, 1);
 }
 
 async function removeMenuCourseItem(courseIndex, itemIndex) {
@@ -2360,6 +2444,29 @@ function normalizeCourseItems(items) {
         title: (item?.title || '').toString(),
         description: (item?.description || '').toString(),
     }));
+}
+
+function countCompletedMenuItems(items) {
+    return (Array.isArray(items) ? items : []).filter((item) => item?.title?.trim()).length;
+}
+
+function validateMenuSettings() {
+    if (rsvpSettings.value?.meal_mode !== 'options') {
+        return null;
+    }
+
+    const incompleteCourses = (rsvpSettings.value?.menu_courses || [])
+        .filter((course) => countCompletedMenuItems(course?.items) < 2)
+        .map((course) => course?.name?.trim() || 'Untitled course');
+
+    if (incompleteCourses.length === 0) {
+        return null;
+    }
+
+    return {
+        message: `Guests choose their own requires at least 2 menu items in each course. Please add more menu items to: ${incompleteCourses.join(', ')}.`,
+        note: 'Or if you only have 1 option, change your RSVP meal type to Set.',
+    };
 }
 
 function hasMultipleOptionsPerCourse() {
@@ -2800,14 +2907,23 @@ function closeConfirmModal(confirmed) {
     }
 }
 
-function openNoticeModal(title, message) {
+function openNoticeModal(title, message, note = '', scrollTarget = '') {
     noticeModal.title = title;
     noticeModal.message = message;
+    noticeModal.note = note;
+    noticeModal.scrollTarget = scrollTarget;
     noticeModal.open = true;
 }
 
 function closeNoticeModal() {
+    const scrollTarget = noticeModal.scrollTarget;
     noticeModal.open = false;
+    noticeModal.note = '';
+    noticeModal.scrollTarget = '';
+
+    if (scrollTarget) {
+        scrollToElementById(scrollTarget);
+    }
 }
 
 function scrollToElementById(elementId) {
@@ -3171,6 +3287,7 @@ function serialize(value) {
     font-weight: 500;
 }
 
+.admin-shell,
 .admin-main-shell {
     max-width: none;
     width: 100%;
@@ -3179,6 +3296,7 @@ function serialize(value) {
 }
 
 @media (min-width: 768px) {
+    .admin-shell,
     .admin-main-shell {
         max-width: 1200px;
         margin-left: auto;

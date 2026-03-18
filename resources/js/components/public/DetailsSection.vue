@@ -21,31 +21,47 @@
                 </div>
             </div>
 
-            <div v-if="sectionVisibility.menu" class="border border-white/20 p-8 shadow-soft md:p-10" :style="{ backgroundColor: primaryColor }">
-                <h3 class="font-heading text-3xl text-white">{{ rsvpSettings.menu_heading }}</h3>
-                <div class="cms-rich mt-4 leading-relaxed text-white/80" v-html="rsvpSettings.menu_intro"></div>
+            <div v-if="sectionVisibility.menu" class="p-8 shadow-soft md:p-10" :style="{ backgroundColor: primaryColor, border: `1px solid ${panelBorderColor}` }">
+                <h3 class="font-heading text-3xl" :style="{ color: textColor }">{{ rsvpSettings.menu_heading }}</h3>
+                <div class="cms-rich mt-4 leading-relaxed" :style="{ color: softTextColor }" v-html="rsvpSettings.menu_intro"></div>
 
                 <div class="mt-8 grid gap-5 md:grid-cols-2">
                     <article
                         v-for="panel in menuPanels"
                         :key="panel.key"
-                        class="h-full border border-white/25 bg-white/10 p-6"
+                        class="h-full p-6"
+                        :style="{ border: `1px solid ${panelBorderColor}`, backgroundColor: panelBackgroundColor }"
                     >
-                        <h4 class="text-xs font-semibold uppercase tracking-[0.22em] text-white/75">{{ panelHeading(panel) }}</h4>
+                        <h4 class="text-xs font-semibold uppercase tracking-[0.22em]" :style="{ color: mutedTextColor }">{{ panelHeading(panel) }}</h4>
                         <div v-if="panel.type === 'course'" class="mt-4 space-y-4">
                             <div v-for="(item, index) in panel.items" :key="`${panel.key}-${item.title}`">
-                                <p class="font-heading text-2xl leading-tight text-white">{{ item.title }}</p>
-                                <p class="mt-2 text-sm leading-relaxed text-white/80">{{ item.description }}</p>
+                                <p class="font-heading text-2xl leading-tight" :style="{ color: textColor }">{{ item.title }}</p>
+                                <p class="mt-2 text-sm leading-relaxed" :style="{ color: softTextColor }">{{ item.description }}</p>
                                 <hr
                                     v-if="showOptionDividers(panel, index)"
-                                    class="mt-4 border-t border-white/30"
+                                    class="mt-4 border-t"
+                                    :style="{ borderColor: dividerColor }"
                                 >
                             </div>
                         </div>
-                        <div v-else class="cms-rich mt-4 leading-relaxed text-white/80" v-html="rsvpSettings.menu_note_text"></div>
+                        <div v-else class="cms-rich mt-4 leading-relaxed" :style="{ color: softTextColor }" v-html="rsvpSettings.menu_note_text"></div>
                     </article>
                 </div>
 
+                <div v-if="kidsMenuItems.length > 0" class="mt-8 border-t pt-8" :style="{ borderColor: dividerColor }">
+                    <h4 class="font-heading text-3xl" :style="{ color: textColor }">Kids Menu</h4>
+                    <div class="mt-5 grid gap-5 md:grid-cols-2">
+                        <article
+                            v-for="(item, index) in kidsMenuItems"
+                            :key="`kids-menu-${index}-${item.title}`"
+                            class="h-full p-6"
+                            :style="{ border: `1px solid ${panelBorderColor}`, backgroundColor: panelBackgroundColor }"
+                        >
+                            <p class="font-heading text-2xl leading-tight" :style="{ color: textColor }">{{ item.title }}</p>
+                            <p class="mt-2 text-sm leading-relaxed" :style="{ color: softTextColor }">{{ item.description }}</p>
+                        </article>
+                    </div>
+                </div>
             </div>
 
             <div v-if="sectionVisibility.faqs" class="card-frame">
@@ -90,6 +106,13 @@ const props = defineProps({
 
 const imagePosition = computed(() => `${props.content.imageFocusX ?? 50}% ${props.content.imageFocusY ?? 50}%`);
 const showVenueTravelBlock = computed(() => props.sectionVisibility.venue || props.sectionVisibility.travel);
+const hasLightBackground = computed(() => isLightColour(props.primaryColor));
+const textColor = computed(() => (hasLightBackground.value ? '#0F1B1D' : '#FFFFFF'));
+const mutedTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.72)' : 'rgba(255, 255, 255, 0.75)'));
+const softTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.82)' : 'rgba(255, 255, 255, 0.8)'));
+const panelBorderColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.16)' : 'rgba(255, 255, 255, 0.25)'));
+const panelBackgroundColor = computed(() => (hasLightBackground.value ? 'rgba(255, 255, 255, 0.68)' : 'rgba(255, 255, 255, 0.1)'));
+const dividerColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.18)' : 'rgba(255, 255, 255, 0.25)'));
 const menuCourseSections = computed(() => {
     const courses = props.rsvpSettings.menu_courses || [];
 
@@ -131,6 +154,14 @@ const menuPanels = computed(() => {
     ];
 });
 
+const kidsMenuItems = computed(() => {
+    if (!props.rsvpSettings.kids_menu_enabled) {
+        return [];
+    }
+
+    return (Array.isArray(props.rsvpSettings.kids_menu_items) ? props.rsvpSettings.kids_menu_items : []).filter((item) => item?.title);
+});
+
 function panelHeading(panel) {
     if (panel.type !== 'course') {
         return panel.label;
@@ -147,5 +178,19 @@ function showOptionDividers(panel, index) {
     return panel.type === 'course'
         && props.rsvpSettings.meal_mode === 'options'
         && index < panel.items.length - 1;
+}
+
+function isLightColour(hex) {
+    const normalized = (hex || '').replace('#', '').trim();
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return false;
+    }
+
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+    const luminance = (0.299 * r) + (0.587 * g) + (0.114 * b);
+
+    return luminance > 160;
 }
 </script>

@@ -62,19 +62,24 @@
                         </select>
                     </div>
 
-                    <div v-if="mealChoicesEnabled && form.status === 'attending' && form.attending_count > 0" class="space-y-3">
-                        <p class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Main course choices</p>
-                        <div v-for="(meal, index) in form.meal_choices" :key="index" class="grid gap-3 md:grid-cols-2">
+                    <div v-if="mealChoicesEnabled && form.status === 'attending' && form.attending_count > 0" class="space-y-4">
+                        <p class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Meal choices</p>
+                        <div v-for="(meal, index) in form.meal_choices" :key="index" class="space-y-3 border border-soft bg-wedding-bg p-4">
                             <input
                                 v-model="meal.guest_name"
                                 type="text"
-                                class="border border-soft bg-white px-4 py-3"
+                                class="w-full border border-soft bg-white px-4 py-3"
                                 :placeholder="`Guest ${index + 1} name`"
                             >
-                            <select v-model="meal.meal" class="border border-soft bg-white px-4 py-3">
-                                <option disabled value="">Select meal</option>
-                                <option v-for="mealOption in mealOptions" :key="mealOption" :value="mealOption">{{ mealOption }}</option>
-                            </select>
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <div v-for="course in mealSectionsForGuest(index)" :key="`${index}-${course.id}`">
+                                    <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">{{ course.name }}</label>
+                                    <select v-model="meal.selections[course.id]" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                                        <option disabled value="">Select {{ course.name }}</option>
+                                        <option v-for="item in course.items" :key="`${course.id}-${item.title}`" :value="item.title">{{ item.title }}</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -146,12 +151,18 @@ const rsvpSettings = ref({
     menu_heading: props.payload?.rsvpSettings?.menu_heading || 'Wedding Menu',
     menu_intro: props.payload?.rsvpSettings?.menu_intro || 'We cannot wait to share a beautiful meal with you.',
     set_menu_description: props.payload?.rsvpSettings?.set_menu_description || 'A chef-curated set menu will be served for all attending guests.',
+    kids_menu_enabled: Boolean(props.payload?.rsvpSettings?.kids_menu_enabled),
+    menu_courses: props.payload?.rsvpSettings?.menu_courses || [],
+    kids_menu_items: props.payload?.rsvpSettings?.kids_menu_items || [],
     meal_options: props.payload?.rsvpSettings?.meal_options?.length
         ? props.payload.rsvpSettings.meal_options
         : (props.payload?.mealOptions || ['Chicken', 'Beef', 'Veg', 'Vegan']),
 });
 const mealOptions = ref(rsvpSettings.value.meal_options);
 const mealChoicesEnabled = computed(() => rsvpSettings.value.meal_mode === 'options');
+const mealCourses = ref(props.payload?.mealCourses || []);
+const kidsMenuItems = ref(props.payload?.kidsMenuItems || []);
+const saveEndpoint = ref('');
 const codeInput = ref((props.payload?.code || '').toUpperCase());
 const party = ref(null);
 const theme = computed(() => props.payload?.content?.theme || {});
@@ -178,6 +189,9 @@ const countOptions = computed(() => {
     return Array.from({ length: maxGuests + 1 }, (_, i) => i);
 });
 
+const availableCourseSections = computed(() => mealCourses.value.filter((course) => Array.isArray(course.items) && course.items.length > 0));
+const hasKidsMenu = computed(() => rsvpSettings.value.kids_menu_enabled && kidsMenuItems.value.length > 0);
+
 watch(
     () => form.attending_count,
     (count) => {
@@ -186,20 +200,7 @@ watch(
             return;
         }
 
-        const current = form.meal_choices;
-        const next = [];
-
-        for (let index = 0; index < count; index += 1) {
-            const existing = current[index];
-            const guest = party.value?.guests?.[index];
-
-            next.push({
-                guest_name: existing?.guest_name || (guest ? `${guest.first_name} ${guest.last_name}` : ''),
-                meal: existing?.meal || '',
-            });
-        }
-
-        form.meal_choices = next;
+        ensureSelectionsShape(count);
     }
 );
 
@@ -236,6 +237,9 @@ async function lookupCode() {
         });
 
         party.value = response.data.party;
+        saveEndpoint.value = response.data.saveUrl || '';
+        mealCourses.value = response.data.mealCourses || [];
+        kidsMenuItems.value = response.data.kidsMenuItems || [];
         if (response.data.rsvpSettings) {
             const incoming = response.data.rsvpSettings;
             rsvpSettings.value = {
@@ -243,6 +247,9 @@ async function lookupCode() {
                 ...incoming,
                 meal_mode: incoming.meal_mode || (incoming.meal_choices_enabled === false ? 'set_menu' : 'options'),
                 meal_options: incoming.meal_options?.length ? incoming.meal_options : rsvpSettings.value.meal_options,
+                kids_menu_enabled: Boolean(incoming.kids_menu_enabled),
+                menu_courses: incoming.menu_courses || response.data.mealCourses || [],
+                kids_menu_items: incoming.kids_menu_items || response.data.kidsMenuItems || [],
             };
             mealOptions.value = rsvpSettings.value.meal_options;
         } else {
@@ -274,7 +281,7 @@ function hydrateFormFromExistingRsvp() {
 
     form.status = existing.status;
     form.attending_count = existing.attending_count;
-    form.meal_choices = existing.meal_choices || [];
+    form.meal_choices = normalizeSavedMealChoices(existing.meal_choices || []);
     form.dietary_restrictions = existing.dietary_restrictions || '';
     form.message = existing.message || '';
 }
@@ -294,10 +301,10 @@ async function saveRsvp() {
     savingRsvp.value = true;
 
     try {
-        const response = await window.axios.post(`/rsvp/${party.value.code}`, {
+        const response = await window.axios.post(saveEndpoint.value || `/rsvp/${party.value.code}`, {
             status: form.status,
             attending_count: form.attending_count,
-            meal_choices: mealChoicesEnabled.value && form.status === 'attending' ? form.meal_choices : [],
+            meal_choices: mealChoicesEnabled.value && form.status === 'attending' ? buildMealChoicesPayload() : [],
             dietary_restrictions: form.dietary_restrictions,
             message: form.message,
         });
@@ -310,5 +317,77 @@ async function saveRsvp() {
     } finally {
         savingRsvp.value = false;
     }
+}
+
+function guestAt(index) {
+    return party.value?.guests?.[index] || null;
+}
+
+function mealSectionsForGuest(index) {
+    const guest = guestAt(index);
+    if (guest?.is_child && hasKidsMenu.value) {
+        return [
+            {
+                id: 'kids-menu',
+                name: 'Kids Menu',
+                items: kidsMenuItems.value,
+            },
+        ];
+    }
+
+    return availableCourseSections.value;
+}
+
+function normalizeSavedMealChoices(items) {
+    return Array.isArray(items) ? items.map((item, index) => {
+        const guest = guestAt(index);
+        return {
+            guest_name: item?.guest_name || (guest ? `${guest.first_name} ${guest.last_name}` : ''),
+            meal: item?.meal || '',
+            selections: item?.selections && typeof item.selections === 'object' ? { ...item.selections } : {},
+        };
+    }) : [];
+}
+
+function ensureSelectionsShape(count) {
+    const current = form.meal_choices;
+    const next = [];
+
+    for (let index = 0; index < count; index += 1) {
+        const existing = current[index];
+        const guest = guestAt(index);
+        next.push({
+            guest_name: existing?.guest_name || (guest ? `${guest.first_name} ${guest.last_name}` : ''),
+            meal: existing?.meal || '',
+            selections: existing?.selections && typeof existing.selections === 'object' ? { ...existing.selections } : {},
+        });
+    }
+
+    form.meal_choices = next;
+    form.meal_choices.forEach((choice, index) => {
+        const validIds = mealSectionsForGuest(index).map((section) => section.id);
+        choice.selections = Object.fromEntries(
+            Object.entries(choice.selections || {}).filter(([key]) => validIds.includes(key))
+        );
+    });
+}
+
+function buildMealSummary(choice, guestIndex) {
+    const sections = mealSectionsForGuest(guestIndex);
+    return sections
+        .map((section) => {
+            const value = choice.selections?.[section.id];
+            return value ? `${section.name}: ${value}` : null;
+        })
+        .filter(Boolean)
+        .join(' | ');
+}
+
+function buildMealChoicesPayload() {
+    return form.meal_choices.map((choice, index) => ({
+        guest_name: choice.guest_name,
+        meal: buildMealSummary(choice, index).slice(0, 60),
+        selections: choice.selections || {},
+    }));
 }
 </script>

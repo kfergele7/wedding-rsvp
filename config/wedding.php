@@ -9,6 +9,8 @@ return [
         'menu_note_title' => 'Dining Notes',
         'menu_note_text' => '<p>If you have dietary requirements, please let us know in the RSVP.</p><p>All tables will include a bottle of red and white wine.</p>',
         'meal_options' => [],
+        'kids_menu_enabled' => false,
+        'kids_menu_items' => [],
         'menu_courses' => [
             [
                 'id' => 'starter',

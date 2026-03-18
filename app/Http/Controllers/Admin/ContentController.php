@@ -40,20 +40,28 @@ class ContentController extends Controller
         if (array_key_exists('meal_options', $incomingRsvpSettings)) {
             $rsvpSettings['meal_options'] = $incomingRsvpSettings['meal_options'];
         }
+        if (array_key_exists('kids_menu_items', $incomingRsvpSettings)) {
+            $rsvpSettings['kids_menu_items'] = $incomingRsvpSettings['kids_menu_items'];
+        }
 
         $rsvpSettings['meal_mode'] = in_array(($rsvpSettings['meal_mode'] ?? 'set_menu'), ['options', 'set_menu'], true)
             ? $rsvpSettings['meal_mode']
             : 'set_menu';
+        $rsvpSettings['kids_menu_enabled'] = (bool) ($rsvpSettings['kids_menu_enabled'] ?? false);
         $rsvpSettings['menu_courses'] = $this->normalizeCourseSections($rsvpSettings['menu_courses'] ?? []);
+        $rsvpSettings['kids_menu_items'] = $this->normalizeMenuItems($rsvpSettings['kids_menu_items'] ?? []);
         $rsvpSettings['meal_options'] = collect($rsvpSettings['meal_options'] ?? [])
             ->map(fn ($option) => trim((string) $option))
             ->filter(fn ($option) => $option !== '')
             ->values()
             ->all();
 
-        // Keep RSVP meal options in sync with main-like course titles when option mode is used.
+        // Keep RSVP meal options in sync with all available selectable menu items.
         if ($rsvpSettings['meal_mode'] === 'options') {
-            $mealOptionItems = $this->resolveMealOptionItems($rsvpSettings['menu_courses']);
+            $mealOptionItems = $this->resolveMealOptionItems(
+                $rsvpSettings['menu_courses'],
+                $rsvpSettings['kids_menu_enabled'] ? $rsvpSettings['kids_menu_items'] : []
+            );
             $rsvpSettings['meal_options'] = collect($mealOptionItems)
                 ->pluck('title')
                 ->map(fn ($title) => trim((string) $title))
@@ -139,12 +147,16 @@ class ContentController extends Controller
             ->first();
 
         if (! $saved || ! is_array($saved->value)) {
+            $fallback['kids_menu_enabled'] = (bool) ($fallback['kids_menu_enabled'] ?? false);
             $fallback['menu_courses'] = $this->normalizeCourseSections($fallback['menu_courses'] ?? []);
+            $fallback['kids_menu_items'] = $this->normalizeMenuItems($fallback['kids_menu_items'] ?? []);
             return $fallback;
         }
 
         $merged = $this->mergeReplacingLists($fallback, $saved->value);
+        $merged['kids_menu_enabled'] = (bool) ($merged['kids_menu_enabled'] ?? false);
         $merged['menu_courses'] = $this->normalizeCourseSections($saved->value['menu_courses'] ?? ($fallback['menu_courses'] ?? []));
+        $merged['kids_menu_items'] = $this->normalizeMenuItems($saved->value['kids_menu_items'] ?? ($fallback['kids_menu_items'] ?? []));
 
         return $merged;
     }
@@ -172,16 +184,7 @@ class ContentController extends Controller
             ->map(function ($section, $index) {
                 $id = trim((string) ($section['id'] ?? ''));
                 $name = trim((string) ($section['name'] ?? ''));
-                $items = collect($section['items'] ?? [])
-                    ->map(function ($item) {
-                        return [
-                            'title' => trim((string) ($item['title'] ?? '')),
-                            'description' => trim((string) ($item['description'] ?? '')),
-                        ];
-                    })
-                    ->filter(fn ($item) => $item['title'] !== '')
-                    ->values()
-                    ->all();
+                $items = $this->normalizeMenuItems($section['items'] ?? []);
 
                 if ($id === '' && in_array(strtolower($name), ['starter', 'main', 'dessert'], true)) {
                     $id = strtolower($name);
@@ -245,29 +248,29 @@ class ContentController extends Controller
         return $normalized;
     }
 
-    private function resolveMealOptionItems(array $sections): array
+    private function normalizeMenuItems(array $items): array
     {
-        $mainLike = collect($sections)
-            ->first(function ($section) {
-                $name = strtolower(trim((string) ($section['name'] ?? '')));
-                return str_contains($name, 'main') || str_contains($name, 'entree');
-            });
+        return collect($items)
+            ->map(function ($item) {
+                return [
+                    'title' => trim((string) ($item['title'] ?? '')),
+                    'description' => trim((string) ($item['description'] ?? '')),
+                ];
+            })
+            ->filter(fn ($item) => $item['title'] !== '')
+            ->values()
+            ->all();
+    }
 
-        if (is_array($mainLike) && count($mainLike['items'] ?? []) > 0) {
-            return $mainLike['items'];
-        }
-
-        $second = $sections[1] ?? null;
-        if (is_array($second) && count($second['items'] ?? []) > 0) {
-            return $second['items'];
-        }
-
-        $first = $sections[0] ?? null;
-        if (is_array($first) && count($first['items'] ?? []) > 0) {
-            return $first['items'];
-        }
-
-        return [];
+    private function resolveMealOptionItems(array $sections, array $kidsMenuItems = []): array
+    {
+        return collect($sections)
+            ->pluck('items')
+            ->flatten(1)
+            ->merge($kidsMenuItems)
+            ->filter(fn ($item) => is_array($item) && trim((string) ($item['title'] ?? '')) !== '')
+            ->values()
+            ->all();
     }
 
     private function isLegacyCourseMap(array $sections): bool
