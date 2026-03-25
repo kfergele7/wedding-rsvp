@@ -776,15 +776,10 @@
                                     v-for="(faq, index) in content.details.faqs"
                                     :id="`faq-item-${index}`"
                                     :key="index"
-                                    class="rounded border border-soft bg-wedding-bg p-3"
+                                    class="rounded border border-soft bg-wedding-bg p-5"
                                 >
-                                    <div class="grid gap-3 md:grid-cols-3">
-                                        <input v-model="faq.question" placeholder="Question" class="border border-soft bg-white px-3 py-2 md:col-span-1">
-                                        <div class="md:col-span-2">
-                                            <RichTextEditor v-model="faq.answer" class="mt-2" tone="secondary" surface="white" button-tone="primary" />
-                                        </div>
-                                    </div>
-                                    <div class="mt-3 flex justify-end">
+                                    <div class="mb-4 flex items-center justify-between gap-3">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">FAQ Item {{ index + 1 }}</p>
                                         <div class="flex items-center gap-2">
                                             <button
                                                 type="button"
@@ -809,6 +804,27 @@
                                                 Remove FAQ
                                             </button>
                                         </div>
+                                    </div>
+
+                                    <div class="grid gap-4">
+                                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">
+                                            Question
+                                            <input
+                                                v-model="faq.question"
+                                                placeholder="e.g. Is there parking at the venue?"
+                                                class="mt-2 w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                            >
+                                        </label>
+
+                                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">
+                                            Answer
+                                            <textarea
+                                                v-model="faq.answer"
+                                                rows="5"
+                                                placeholder="e.g. Yes, there is free onsite parking available for all guests."
+                                                class="mt-2 w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                            ></textarea>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
