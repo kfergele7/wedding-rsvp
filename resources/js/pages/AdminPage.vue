@@ -50,57 +50,13 @@
 
         <main class="admin-main-shell pb-10 pt-4 md:py-10">
             <section v-if="section === 'dashboard'" class="space-y-6">
-                <div class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
-                    <article v-for="card in dashboardCards" :key="card.label" class="card-frame bg-white text-center">
-                        <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">{{ card.label }}</p>
-                        <p class="mt-2 font-heading text-4xl">{{ card.value }}</p>
-                    </article>
-                </div>
-
-                <article class="content-section-block content-section-even">
-                    <h2 class="font-heading text-3xl">Site Information</h2>
-
-                    <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Public URL</p>
-                    <p class="mt-1 text-lg">
-                        <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="text-wedding-band underline decoration-wedding-band/50 underline-offset-4 hover:decoration-wedding-band">
-                            {{ previewUrl }}
-                        </a>
-                    </p>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]">
-                            <span class="material-symbols-outlined btn-icon">visibility</span>
-                            Preview Site
-                        </a>
-                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="copyPublicUrl">
-                            <span class="material-symbols-outlined btn-icon">{{ copyLinkCopied ? 'check' : 'content_copy' }}</span>
-                            {{ copyLinkCopied ? 'Link Copied' : 'Copy Link' }}
-                        </button>
-                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="sharePublicUrl">
-                            <span class="material-symbols-outlined btn-icon">share</span>
-                            Share
-                        </button>
-                        <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="openQrModal">
-                            <span class="material-symbols-outlined btn-icon">qr_code_2</span>
-                            Generate QR Code
-                        </button>
-                    </div>
-
-                    <p class="mt-8 text-sm uppercase tracking-[0.14em] text-wedding-muted">Site Visibility</p>
-                    <p class="mt-1 text-lg">{{ sitePublished ? 'Published' : 'Draft' }}</p>
-
-                    <button type="button" class="admin-btn admin-btn-success mt-6 inline-flex items-center gap-2 px-6 py-4 text-sm uppercase tracking-[0.14em]" @click="toggleSitePublished">
-                        <span class="material-symbols-outlined btn-icon">{{ sitePublished ? 'visibility_off' : 'publish' }}</span>
-                        {{ sitePublished ? 'Move To Draft' : 'Publish Site' }}
-                    </button>
-                </article>
-
                 <article class="content-section-block content-section-odd">
                     <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Recommended process</p>
                     <h2 class="mt-2 font-heading text-3xl">Use Magic Invitation in 3 easy steps</h2>
                     <p class="mt-3 text-wedding-muted">Follow this order for the smoothest setup and best guest experience.</p>
 
                     <div class="mt-7 grid gap-5 lg:grid-cols-3">
-                        <article class="content-section-block content-section-even h-full">
+                        <article class="content-section-block content-section-even flex h-full flex-col">
                             <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 1</p>
                             <h3 class="mt-2 font-heading text-2xl">Create your website</h3>
                             <ul class="mt-4 space-y-2 text-sm text-wedding-black">
@@ -108,15 +64,17 @@
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Add story, timeline, menu, and FAQs</li>
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Upload imagery and preview before publishing</li>
                             </ul>
-                            <div class="mt-5">
-                                <a :href="`${adminBaseUrl}/content`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                    <span class="material-symbols-outlined btn-icon">draw</span>
-                                    Create your website
-                                </a>
+                            <div class="dashboard-card-footer">
+                                <div class="dashboard-card-footer-inner">
+                                    <a :href="`${adminBaseUrl}/content`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                        <span class="material-symbols-outlined btn-icon">draw</span>
+                                        Create your website
+                                    </a>
+                                </div>
                             </div>
                         </article>
 
-                        <article class="content-section-block content-section-even h-full">
+                        <article class="content-section-block content-section-even flex h-full flex-col">
                             <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 2</p>
                             <h3 class="mt-2 font-heading text-2xl">Build your guest list</h3>
                             <ul class="mt-4 space-y-2 text-sm text-wedding-black">
@@ -124,15 +82,17 @@
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Set invited seats and add notes per party</li>
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Generate invite codes and send RSVP emails</li>
                             </ul>
-                            <div class="mt-5">
-                                <a :href="`${adminBaseUrl}/parties`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                    <span class="material-symbols-outlined btn-icon">groups</span>
-                                    Open guest list
-                                </a>
+                            <div class="dashboard-card-footer">
+                                <div class="dashboard-card-footer-inner">
+                                    <a :href="`${adminBaseUrl}/parties`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                        <span class="material-symbols-outlined btn-icon">groups</span>
+                                        Open guest list
+                                    </a>
+                                </div>
                             </div>
                         </article>
 
-                        <article class="content-section-block content-section-even h-full">
+                        <article class="content-section-block content-section-even flex h-full flex-col">
                             <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 3</p>
                             <h3 class="mt-2 font-heading text-2xl">View and manage RSVPs</h3>
                             <ul class="mt-4 space-y-2 text-sm text-wedding-black">
@@ -140,15 +100,71 @@
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Review meal choices and dietary requirements</li>
                                 <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Update RSVPs manually and export CSV anytime</li>
                             </ul>
-                            <div class="mt-5">
-                                <a :href="`${adminBaseUrl}/rsvps`" class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                    <span class="material-symbols-outlined btn-icon">fact_check</span>
-                                    Manage RSVPs
-                                </a>
+                            <div class="dashboard-card-footer">
+                                <div class="dashboard-card-footer-inner">
+                                    <a :href="`${adminBaseUrl}/rsvps`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                        <span class="material-symbols-outlined btn-icon">fact_check</span>
+                                        Manage RSVPs
+                                    </a>
+                                </div>
                             </div>
                         </article>
                     </div>
                 </article>
+
+                <div class="grid gap-6 xl:grid-cols-[1.35fr_0.9fr]">
+                    <article class="content-section-block content-section-even">
+                        <h2 class="font-heading text-3xl">Site Information</h2>
+
+                        <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Public URL</p>
+                        <p class="mt-1 text-lg">
+                            <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="text-wedding-band underline decoration-wedding-band/50 underline-offset-4 hover:decoration-wedding-band">
+                                {{ previewUrl }}
+                            </a>
+                        </p>
+                        <div class="site-tools-wrap mt-4">
+                            <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Site tools</p>
+                            <div class="site-tools-grid mt-3">
+                            <a :href="previewUrl" target="_blank" rel="noopener noreferrer" class="admin-tool-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
+                                <span class="material-symbols-outlined btn-icon">visibility</span>
+                                Preview Site
+                            </a>
+                            <button type="button" class="admin-tool-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="copyPublicUrl">
+                                <span class="material-symbols-outlined btn-icon">{{ copyLinkCopied ? 'check' : 'content_copy' }}</span>
+                                {{ copyLinkCopied ? 'Link Copied' : 'Copy Link' }}
+                            </button>
+                            <button type="button" class="admin-tool-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="sharePublicUrl">
+                                <span class="material-symbols-outlined btn-icon">share</span>
+                                Share
+                            </button>
+                            <button type="button" class="admin-tool-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="openQrModal">
+                                <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+                                Generate QR Code
+                            </button>
+                            </div>
+                        </div>
+
+                        <p class="mt-8 text-sm uppercase tracking-[0.14em] text-wedding-muted">Site Visibility</p>
+                        <p class="mt-1 text-lg">{{ sitePublished ? 'Published' : 'Draft' }}</p>
+
+                        <button type="button" class="admin-btn admin-btn-success mt-6 inline-flex items-center gap-2 px-6 py-4 text-sm uppercase tracking-[0.14em]" @click="toggleSitePublished">
+                            <span class="material-symbols-outlined btn-icon">{{ sitePublished ? 'visibility_off' : 'publish' }}</span>
+                            {{ sitePublished ? 'Move To Draft' : 'Publish Site' }}
+                        </button>
+                    </article>
+
+                    <article class="content-section-block content-section-even">
+                        <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Quick overview</p>
+                        <h2 class="mt-2 font-heading text-3xl">Your current numbers</h2>
+
+                        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                            <article v-for="card in dashboardCards" :key="card.label" class="dashboard-stat-card">
+                                <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">{{ card.label }}</p>
+                                <p class="mt-3 font-heading text-4xl">{{ card.value }}</p>
+                            </article>
+                        </div>
+                    </article>
+                </div>
             </section>
 
             <section v-if="section === 'content'" class="space-y-8 pb-32">
@@ -712,8 +728,12 @@
                                     </div>
                                 </div>
                                 <div v-else class="rounded border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
-                                    Leave this off if children will eat from the main wedding menu.
+                                    Leave this off if children will eat from the main wedding menu or if children are not attending the wedding.
                                 </div>
+                            </div>
+
+                            <div class="menu-courses-divider">
+                                <hr class="w-full border-t border-wedding-band/70">
                             </div>
 
                             <div class="mt-6 grid gap-4 md:grid-cols-3">
@@ -1368,34 +1388,34 @@
         </div>
 
         <div v-if="qrModalOpen" class="fixed inset-0 z-[88] bg-black/50 p-4 md:p-8" @click.self="closeQrModal">
-            <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-white p-6 shadow-soft md:mt-16">
+            <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-wedding-bg p-6 shadow-soft md:mt-16">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="font-heading text-3xl">Share QR Code</h3>
-                    <button type="button" class="admin-btn admin-btn-danger inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="closeQrModal">
+                    <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="closeQrModal">
                         <span class="material-symbols-outlined btn-icon">close</span>
                         Close
                     </button>
                 </div>
                 <p class="mt-2 text-sm text-wedding-muted">Download, share digitally, or print your invitation QR code.</p>
 
-                <div class="mt-5 flex justify-center">
+                <div class="mt-5 flex justify-center border border-soft bg-white p-6">
                     <img :src="qrImageUrl" alt="Public URL QR code" class="h-72 w-72 border border-soft object-contain">
                 </div>
 
-                <div class="mt-5 flex flex-wrap justify-center gap-2">
+                <div class="mt-5 grid gap-3 sm:grid-cols-3">
                     <a
                         :href="qrImageUrl"
                         :download="`${qrDownloadName}-qr.png`"
-                        class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]"
+                        class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
                     >
                         <span class="material-symbols-outlined btn-icon">download</span>
                         Download
                     </a>
-                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="shareQrImage">
+                    <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="shareQrImage">
                         <span class="material-symbols-outlined btn-icon">share</span>
                         Share Image
                     </button>
-                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="printQrImage">
+                    <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="printQrImage">
                         <span class="material-symbols-outlined btn-icon">print</span>
                         Print
                     </button>
@@ -1460,7 +1480,7 @@
                             </p>
                         </div>
                         <div class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:justify-end md:gap-3">
-                            <button class="admin-btn admin-btn-success inline-flex items-center justify-center gap-1 px-3 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:text-xs md:tracking-[0.2em]" type="button" @click="saveContent(false)">
+                            <button class="admin-btn admin-btn-success inline-flex items-center justify-center gap-1 px-4 py-3 text-[11px] uppercase tracking-[0.14em] md:gap-2 md:px-8 md:py-4 md:text-xs md:tracking-[0.2em]" type="button" @click="saveContent(false)">
                                 <span class="material-symbols-outlined btn-icon">save</span>
                                 Save
                             </button>
@@ -3395,6 +3415,65 @@ function serialize(value) {
     border: 1px solid #e66363 !important;
     background-color: #e66363 !important;
     color: #ffffff !important;
+}
+
+.dashboard-stat-card {
+    border: 1px solid rgba(15, 27, 29, 0.12);
+    background: #ffffff;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.dashboard-card-footer {
+    margin-top: auto;
+    min-height: 6rem;
+    display: flex;
+    align-items: flex-end;
+}
+
+.dashboard-card-footer-inner {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.dashboard-card-footer-inner .admin-btn {
+    margin-top: 24px;
+}
+
+.site-tools-wrap {
+    border-top: 1px solid rgba(15, 27, 29, 0.08);
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+}
+
+.site-tools-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-tool-btn {
+    border: 1px solid rgba(15, 27, 29, 0.12);
+    background: #f7f7f7 !important;
+    color: #0f1b1d !important;
+    box-shadow: none !important;
+    justify-content: flex-start;
+}
+
+.admin-tool-btn .btn-icon {
+    color: #22363a !important;
+}
+
+.admin-tool-btn:hover {
+    border-color: #22363a !important;
+    background: #f2ece3 !important;
+    color: #0f1b1d !important;
+}
+
+.admin-tool-btn:hover .btn-icon {
+    color: #22363a !important;
 }
 
 .admin-btn-danger-solid:hover {
