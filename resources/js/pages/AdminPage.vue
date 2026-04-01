@@ -3484,7 +3484,7 @@ function serialize(value) {
 
 .admin-tool-btn:hover {
     border-color: #22363a !important;
-    background: #f2ece3 !important;
+    background: #ffffff !important;
     color: #0f1b1d !important;
 }
 
