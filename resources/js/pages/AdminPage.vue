@@ -212,6 +212,13 @@
                                 </label>
                             </div>
                             <p class="mt-3 text-sm italic text-wedding-muted">Tip: keep colour contrast in mind so your text stays easy to read.</p>
+                            <button
+                                type="button"
+                                class="mt-4 text-sm font-medium text-red-700 underline decoration-wedding-danger underline-offset-4 transition hover:text-[#B93F3F]"
+                                @click="resetThemeColours"
+                            >
+                                Reset to default colours
+                            </button>
                         </div>
 
                         <div class="w-full py-8">
@@ -1448,9 +1455,9 @@
                         <span class="material-symbols-outlined btn-icon">close</span>
                         Cancel
                     </button>
-                    <button type="button" class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" @click="closeConfirmModal(true)">
-                        <span class="material-symbols-outlined btn-icon">close</span>
-                        Confirm
+                    <button type="button" class="admin-btn inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.12em]" :class="confirmModal.confirmClass" @click="closeConfirmModal(true)">
+                        <span class="material-symbols-outlined btn-icon">{{ confirmModal.confirmIcon }}</span>
+                        {{ confirmModal.confirmLabel }}
                     </button>
                 </div>
             </div>
@@ -1474,11 +1481,6 @@
             <div class="w-full border-t border-soft bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:px-8">
                 <div class="flex flex-col items-center justify-center gap-3 text-center md:flex-row md:justify-between md:text-left">
                     <div class="flex flex-col items-center gap-2 md:flex-row md:items-center md:gap-4">
-                        <p class="text-sm text-wedding-muted">
-                            <span class="uppercase tracking-[0.12em]">Last Saved:</span>
-                            <span class="ml-2">{{ lastSavedAt || 'Not yet saved' }}</span>
-                        </p>
-                        <span class="hidden h-5 w-px bg-soft md:inline-block"></span>
                         <p class="text-sm">
                             <span class="uppercase tracking-[0.12em] text-wedding-muted">Current Changes:</span>
                             <span class="ml-2 font-medium" :class="hasUnsavedChanges ? 'text-red-700' : 'text-emerald-700'">
@@ -1486,8 +1488,8 @@
                             </span>
                         </p>
                     </div>
-                    <div class="w-full md:w-auto">
-                        <div class="mb-2 flex flex-wrap items-center justify-center gap-2 md:mb-0 md:justify-end">
+                    <div class="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center md:justify-end md:gap-3">
+                        <div class="flex flex-wrap items-center justify-center gap-2 md:justify-end">
                             <p v-if="globalMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
                                 {{ globalMessage }}
                             </p>
@@ -1602,6 +1604,9 @@ const confirmModal = reactive({
     open: false,
     title: '',
     message: '',
+    confirmClass: 'admin-btn-danger',
+    confirmIcon: 'close',
+    confirmLabel: 'Confirm',
 });
 const noticeModal = reactive({
     open: false,
@@ -2174,6 +2179,29 @@ async function removeFaqItem(index) {
         return;
     }
     content.value.details.faqs.splice(index, 1);
+}
+
+async function resetThemeColours() {
+    const confirmed = await openConfirmModal(
+        'Reset Theme Colours',
+        'Are you sure you want to reset your theme colours? This will overwrite your selected primary section colour and button colour once you click Save.',
+        {
+            confirmClass: 'admin-btn-success',
+            confirmIcon: 'check',
+            confirmLabel: 'Yes, Reset Colours',
+        }
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    if (!content.value.theme || typeof content.value.theme !== 'object') {
+        content.value.theme = {};
+    }
+
+    content.value.theme.primary_color = '#22363A';
+    content.value.theme.button_color = '#22363A';
 }
 
 async function saveContent(openPreviewAfterSave = false) {
@@ -2925,9 +2953,12 @@ async function sendRsvpEmailsToSelected() {
     }
 }
 
-function openConfirmModal(title, message) {
+function openConfirmModal(title, message, options = {}) {
     confirmModal.title = title;
     confirmModal.message = message;
+    confirmModal.confirmClass = options.confirmClass || 'admin-btn-danger';
+    confirmModal.confirmIcon = options.confirmIcon || 'close';
+    confirmModal.confirmLabel = options.confirmLabel || 'Confirm';
     confirmModal.open = true;
 
     return new Promise((resolve) => {

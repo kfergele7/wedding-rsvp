@@ -20,28 +20,10 @@ class SaveSiteSettingsRequest extends FormRequest
             'content.theme.primary_color' => [
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! is_string($value)) {
-                        return;
-                    }
-
-                    if (! $this->isDarkHexColor($value)) {
-                        $fail('Primary section color must be a dark hex color for text contrast.');
-                    }
-                },
             ],
             'content.theme.button_color' => [
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! is_string($value)) {
-                        return;
-                    }
-
-                    if (! $this->isDarkHexColor($value)) {
-                        $fail('Button color must be a dark hex color for text contrast.');
-                    }
-                },
             ],
             'rsvp_settings' => ['nullable', 'array'],
             'rsvp_settings.meal_mode' => ['nullable', Rule::in(['options', 'set_menu'])],
@@ -60,19 +42,4 @@ class SaveSiteSettingsRequest extends FormRequest
         ];
     }
 
-    private function isDarkHexColor(string $hex): bool
-    {
-        $normalized = ltrim($hex, '#');
-        if (strlen($normalized) !== 6) {
-            return false;
-        }
-
-        $red = hexdec(substr($normalized, 0, 2));
-        $green = hexdec(substr($normalized, 2, 2));
-        $blue = hexdec(substr($normalized, 4, 2));
-
-        $luminance = (0.2126 * $red) + (0.7152 * $green) + (0.0722 * $blue);
-
-        return $luminance <= 150;
-    }
 }

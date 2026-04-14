@@ -195,9 +195,14 @@ const previewBanner = computed(() => props.payload?.previewBanner || null);
 const previewBannerRef = ref(null);
 const previewBannerHeight = ref(0);
 
-const themeVars = computed(() => ({
-    '--wedding-button-color': content.value.theme.button_color || fallbackContent.theme.button_color,
-}));
+const themeVars = computed(() => {
+    const buttonColor = content.value.theme.button_color || fallbackContent.theme.button_color;
+
+    return {
+        '--wedding-button-color': buttonColor,
+        '--wedding-button-hover-color': washedOutColour(buttonColor),
+    };
+});
 const isRsvpModalOpen = ref(Boolean(props.payload?.openRsvpModal));
 const rsvpInitialCode = ref(props.payload?.rsvpCode || '');
 const currentYear = new Date().getFullYear();
@@ -207,6 +212,7 @@ function updatePreviewBannerHeight() {
 }
 
 onMounted(() => {
+    updateDocumentTitle();
     updatePreviewBannerHeight();
     window.addEventListener('resize', updatePreviewBannerHeight);
 });
@@ -219,6 +225,17 @@ watch(previewBanner, async () => {
     await nextTick();
     updatePreviewBannerHeight();
 });
+
+watch(
+    () => [props.payload?.siteTitle, content.value.hero?.names],
+    () => updateDocumentTitle(),
+);
+
+function updateDocumentTitle() {
+    const title = (props.payload?.siteTitle || content.value.hero?.names || 'Magic Invitation').toString().trim();
+
+    document.title = title || 'Magic Invitation';
+}
 
 const fallbackRsvpSettings = {
     meal_mode: 'options',
@@ -339,5 +356,26 @@ function normalizeMenuCourses(courses) {
     }
 
     return fallbackRsvpSettings.menu_courses;
+}
+
+function washedOutColour(hex) {
+    const normalized = (hex || '').replace('#', '').trim();
+
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return '#466369';
+    }
+
+    const red = parseInt(normalized.slice(0, 2), 16);
+    const green = parseInt(normalized.slice(2, 4), 16);
+    const blue = parseInt(normalized.slice(4, 6), 16);
+    const mixWithWhite = 0.24;
+
+    const washedRed = Math.round(red + ((255 - red) * mixWithWhite));
+    const washedGreen = Math.round(green + ((255 - green) * mixWithWhite));
+    const washedBlue = Math.round(blue + ((255 - blue) * mixWithWhite));
+
+    return `#${[washedRed, washedGreen, washedBlue]
+        .map((channel) => channel.toString(16).padStart(2, '0'))
+        .join('')}`;
 }
 </script>

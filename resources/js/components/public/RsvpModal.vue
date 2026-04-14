@@ -182,7 +182,7 @@ const kidsMenuItems = ref([]);
 const saveEndpoint = ref('');
 const lookupEndpoint = computed(() => {
     if (props.publicSlug) {
-        return `/w/${props.publicSlug}/rsvp/lookup`;
+        return `/${props.publicSlug}/rsvp/lookup`;
     }
     return '/rsvp/lookup';
 });
@@ -315,7 +315,7 @@ async function saveRsvp() {
 
     try {
         const fallbackSaveEndpoint = props.publicSlug
-            ? `/w/${props.publicSlug}/rsvp/${party.value.code}`
+            ? `/${props.publicSlug}/rsvp/${party.value.code}`
             : `/rsvp/${party.value.code}`;
 
         const response = await window.axios.post(saveEndpoint.value || fallbackSaveEndpoint, {

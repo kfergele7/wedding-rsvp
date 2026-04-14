@@ -135,12 +135,13 @@ QUEUE_CONNECTION=sync
 - CSV import/export for households and RSVPs
 
 ## Preview And Publishing Rules
-- Public URL format is `GET /w/{public_slug}`.
+- Public URL format is `GET /{public_slug}`.
+- Legacy `GET /w/{public_slug}` links still resolve for backwards compatibility.
 - If a site is unpublished:
   - Owner account users can preview the full site while logged in.
   - Staff users can preview any unpublished site while logged in.
   - Everyone else sees `Coming Soon`.
-- Unpublished RSVP endpoints (`/w/{public_slug}/rsvp/*`) are blocked for non-auth users and non-owner/non-staff users.
+- Unpublished RSVP endpoints (`/{public_slug}/rsvp/*`) are blocked for non-auth users and non-owner/non-staff users.
 - Published sites are still gated by billing status (`active`/`gifted` etc.) for public availability.
 
 ## Menu Mode Rules (Content Area)
@@ -234,9 +235,12 @@ You can replace with `.jpg/.png/.webp`; then update corresponding image paths in
 - `GET /features`
 - `GET /how-it-works`
 - `GET /faq`
-- `GET /w/{public_slug}`
-- `POST /w/{public_slug}/rsvp/lookup`
-- `POST /w/{public_slug}/rsvp/{code}`
+- `GET /{public_slug}`
+- `POST /{public_slug}/rsvp/lookup`
+- `POST /{public_slug}/rsvp/{code}`
+- Legacy: `GET /w/{public_slug}`
+- Legacy: `POST /w/{public_slug}/rsvp/lookup`
+- Legacy: `POST /w/{public_slug}/rsvp/{code}`
 
 ### Admin
 - `GET /admin/login`

@@ -164,9 +164,9 @@ Route::middleware('tenant.resolve')->group(function () {
             Route::get('/accounts/{account}/sites/{site}/launch-admin', [StaffAccountController::class, 'launchSiteAdmin'])->name('accounts.sites.launch-admin');
         });
 
-    Route::get('/w/{public_slug}', [PublicSiteController::class, 'showBySlug'])->name('wedding.public');
-    Route::post('/w/{public_slug}/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup.slug');
-    Route::post('/w/{public_slug}/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save.slug');
+    Route::get('/w/{public_slug}', [PublicSiteController::class, 'showBySlug'])->name('wedding.public.legacy');
+    Route::post('/w/{public_slug}/rsvp/lookup', [RsvpController::class, 'lookup'])->middleware('throttle:20,1')->name('rsvp.lookup.slug.legacy');
+    Route::post('/w/{public_slug}/rsvp/{code}', [RsvpController::class, 'save'])->middleware('throttle:20,1')->name('rsvp.save.slug.legacy');
 
     Route::get('/demo', [PublicSiteController::class, 'demo'])->name('demo');
     Route::get('/rsvp/{code?}', [PublicSiteController::class, 'rsvp'])->name('rsvp.page');
@@ -207,4 +207,18 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::put('/api/rsvps/{party}', [AdminRsvpController::class, 'update'])->name('api.rsvps.update');
         Route::get('/api/rsvps/export', [AdminRsvpController::class, 'export'])->name('api.rsvps.export');
     });
+
+    $publicSlugPattern = '^(?!(?:admin|api|app|demo|dev|faq|features|forgot-password|how-it-works|login|logout|pricing|register|reset-password|rsvp|staff|stripe|verify-email|w)$)[a-z0-9-]+$';
+
+    Route::get('/{public_slug}', [PublicSiteController::class, 'showBySlug'])
+        ->where('public_slug', $publicSlugPattern)
+        ->name('wedding.public');
+    Route::post('/{public_slug}/rsvp/lookup', [RsvpController::class, 'lookup'])
+        ->where('public_slug', $publicSlugPattern)
+        ->middleware('throttle:20,1')
+        ->name('rsvp.lookup.slug');
+    Route::post('/{public_slug}/rsvp/{code}', [RsvpController::class, 'save'])
+        ->where('public_slug', $publicSlugPattern)
+        ->middleware('throttle:20,1')
+        ->name('rsvp.save.slug');
 });

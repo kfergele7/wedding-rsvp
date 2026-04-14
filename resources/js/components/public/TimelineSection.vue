@@ -4,11 +4,11 @@
             <h2 class="section-heading">{{ content.heading }}</h2>
             <p class="mt-3 font-script text-5xl" :style="{ color: mutedTextColor }">{{ content.dateAccent }}</p>
 
-            <div class="timeline-items-grid mt-12 grid gap-4">
+            <div class="timeline-items-grid mt-12 grid gap-4" :style="timelineGridStyle">
                 <article
                     v-for="(item, index) in content.items"
                     :key="`${item.time || ''}-${item.title || ''}-${index}`"
-                    class="px-6 py-8 text-left"
+                    class="px-5 py-7 text-left md:px-4 lg:px-5"
                     :style="{ border: `1px solid ${panelBorderColor}`, backgroundColor: panelBackgroundColor }"
                 >
                     <p class="font-heading text-xl" :style="{ color: mutedTextColor }">{{ item.time }}</p>
@@ -40,6 +40,13 @@ const mutedTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 
 const softTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.82)' : 'rgba(255, 255, 255, 0.8)'));
 const panelBorderColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.16)' : 'rgba(255, 255, 255, 0.25)'));
 const panelBackgroundColor = computed(() => (hasLightBackground.value ? 'rgba(255, 255, 255, 0.55)' : 'rgba(255, 255, 255, 0.05)'));
+const timelineGridStyle = computed(() => {
+    const itemCount = Math.min(Math.max(props.content?.items?.length || 1, 1), 5);
+
+    return {
+        '--timeline-desktop-columns': `repeat(${itemCount}, minmax(0, 1fr))`,
+    };
+});
 
 function isLightColour(hex) {
     const normalized = (hex || '').replace('#', '').trim();
@@ -58,6 +65,18 @@ function isLightColour(hex) {
 
 <style scoped>
 .timeline-items-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .timeline-items-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .timeline-items-grid {
+        grid-template-columns: var(--timeline-desktop-columns);
+    }
 }
 </style>

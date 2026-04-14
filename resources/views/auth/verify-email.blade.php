@@ -29,7 +29,7 @@
             </form>
         </div>
 
-        <p class="mt-5 text-sm text-wedding-muted">After verification: subscribe on your dashboard, then publish your site at your unique <code>/w/{slug}</code> URL.</p>
+        <p class="mt-5 text-sm text-wedding-muted">After verification: subscribe on your dashboard, then publish your site at your unique <code>/{slug}</code> URL.</p>
     </section>
 </main>
 </body>

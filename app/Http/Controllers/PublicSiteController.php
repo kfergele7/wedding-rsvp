@@ -27,6 +27,7 @@ class PublicSiteController extends Controller
             ->view('app', [
                 'page' => 'home',
                 'payload' => [
+                    'siteTitle' => $this->currentSite()->title,
                     'content' => $this->homepageContent(),
                     'rsvpSettings' => $rsvpSettings,
                     'rsvpCode' => $lookupCode,
@@ -56,6 +57,7 @@ class PublicSiteController extends Controller
             ->view('app', [
                 'page' => 'home',
                 'payload' => [
+                    'siteTitle' => $this->currentSite()->title,
                     'content' => $this->homepageContent(),
                     'rsvpSettings' => $rsvpSettings,
                     'rsvpCode' => $lookupCode,
@@ -91,12 +93,13 @@ class PublicSiteController extends Controller
 
     public function demo(Request $request)
     {
-        [$content, $rsvpSettings, $publicSlug] = $this->demoTemplatePayload();
+        [$content, $rsvpSettings, $publicSlug, $siteTitle] = $this->demoTemplatePayload();
 
         return response()
             ->view('app', [
                 'page' => 'home',
                 'payload' => [
+                    'siteTitle' => $siteTitle,
                     'content' => $content,
                     'rsvpSettings' => $rsvpSettings,
                     'rsvpCode' => null,
@@ -118,6 +121,7 @@ class PublicSiteController extends Controller
             ->view('app', [
                 'page' => 'home',
                 'payload' => [
+                    'siteTitle' => $this->currentSite()->title,
                     'content' => $this->homepageContent(),
                     'rsvpSettings' => $rsvpSettings,
                     'rsvpCode' => $lookupCode,
@@ -251,7 +255,7 @@ class PublicSiteController extends Controller
         }
 
         if (! $demoSite) {
-            return [$fallbackContent, $fallbackRsvp, null];
+            return [$fallbackContent, $fallbackRsvp, null, 'Magic Invitation Demo'];
         }
 
         $savedContent = SiteSetting::query()
@@ -270,7 +274,7 @@ class PublicSiteController extends Controller
             ? $this->mergeReplacingLists($fallbackRsvp, $savedRsvp->value)
             : $fallbackRsvp;
 
-        return [$content, $rsvpSettings, $demoSite->public_slug];
+        return [$content, $rsvpSettings, $demoSite->public_slug, $demoSite->title];
     }
 
     /**

@@ -118,6 +118,7 @@ class AccountController extends Controller
                 'min:4',
                 'max:24',
                 'regex:/^[a-z0-9-]+$/',
+                Rule::notIn($this->reservedPublicSlugs()),
                 Rule::unique('sites', 'public_slug')->ignore($site->id),
             ],
         ]);
@@ -140,6 +141,31 @@ class AccountController extends Controller
         ]);
 
         return back()->with('status', 'Public URL slug updated.');
+    }
+
+    private function reservedPublicSlugs(): array
+    {
+        return [
+            'admin',
+            'api',
+            'app',
+            'demo',
+            'dev',
+            'faq',
+            'features',
+            'forgot-password',
+            'how-it-works',
+            'login',
+            'logout',
+            'pricing',
+            'register',
+            'reset-password',
+            'rsvp',
+            'staff',
+            'stripe',
+            'verify-email',
+            'w',
+        ];
     }
 
     public function launchSiteAdmin(Request $request, Account $account, Site $site): RedirectResponse

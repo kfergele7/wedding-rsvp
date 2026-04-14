@@ -139,8 +139,8 @@
     }
 
     .button-dark:hover {
-        border-color: var(--wedding-primary-green);
-        background-color: var(--wedding-primary-green);
+        border-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
+        background-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
     }
 
     .preview-account-button:hover {
@@ -172,8 +172,8 @@
     }
 
     .cms-button-link:hover {
-        border-color: var(--wedding-primary-green);
-        background-color: var(--wedding-primary-green);
+        border-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
+        background-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
     }
 
     .btn-icon {

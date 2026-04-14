@@ -61,7 +61,7 @@
                 <li>1. Create account and sign in</li>
                 <li>2. Verify your email</li>
                 <li>3. Subscribe monthly</li>
-                <li>4. Publish your /w/{slug} site</li>
+                <li>4. Publish your unique /{slug} site</li>
             </ol>
         </aside>
     </section>

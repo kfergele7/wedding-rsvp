@@ -13,7 +13,7 @@
 - Billing: Stripe webhook + checkout/portal flows
 
 ## Key routes
-- Public: `/`, `/pricing`, `/features`, `/demo`, `/rsvp/{code?}`, `/w/{public_slug}`
+- Public: `/`, `/pricing`, `/features`, `/demo`, `/rsvp/{code?}`, `/{public_slug}`. Legacy `/w/{public_slug}` links still resolve.
 - Auth: `/register`, `/login`, `/verify-email`, `/forgot-password`
 - Customer app: `/app` and `/app/admin/*`
 - Admin area: `/admin/*`

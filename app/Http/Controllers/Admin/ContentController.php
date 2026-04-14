@@ -30,6 +30,7 @@ class ContentController extends Controller
         $incomingContent = (array) $request->input('content', []);
         $existingContent = $this->resolvedContent();
         $content = $this->mergeReplacingLists($existingContent, $incomingContent);
+        $content = $this->normalizeHomepageContent($content, $incomingContent);
         $incomingRsvpSettings = (array) $request->input('rsvp_settings', []);
         $rsvpSettings = $this->mergeReplacingLists($this->resolvedRsvpSettings(), $incomingRsvpSettings);
 
@@ -136,6 +137,19 @@ class ContentController extends Controller
         }
 
         return $this->mergeReplacingLists($fallback, $saved->value);
+    }
+
+    private function normalizeHomepageContent(array $content, array $incomingContent): array
+    {
+        $incomingVenue = data_get($incomingContent, 'details.venue');
+
+        if (is_array($incomingVenue)) {
+            data_set($content, 'details.venue.name', trim((string) ($incomingVenue['name'] ?? data_get($content, 'details.venue.name', ''))));
+            data_set($content, 'details.venue.address', trim((string) ($incomingVenue['address'] ?? data_get($content, 'details.venue.address', ''))));
+            data_set($content, 'details.venue.blurb', (string) ($incomingVenue['blurb'] ?? data_get($content, 'details.venue.blurb', '')));
+        }
+
+        return $content;
     }
 
     private function resolvedRsvpSettings(): array

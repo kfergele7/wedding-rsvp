@@ -5,7 +5,7 @@
                 <h2 class="font-heading text-5xl uppercase tracking-[0.08em]">{{ headingPrimary }}</h2>
                 <p class="font-script text-5xl text-wedding-muted">{{ headingAccent }}</p>
                 <div class="cms-rich mx-auto mt-8 max-w-md leading-relaxed text-wedding-muted" v-html="content.letter"></div>
-                <p class="mt-8 font-heading text-2xl">{{ content.signoff }}</p>
+                <p class="mt-8 font-heading text-3xl">{{ content.signoff }}</p>
             </article>
 
             <div class="h-[430px] overflow-hidden border border-soft bg-white p-4 shadow-soft md:h-[520px]">
