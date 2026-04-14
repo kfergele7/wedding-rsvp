@@ -143,6 +143,33 @@
         background-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
     }
 
+    .button-success {
+        @apply inline-flex items-center justify-center border px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition;
+        border-color: var(--wedding-success);
+        background-color: var(--wedding-success);
+        box-shadow: 0 6px 14px rgba(33, 193, 119, 0.22);
+    }
+
+    .button-success:hover {
+        border-color: var(--wedding-success-dark);
+        background-color: var(--wedding-success-dark);
+    }
+
+    .modal-close-x {
+        @apply inline-flex h-9 w-9 items-center justify-center border border-transparent bg-transparent text-wedding-danger transition;
+    }
+
+    .modal-close-x:hover {
+        border-color: rgba(230, 99, 99, 0.28);
+        background-color: rgba(230, 99, 99, 0.1);
+        color: var(--wedding-danger-dark);
+    }
+
+    .modal-close-x .material-symbols-outlined {
+        font-size: 20px;
+        line-height: 1;
+    }
+
     .preview-account-button:hover {
         border-color: var(--wedding-black) !important;
         background-color: var(--wedding-black) !important;
@@ -227,6 +254,7 @@
 button:disabled,
 .admin-btn:disabled,
 .button-dark:disabled,
+.button-success:disabled,
 .cms-button-link:disabled {
     background-color: var(--wedding-disabled) !important;
     border-color: var(--wedding-disabled) !important;

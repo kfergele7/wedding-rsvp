@@ -1,6 +1,6 @@
 <template>
-    <div class="space-y-2">
-        <div class="rich-toolbar flex flex-wrap gap-2 border border-soft p-2" :class="toolbarClass">
+    <div>
+        <div class="rich-toolbar flex flex-wrap gap-2 border border-b-0 border-soft p-2" :class="toolbarClass">
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('bold')"><strong>B</strong></button>
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('italic')"><em>I</em></button>
             <button type="button" class="format-btn border border-soft px-2 py-1 text-xs" :class="formatButtonClass" @click="runCommand('insertUnorderedList')">List</button>
@@ -34,10 +34,12 @@
                     <h4 class="font-heading text-2xl">{{ linkModalMode === 'button' ? 'Add Button Link' : 'Add Link' }}</h4>
                     <button
                         type="button"
-                        class="admin-btn border border-red-300 px-3 py-2 text-xs uppercase tracking-[0.12em] text-red-700 transition hover:border-red-400 hover:bg-red-50"
+                        class="modal-close-x"
+                        aria-label="Close link modal"
+                        title="Close"
                         @click="closeLinkModal"
                     >
-                        X Close
+                        <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
 

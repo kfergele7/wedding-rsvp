@@ -1,5 +1,5 @@
 <template>
-    <section class="pb-20 md:pb-28">
+    <section class="bg-[#F2ECE3] py-20 md:py-28">
         <div class="site-shell space-y-20 md:space-y-28">
             <div v-if="showVenueTravelBlock" class="grid items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr]">
                 <div class="space-y-8">

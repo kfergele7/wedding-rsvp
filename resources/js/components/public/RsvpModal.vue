@@ -8,11 +8,13 @@
                     <p class="mt-3 text-wedding-muted">Enter your invitation code to view and update your response.</p>
                 </div>
                 <button
-                    class="admin-btn admin-btn-danger px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                    class="modal-close-x"
                     type="button"
+                    aria-label="Close RSVP modal"
+                    title="Close"
                     @click="$emit('close')"
                 >
-                    X Close
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
@@ -118,7 +120,7 @@
                 </div>
 
                 <div class="mt-8 flex flex-wrap gap-3">
-                    <button class="button-dark" type="button" @click="saveRsvp" :disabled="savingRsvp">
+                    <button class="button-success" type="button" @click="saveRsvp" :disabled="savingRsvp">
                         {{ savingRsvp ? 'Saving...' : 'Save RSVP' }}
                     </button>
                     <button

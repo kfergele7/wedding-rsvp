@@ -956,6 +956,12 @@
                         <span class="material-symbols-outlined btn-icon">add</span>
                         Create this Party
                     </button>
+                    <p v-if="createPartyMessage" class="mt-3 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {{ createPartyMessage }}
+                    </p>
+                    <p v-if="createPartyError" class="mt-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ createPartyError }}
+                    </p>
                 </div>
 
                 <div class="content-section-block content-section-odd">
@@ -972,15 +978,6 @@
                             <div class="flex flex-wrap items-center justify-end gap-3">
                                 <p class="text-sm text-wedding-muted">Select parties below to action</p>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <button
-                                        class="admin-btn inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                        type="button"
-                                        :disabled="filteredParties.length === 0"
-                                        @click="toggleSelectAllFilteredParties"
-                                    >
-                                        <span class="material-symbols-outlined btn-icon">{{ areAllFilteredPartiesSelected ? 'deselect' : 'select_all' }}</span>
-                                        {{ areAllFilteredPartiesSelected ? 'Clear selected' : 'Select all' }}
-                                    </button>
                                     <button
                                         class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
                                         type="button"
@@ -1016,6 +1013,31 @@
                         <p class="text-sm text-wedding-muted">Showing {{ filteredParties.length }} of {{ parties.length }}</p>
                     </div>
 
+                    <div class="mb-4 flex flex-wrap items-center gap-4 border border-soft bg-[#F7F7F7] px-4 py-3 text-xs text-wedding-muted">
+                        <span class="uppercase tracking-[0.14em] text-wedding-text">RSVP key</span>
+                        <span
+                            v-for="item in rsvpStatusLegend"
+                            :key="item.title"
+                            class="inline-flex items-center gap-1"
+                            :title="item.title"
+                        >
+                            <span class="material-symbols-outlined rsvp-status-icon-small" :style="{ color: item.color }">{{ item.icon }}</span>
+                            {{ item.label }}
+                        </span>
+                    </div>
+
+                    <div class="mb-4 flex flex-wrap items-center gap-3">
+                        <button
+                            class="admin-btn inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                            type="button"
+                            :disabled="filteredParties.length === 0"
+                            @click="toggleSelectAllFilteredParties"
+                        >
+                            <span class="material-symbols-outlined btn-icon">{{ areAllFilteredPartiesSelected ? 'deselect' : 'select_all' }}</span>
+                            {{ areAllFilteredPartiesSelected ? 'Clear selected' : 'Select all' }}
+                        </button>
+                    </div>
+
                     <div class="your-guests-table max-h-[620px] overflow-x-auto overflow-y-auto border border-soft/60 bg-white">
                         <table class="min-w-full text-left text-sm">
                             <thead class="sticky top-0 bg-white">
@@ -1043,9 +1065,20 @@
                                         :title="partyItem.email ? 'Select for email or delete action' : 'Select for delete action (no email set)'"
                                         @change="togglePartyEmailSelection(partyItem)"
                                     >
-                                </td>
+                                    </td>
                                     <td class="px-3 py-2">
-                                        <p class="font-medium">{{ partyItem.display_name }}</p>
+                                        <p class="inline-flex items-center gap-2 font-medium">
+                                            <span>{{ partyItem.display_name }}</span>
+                                            <span
+                                                class="material-symbols-outlined rsvp-status-icon"
+                                                :style="{ color: rsvpStatusMeta(partyItem).color }"
+                                                :title="rsvpStatusMeta(partyItem).title"
+                                                :aria-label="rsvpStatusMeta(partyItem).title"
+                                                role="img"
+                                            >
+                                                {{ rsvpStatusMeta(partyItem).icon }}
+                                            </span>
+                                        </p>
                                         <p v-if="partyItem.guests.length" class="mt-1 text-xs text-wedding-muted">
                                             Guests: {{ partyItem.guests.map((guest) => `${guest.first_name} ${guest.last_name}`.trim()).join(', ') }}
                                         </p>
@@ -1092,9 +1125,8 @@
                 <div class="guest-help-scope mx-auto mt-6 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:mt-12 md:p-8">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">Edit Party · {{ selectedParty.display_name }}</h3>
-                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeEditPartyModal">
-                            <span class="material-symbols-outlined btn-icon">close</span>
-                            Close
+                        <button class="modal-close-x" type="button" aria-label="Close edit party modal" title="Close" @click="closeEditPartyModal">
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
                     <p class="mt-3 text-sm text-wedding-muted">
@@ -1205,9 +1237,8 @@
                 <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">Send Email RSVP Request</h3>
-                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeSendRsvpConfirmModal">
-                            <span class="material-symbols-outlined btn-icon">close</span>
-                            Close
+                        <button class="modal-close-x" type="button" aria-label="Close send RSVP confirmation" title="Close" @click="closeSendRsvpConfirmModal">
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
                     <p class="mt-3 text-wedding-muted">Are you sure you want to send an RSVP request to the selected parties below?</p>
@@ -1236,9 +1267,8 @@
                 <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">RSVP Request History · {{ emailHistoryModal.partyName }}</h3>
-                        <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closePartyEmailHistory">
-                            <span class="material-symbols-outlined btn-icon">close</span>
-                            Close
+                        <button class="modal-close-x" type="button" aria-label="Close RSVP request history" title="Close" @click="closePartyEmailHistory">
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
                     <div class="mt-4 max-h-72 overflow-y-auto border border-soft bg-wedding-bg p-3">
@@ -1272,19 +1302,12 @@
                         >
                     </label>
                     <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                        Response Filter
-                        <select v-model="rsvpResponseFilter" class="mt-1 w-full border border-soft bg-white px-3 py-2 text-sm normal-case tracking-normal text-wedding-text">
-                            <option value="all">All Guest Lists</option>
-                            <option value="responded">Responded</option>
-                            <option value="no_response">No Response</option>
-                        </select>
-                    </label>
-                    <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                        Status Filter
+                        Response Status Filter
                         <select v-model="rsvpStatusFilter" class="mt-1 w-full border border-soft bg-white px-3 py-2 text-sm normal-case tracking-normal text-wedding-text">
                             <option value="all">All Statuses</option>
                             <option value="attending">Attending</option>
                             <option value="not_attending">Not Attending</option>
+                            <option value="no_response">No Response</option>
                         </select>
                     </label>
                     <div class="flex items-end text-sm text-wedding-muted">
@@ -1307,7 +1330,7 @@
                                 @click="editRsvp(row)"
                             >
                                 <span class="material-symbols-outlined btn-icon">{{ row.rsvp?.status ? 'edit' : 'add' }}</span>
-                                {{ row.rsvp?.status ? 'Edit RSVP' : 'Add RSVP' }}
+                                {{ row.rsvp?.status ? 'Edit RSVP' : 'Manually RSVP' }}
                             </button>
                         </div>
 
@@ -1318,7 +1341,7 @@
                                 :class="{
                                     'border-emerald-200 bg-emerald-50 text-emerald-700': row.rsvp?.status === 'attending',
                                     'border-red-200 bg-red-50 text-red-700': row.rsvp?.status === 'not_attending',
-                                    'border-amber-200 bg-amber-50 text-amber-700': !row.rsvp?.status,
+                                    'border-[#D79A2B] bg-[#D79A2B]/10 text-[#D79A2B]': !row.rsvp?.status,
                                 }"
                             >
                                 {{ row.rsvp ? formatStatus(row.rsvp.status) : 'No Response' }}
@@ -1328,17 +1351,25 @@
                         <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
                             <span>Email RSVP request sent:</span>
                             <template v-if="row.rsvp_email_sent">
-                                <span class="text-emerald-700">Yes · {{ formatDateTime(row.rsvp_email_sent_at) }}</span>
+                                <span class="text-emerald-700">Yes, email sent at {{ formatDateTime(row.rsvp_email_sent_at) }}</span>
                                 <button
                                     type="button"
-                                    class="admin-btn admin-btn-success inline-flex items-center justify-center px-2 py-2 text-xs"
+                                    class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
                                     title="View RSVP email history"
                                     @click="openPartyEmailHistory(row.party_id, row.party_name)"
                                 >
-                                    <span class="material-symbols-outlined btn-icon">visibility</span>
+                                    View RSVP History
                                 </button>
                             </template>
-                            <span v-else class="text-red-700">No</span>
+                            <button
+                                v-else-if="row.email"
+                                type="button"
+                                class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
+                                @click="openSendRsvpConfirmModal([row.party_id])"
+                            >
+                                Send email now
+                            </button>
+                            <span v-else class="text-wedding-muted">No email address has been entered for this guest</span>
                         </div>
                     </article>
                     <p v-if="filteredRsvpRows.length === 0" class="border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
@@ -1352,26 +1383,33 @@
         <div v-if="editingRsvp" class="fixed inset-0 z-[70] bg-black/40 p-4 md:p-8" @click.self="closeRsvpModal">
             <div class="mx-auto mt-6 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:mt-16 md:p-8">
                 <div class="flex items-start justify-between gap-3">
-                    <h3 class="font-heading text-3xl">{{ editingRsvp.rsvp?.status ? 'Update RSVP' : 'Add RSVP' }} · {{ editingRsvp.party_name }}</h3>
-                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpModal">
-                        <span class="material-symbols-outlined btn-icon">close</span>
-                        Close
+                    <h3 class="font-heading text-3xl">{{ editingRsvp.rsvp?.status ? 'Update RSVP' : 'Manually RSVP' }} · {{ editingRsvp.party_name }}</h3>
+                    <button class="modal-close-x" type="button" aria-label="Close manual RSVP modal" title="Close" @click="closeRsvpModal">
+                        <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
                 <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
                     <span>Email RSVP request sent:</span>
                     <template v-if="editingRsvp.rsvp_email_sent">
-                        <span class="text-emerald-700">Yes · {{ formatDateTime(editingRsvp.rsvp_email_sent_at) }}</span>
+                        <span class="text-emerald-700">Yes, email sent at {{ formatDateTime(editingRsvp.rsvp_email_sent_at) }}</span>
                         <button
                             type="button"
-                            class="admin-btn admin-btn-success inline-flex items-center justify-center px-2 py-2 text-xs"
+                            class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
                             title="View RSVP email history"
                             @click="openPartyEmailHistory(editingRsvp.party_id, editingRsvp.party_name)"
                         >
-                            <span class="material-symbols-outlined btn-icon">visibility</span>
+                            View RSVP History
                         </button>
                     </template>
-                    <span v-else class="text-red-700">No</span>
+                    <button
+                        v-else-if="editingRsvp.email"
+                        type="button"
+                        class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
+                        @click="openSendRsvpConfirmModal([editingRsvp.party_id])"
+                    >
+                        Send email now
+                    </button>
+                    <span v-else class="text-wedding-muted">No email address has been entered for this guest</span>
                 </div>
 
                 <div class="mt-5 grid gap-3 md:grid-cols-2">
@@ -1414,9 +1452,8 @@
             <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-wedding-bg p-6 shadow-soft md:mt-16">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="font-heading text-3xl">Share QR Code</h3>
-                    <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]" @click="closeQrModal">
-                        <span class="material-symbols-outlined btn-icon">close</span>
-                        Close
+                    <button type="button" class="modal-close-x" aria-label="Close QR code modal" title="Close" @click="closeQrModal">
+                        <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
                 <p class="mt-2 text-sm text-wedding-muted">Download, share digitally, or print your invitation QR code.</p>
@@ -1523,11 +1560,12 @@
                     <h2 class="font-heading text-3xl">Menu</h2>
                     <button
                         type="button"
-                        class="admin-btn admin-btn-danger inline-flex items-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                        class="modal-close-x"
+                        aria-label="Close menu"
+                        title="Close"
                         @click="mobileNavOpen = false"
                     >
-                        <span class="material-symbols-outlined btn-icon">close</span>
-                        Close
+                        <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
@@ -1593,6 +1631,8 @@ const siteTitle = ref(props.payload?.siteTitle || '');
 const sitePublished = ref(Boolean(props.payload?.sitePublished ?? false));
 const globalMessage = ref('');
 const globalError = ref('');
+const createPartyMessage = ref('');
+const createPartyError = ref('');
 const lastSavedAt = ref('');
 const lastSavedContentSnapshot = ref('');
 const lastSavedRsvpSnapshot = ref('');
@@ -1667,7 +1707,6 @@ const emailHistoryModal = reactive({
     error: '',
 });
 const rsvpRows = ref([]);
-const rsvpResponseFilter = ref('all');
 const rsvpStatusFilter = ref('all');
 const rsvpSearchTerm = ref('');
 const editingRsvp = ref(null);
@@ -1759,13 +1798,10 @@ const filteredRsvpRows = computed(() =>
             }
         }
 
-        if (rsvpResponseFilter.value === 'responded' && !row.rsvp?.status) {
-            return false;
-        }
-        if (rsvpResponseFilter.value === 'no_response' && row.rsvp?.status) {
-            return false;
-        }
         if (rsvpStatusFilter.value !== 'all') {
+            if (rsvpStatusFilter.value === 'no_response') {
+                return !row.rsvp?.status;
+            }
             if (!row.rsvp?.status) {
                 return false;
             }
@@ -1778,12 +1814,32 @@ const filteredRsvpRows = computed(() =>
 );
 
 const dashboardCards = computed(() => [
-    { label: 'Total Guest Lists', value: stats.value.total_households },
+    { label: 'Total Parties', value: stats.value.total_households },
     { label: 'Invited Guests', value: stats.value.invited_guests },
     { label: 'Attending', value: stats.value.attending },
     { label: 'Not Attending', value: stats.value.not_attending },
     { label: 'No Response', value: stats.value.no_response },
 ]);
+const rsvpStatusLegend = [
+    {
+        icon: 'check',
+        color: '#21C177',
+        label: 'Attending',
+        title: 'Guest confirmed attending',
+    },
+    {
+        icon: 'close',
+        color: '#E66363',
+        label: 'Not attending',
+        title: 'Guest confirmed not attending',
+    },
+    {
+        icon: 'horizontal_rule',
+        color: '#D79A2B',
+        label: 'No response',
+        title: 'Guest has not yet responded',
+    },
+];
 
 const navItems = [
     { key: 'dashboard', label: 'Dashboard', href: adminBaseUrl, icon: 'dashboard' },
@@ -2140,6 +2196,32 @@ function printQrImage() {
 
 function formatStatus(status) {
     return status === 'attending' ? 'Attending' : 'Not Attending';
+}
+
+function rsvpStatusMeta(partyItem) {
+    const status = partyItem?.rsvp?.status;
+
+    if (status === 'attending') {
+        return {
+            icon: 'check',
+            color: '#21C177',
+            title: 'Guest confirmed attending',
+        };
+    }
+
+    if (status === 'not_attending') {
+        return {
+            icon: 'close',
+            color: '#E66363',
+            title: 'Guest confirmed not attending',
+        };
+    }
+
+    return {
+        icon: 'horizontal_rule',
+        color: '#D79A2B',
+        title: 'Guest has not yet responded',
+    };
 }
 
 function addTimelineItem() {
@@ -2577,20 +2659,20 @@ async function uploadContentImage(event, field) {
 }
 
 async function createParty() {
-    clearError();
+    clearCreatePartyFeedback();
 
     if (!newParty.display_name || newParty.display_name.trim() === '') {
-        setError('Party name is required.');
+        setCreatePartyError('Party name is required.');
         return;
     }
 
     if (newParty.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newParty.email.trim())) {
-        setError('Enter a valid email address for the party.');
+        setCreatePartyError('Enter a valid email address for the party.');
         return;
     }
 
     if (!Array.isArray(newPartyGuests.value) || newPartyGuests.value.length === 0) {
-        setError('Add at least one guest for this party.');
+        setCreatePartyError('Add at least one guest for this party.');
         return;
     }
 
@@ -2603,18 +2685,18 @@ async function createParty() {
 
     const hasIncompleteGuest = guestsPayload.some((guest) => !guest.first_name || !guest.last_name);
     if (hasIncompleteGuest) {
-        setError('Every guest row must include first and last name.');
+        setCreatePartyError('Every guest row must include first and last name.');
         return;
     }
 
     const invitedSeats = guestsPayload.length + guestsPayload.filter((guest) => guest.allow_plus_one).length;
     if (invitedSeats < 1 || invitedSeats > 20) {
-        setError('Invited seats must be between 1 and 20.');
+        setCreatePartyError('Invited seats must be between 1 and 20.');
         return;
     }
 
     if (newParty.code?.trim() && !/^[A-Za-z]{3,10}$/.test(newParty.code.trim())) {
-        setError('RSVP code must be 3-10 letters.');
+        setCreatePartyError('RSVP code must be 3-10 letters.');
         return;
     }
 
@@ -2632,9 +2714,9 @@ async function createParty() {
         await generateCodeForCreate(false);
         await loadParties();
         await loadStats();
-        setMessage('Party created successfully.');
+        setCreatePartyMessage('Party created successfully.');
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not create party.'));
+        setCreatePartyError(extractErrorMessage(error, 'Could not create party.'));
     }
 }
 
@@ -3289,6 +3371,25 @@ function setMessage(message, durationMs = 3000) {
     }, durationMs);
 }
 
+function setCreatePartyMessage(message, durationMs = 3000) {
+    createPartyError.value = '';
+    createPartyMessage.value = message;
+    window.setTimeout(() => {
+        createPartyMessage.value = '';
+    }, durationMs);
+}
+
+function setCreatePartyError(message) {
+    createPartyMessage.value = '';
+    createPartyError.value = message;
+}
+
+function clearCreatePartyFeedback() {
+    createPartyMessage.value = '';
+    createPartyError.value = '';
+    clearError();
+}
+
 function setError(message) {
     globalMessage.value = '';
     globalError.value = message;
@@ -3527,6 +3628,17 @@ function serialize(value) {
     border-color: #b93f3f !important;
     background-color: #b93f3f !important;
     color: #ffffff !important;
+}
+
+.rsvp-status-icon {
+    font-size: 18px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.rsvp-status-icon-small {
+    font-size: 14px;
+    line-height: 1;
 }
 
 .admin-btn:disabled,

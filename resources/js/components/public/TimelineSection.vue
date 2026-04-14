@@ -8,7 +8,7 @@
                 <article
                     v-for="(item, index) in content.items"
                     :key="`${item.time || ''}-${item.title || ''}-${index}`"
-                    class="px-5 py-7 text-left md:px-4 lg:px-5"
+                    class="px-5 py-7 text-center md:px-4 lg:px-5 lg:text-left"
                     :style="{ border: `1px solid ${panelBorderColor}`, backgroundColor: panelBackgroundColor }"
                 >
                     <p class="font-heading text-xl" :style="{ color: mutedTextColor }">{{ item.time }}</p>

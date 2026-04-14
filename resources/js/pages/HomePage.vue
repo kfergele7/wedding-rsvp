@@ -28,7 +28,7 @@
 
         <HeroSection :content="content.hero" @open-rsvp="openRsvpModal" />
 
-        <main>
+        <main class="bg-[#F7F5F2]">
             <WelcomeSection v-if="sectionVisibility.welcome" :content="content.welcome" />
             <TimelineSection v-if="sectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" />
             <StorySection v-if="sectionVisibility.story" :content="content.story" />
@@ -41,17 +41,19 @@
             <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
         </main>
 
-        <footer class="bg-[#0f1b1d] py-[5px] text-white/85">
-            <div class="site-shell flex items-center justify-between text-xs uppercase tracking-[0.12em]">
-                <span>&copy; Copyright {{ currentYear }}</span>
-                <span>
-                    Built by
-                    <a href="https://elementseven.co/" target="_blank" rel="noopener noreferrer" class="ml-1 text-white underline-offset-2 hover:underline">
-                        Element Seven
-                    </a>
-                </span>
-            </div>
-        </footer>
+        <div class="bg-[#22363a]">
+            <footer class="w-full py-[5px] text-white/85">
+                <div class="site-shell flex items-center justify-between text-xs uppercase tracking-[0.12em]">
+                    <span>&copy; Copyright {{ currentYear }}</span>
+                    <span>
+                        Built by
+                        <a href="https://elementseven.co/" target="_blank" rel="noopener noreferrer" class="ml-1 text-white underline-offset-2 hover:underline">
+                            Element Seven
+                        </a>
+                    </span>
+                </div>
+            </footer>
+        </div>
 
         <RsvpModal
             v-if="isRsvpModalOpen"
