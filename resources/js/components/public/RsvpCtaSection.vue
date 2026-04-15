@@ -4,7 +4,7 @@
             <div class="p-8 text-center text-white shadow-soft md:p-10" :style="{ border: `1px solid ${panelBorderColor}`, backgroundColor: '#466369' }">
                 <h2 class="section-heading">{{ content.title }}</h2>
                 <div class="cms-rich mx-auto mt-4 max-w-2xl leading-relaxed" :style="{ color: softTextColor }" v-html="content.text"></div>
-                <a href="/rsvp" class="button-dark mt-8" @click.prevent="$emit('open-rsvp')">{{ content.buttonLabel }}</a>
+                <a href="/rsvp" class="footer-rsvp-button button-dark mt-8" @click.prevent="$emit('open-rsvp')">{{ content.buttonLabel }}</a>
             </div>
         </div>
     </section>
@@ -44,3 +44,10 @@ function isLightColour(hex) {
     return luminance > 160;
 }
 </script>
+
+<style scoped>
+.footer-rsvp-button:hover {
+    border-color: #0F1B1D;
+    background-color: #0F1B1D;
+}
+</style>
