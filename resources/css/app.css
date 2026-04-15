@@ -233,6 +233,19 @@
         border-color: var(--wedding-danger-dark) !important;
         color: var(--wedding-white) !important;
     }
+
+    .admin-btn-success {
+        background-color: var(--wedding-success) !important;
+        border-color: var(--wedding-success) !important;
+        color: var(--wedding-white) !important;
+        box-shadow: 0 6px 14px rgba(33, 193, 119, 0.22);
+    }
+
+    .admin-btn-success:hover {
+        background-color: var(--wedding-success-dark) !important;
+        border-color: var(--wedding-success-dark) !important;
+        color: var(--wedding-white) !important;
+    }
 }
 
 /* Palette normalization for existing status utility classes used across views/components. */

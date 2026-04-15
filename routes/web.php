@@ -20,8 +20,10 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\SiteSettingsController;
 use App\Http\Controllers\Customer\SitePublishingController;
 use App\Http\Controllers\Marketing\MarketingController;
+use App\Http\Controllers\Marketing\NewsletterSignupController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\RsvpController;
+use App\Http\Controllers\Staff\AccountSettingsController as StaffAccountSettingsController;
 use App\Http\Controllers\Staff\AccountController as StaffAccountController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\TemplateManagementController as StaffTemplateManagementController;
@@ -39,6 +41,9 @@ Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing
 Route::get('/features', [MarketingController::class, 'features'])->name('marketing.features');
 Route::get('/how-it-works', [MarketingController::class, 'howItWorks'])->name('marketing.how');
 Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
+Route::post('/newsletter', NewsletterSignupController::class)
+    ->middleware('throttle:8,1')
+    ->name('newsletter.signup');
 
 if (app()->environment('local')) {
     Route::get('/dev/verify-email/{email}', function (string $email) {
@@ -160,6 +165,9 @@ Route::middleware('tenant.resolve')->group(function () {
         ->middleware(['auth', 'staff.auth'])
         ->group(function () {
             Route::get('/', StaffDashboardController::class)->name('dashboard');
+            Route::get('/account', [StaffAccountSettingsController::class, 'edit'])->name('account.edit');
+            Route::put('/account/profile', [StaffAccountSettingsController::class, 'updateProfile'])->name('account.profile.update');
+            Route::put('/account/password', [StaffAccountSettingsController::class, 'updatePassword'])->name('account.password.update');
             Route::get('/template-management', [StaffTemplateManagementController::class, 'index'])->name('templates.index');
             Route::put('/template-management/field-help', [StaffTemplateManagementController::class, 'updateFieldHelp'])->name('templates.field-help.update');
             Route::put('/template-management/demo-source', [StaffTemplateManagementController::class, 'updateDemoSource'])->name('templates.demo-source.update');

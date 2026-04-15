@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Staff Admin' }} | Wedding RSVP SaaS</title>
+    @include('partials.favicons')
     @vite(['resources/css/app.css'])
     <style>
         .staff-shell { max-width: 1200px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
@@ -44,6 +45,10 @@
             </nav>
 
             <div class="flex items-center gap-2 border-l border-soft pl-4">
+                <a href="{{ route('staff.account.edit') }}" class="staff-tab inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em] {{ ($activeTab ?? '') === 'account' ? 'staff-tab-active' : '' }}">
+                    <span class="material-symbols-outlined btn-icon">person</span>
+                    My Account
+                </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="admin-btn staff-logout inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">

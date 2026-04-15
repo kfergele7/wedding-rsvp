@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Customer Dashboard | Wedding RSVP</title>
+    @include('partials.favicons')
     @vite(['resources/css/app.css'])
     <style>
         .cust-shell { max-width: 1200px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }

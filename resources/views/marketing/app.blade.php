@@ -13,6 +13,7 @@
     <meta property="og:image" content="{{ $meta['og_image'] ?? '/images/marketing/hero.jpg' }}">
     <meta property="og:url" content="{{ request()->fullUrl() }}">
 
+    @include('partials.favicons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-wedding-bg text-wedding-black antialiased">

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RSVP | Wedding RSVP</title>
+    @include('partials.favicons')
     @vite(['resources/css/app.css'])
 </head>
 <body class="min-h-screen bg-wedding-bg">

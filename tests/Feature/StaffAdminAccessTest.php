@@ -9,6 +9,7 @@ use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class StaffAdminAccessTest extends TestCase
@@ -45,6 +46,60 @@ class StaffAdminAccessTest extends TestCase
             ->get(route('staff.templates.index'))
             ->assertOk()
             ->assertSee('Template Management');
+    }
+
+    public function test_staff_user_can_view_own_account_settings_page(): void
+    {
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->get(route('staff.account.edit'))
+            ->assertOk()
+            ->assertSee('Staff Profile')
+            ->assertSee('Change Password');
+    }
+
+    public function test_staff_user_can_update_own_profile_details(): void
+    {
+        $staff = User::factory()->create([
+            'is_staff' => true,
+            'email_verified_at' => now(),
+            'password' => Hash::make('OldPassword123!'),
+        ]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.account.profile.update'), [
+                'name' => 'Updated Staff Name',
+                'email' => 'updated-staff@example.com',
+                'current_password' => 'OldPassword123!',
+            ])
+            ->assertRedirect(route('staff.account.edit'));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $staff->id,
+            'name' => 'Updated Staff Name',
+            'email' => 'updated-staff@example.com',
+            'is_staff' => true,
+        ]);
+    }
+
+    public function test_staff_user_can_update_own_password(): void
+    {
+        $staff = User::factory()->create([
+            'is_staff' => true,
+            'email_verified_at' => now(),
+            'password' => Hash::make('OldPassword123!'),
+        ]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.account.password.update'), [
+                'current_password' => 'OldPassword123!',
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'NewPassword123!',
+            ])
+            ->assertRedirect(route('staff.account.edit'));
+
+        $this->assertTrue(Hash::check('NewPassword123!', $staff->fresh()->password));
     }
 
     public function test_staff_user_can_update_account_access_status_and_notes(): void

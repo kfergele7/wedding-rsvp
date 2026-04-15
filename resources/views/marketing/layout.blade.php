@@ -13,6 +13,7 @@
     <meta property="og:image" content="{{ $meta['og_image'] ?? '/images/wedding/uploads/hero-image-20260224111916.jpeg' }}">
     <meta property="og:url" content="{{ request()->fullUrl() }}">
 
+    @include('partials.favicons')
     @vite(['resources/css/app.css'])
     <style>
         .mk-container { max-width: 1180px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }

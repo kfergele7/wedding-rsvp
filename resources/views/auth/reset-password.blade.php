@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Set New Password | Wedding RSVP SaaS</title>
+    @include('partials.favicons')
     @vite(['resources/css/app.css'])
 </head>
 <body class="min-h-screen bg-wedding-bg">
