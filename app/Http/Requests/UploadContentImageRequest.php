@@ -14,8 +14,22 @@ class UploadContentImageRequest extends FormRequest
 
     public function rules(): array
     {
+        $galleryFields = collect(range(0, 7))
+            ->map(fn ($index) => "gallery.items.{$index}.image")
+            ->all();
+
         return [
-            'field' => ['required', 'string', Rule::in(['hero.image', 'welcome.image', 'story.image', 'details.image'])],
+            'field' => [
+                'required',
+                'string',
+                Rule::in([
+                    'hero.image',
+                    'welcome.image',
+                    'story.image',
+                    'details.image',
+                    ...$galleryFields,
+                ]),
+            ],
             'image_file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
         ];
     }

@@ -38,6 +38,7 @@
                 :primary-color="content.theme.primary_color"
                 :section-visibility="sectionVisibility"
             />
+            <GallerySection v-if="sectionVisibility.gallery" :content="content.gallery" />
             <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
         </main>
 
@@ -66,6 +67,7 @@ import WelcomeSection from '../components/public/WelcomeSection.vue';
 import TimelineSection from '../components/public/TimelineSection.vue';
 import StorySection from '../components/public/StorySection.vue';
 import DetailsSection from '../components/public/DetailsSection.vue';
+import GallerySection from '../components/public/GallerySection.vue';
 import RsvpCtaSection from '../components/public/RsvpCtaSection.vue';
 import RsvpModal from '../components/public/RsvpModal.vue';
 
@@ -140,6 +142,10 @@ const fallbackContent = {
         imageFocusX: 50,
         imageFocusY: 50,
     },
+    gallery: {
+        heading: "Photo's of us across the years",
+        items: [],
+    },
     cta: {
         title: 'Ready to Celebrate With Us?',
         text: 'RSVP online in just a few moments using your invitation code.',
@@ -157,6 +163,7 @@ const fallbackContent = {
         travel: true,
         menu: true,
         faqs: true,
+        gallery: true,
     },
 };
 
@@ -179,6 +186,11 @@ const content = computed(() => {
             ...(incoming.details || {}),
             venue: { ...fallbackContent.details.venue, ...(incoming.details?.venue || {}) },
             faqs: incoming.details?.faqs || fallbackContent.details.faqs,
+        },
+        gallery: {
+            ...fallbackContent.gallery,
+            ...(incoming.gallery || {}),
+            items: incoming.gallery?.items || fallbackContent.gallery.items,
         },
         cta: { ...fallbackContent.cta, ...(incoming.cta || {}) },
         theme: { ...fallbackContent.theme, ...(incoming.theme || {}) },

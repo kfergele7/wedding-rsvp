@@ -85,8 +85,14 @@ if (app()->environment('local')) {
 
 Route::middleware('tenant.resolve')->group(function () {
     Route::middleware('guest')->group(function () {
-        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-        Route::post('/register', [RegisteredUserController::class, 'store']);
+        if (config('app.allow_public_registration')) {
+            Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+            Route::post('/register', [RegisteredUserController::class, 'store']);
+        } else {
+            Route::get('/register', fn () => view('marketing.coming-soon'))->name('register');
+            Route::post('/register', fn () => redirect()->route('register'));
+        }
+
         Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
         Route::post('/login', [AuthenticatedSessionController::class, 'store']);
         Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');

@@ -144,6 +144,19 @@ QUEUE_CONNECTION=sync
 - Unpublished RSVP endpoints (`/{public_slug}/rsvp/*`) are blocked for non-auth users and non-owner/non-staff users.
 - Published sites are still gated by billing status (`active`/`gifted` etc.) for public availability.
 
+## Private Launch / Coming Soon Mode
+Use these flags when launching the platform privately while customer weddings remain live:
+
+```env
+MARKETING_COMING_SOON=true
+ALLOW_PUBLIC_REGISTRATION=false
+```
+
+- `MARKETING_COMING_SOON=true` shows a branded coming soon page for `/`, `/pricing`, `/features`, `/how-it-works`, `/faq`, and `/demo`.
+- `/login`, `/app`, `/app/admin`, `/staff`, and published customer wedding URLs like `/{public_slug}` remain available.
+- `ALLOW_PUBLIC_REGISTRATION=false` hides public sign-up and redirects registration attempts back to the coming soon page.
+- After changing these values on a server, run `php artisan optimize:clear` or rebuild the config cache.
+
 ## Menu Mode Rules (Content Area)
 - Default mode is `Set menu for all guests`.
 - In `set_menu` mode:

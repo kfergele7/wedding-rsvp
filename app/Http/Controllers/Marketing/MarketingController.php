@@ -168,6 +168,15 @@ class MarketingController extends Controller
 
     private function page(string $page, array $payload = []): View
     {
+        if (config('app.marketing_coming_soon')) {
+            return view('marketing.coming-soon', [
+                'meta' => $this->meta(
+                    'Magic Invitation is coming soon',
+                    'Magic Invitation is preparing to launch. Existing customers can still log in and published wedding websites remain available.'
+                ),
+            ]);
+        }
+
         return view('marketing.app', [
             'marketingPage' => $page,
             'payload' => $payload,

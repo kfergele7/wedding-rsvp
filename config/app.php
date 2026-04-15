@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Launch Controls
+    |--------------------------------------------------------------------------
+    |
+    | These flags let us privately launch the application while keeping the
+    | customer/admin areas and published wedding sites available.
+    |
+    */
+
+    'marketing_coming_soon' => (bool) env('MARKETING_COMING_SOON', false),
+
+    'allow_public_registration' => (bool) env('ALLOW_PUBLIC_REGISTRATION', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

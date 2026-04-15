@@ -841,9 +841,132 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-odd">
+                        <div id="gallery-section" class="content-section-block content-section-odd">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                                <h3 class="section-heading-with-badge">
+                                    <span class="section-step-badge">10</span>
+                                    <span class="font-heading text-3xl">Photo Gallery</span>
+                                </h3>
+                                <button
+                                    type="button"
+                                    class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
+                                    :disabled="isGalleryAtMax"
+                                    @click="addGalleryImage"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">add</span>
+                                    Add Image
+                                </button>
+                            </div>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('gallery') }" @click="toggleSectionVisibility('gallery')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('gallery')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
+                            </div>
+
+                            <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Photo Gallery Heading
+                                <input v-model="content.gallery.heading" class="mt-2 w-full border border-soft bg-white px-4 py-3">
+                            </label>
+
+                            <p class="mt-3 text-sm text-wedding-muted">
+                                Add between 2 and 8 images. The gallery automatically adapts the row layout so the images span the full width.
+                            </p>
+                            <p v-if="galleryValidationMessage" class="mt-2 text-sm text-wedding-danger">
+                                {{ galleryValidationMessage }}
+                            </p>
+
+                            <div class="mt-5 grid gap-5 md:grid-cols-2">
+                                <div
+                                    v-for="(item, index) in content.gallery.items"
+                                    :id="`gallery-item-${index}`"
+                                    :key="`gallery-item-${index}`"
+                                    class="border border-soft bg-wedding-bg p-4"
+                                >
+                                    <div class="mb-5 flex items-center justify-between gap-3">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Gallery Image {{ index + 1 }}</p>
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex h-8 w-8 items-center justify-center p-0"
+                                                :disabled="index === 0"
+                                                title="Move image left"
+                                                @click="moveGalleryImage(index, -1)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">chevron_left</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex h-8 w-8 items-center justify-center p-0"
+                                                :disabled="index === content.gallery.items.length - 1"
+                                                title="Move image right"
+                                                @click="moveGalleryImage(index, 1)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">chevron_right</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid items-stretch gap-[18px] sm:grid-cols-[0.7fr_1.3fr]">
+                                        <label class="gallery-action-label admin-btn admin-btn-success flex h-12 cursor-pointer items-center justify-center gap-2 px-2 text-xs uppercase tracking-[0.12em] leading-none">
+                                            <span class="material-symbols-outlined btn-icon">upload</span>
+                                            Upload
+                                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="hidden" @change="uploadContentImage($event, `gallery.items.${index}.image`)">
+                                        </label>
+                                        <button type="button" class="admin-btn flex h-12 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs uppercase tracking-[0.12em] leading-none" @click="openImageLibrary(index)">
+                                            <span class="material-symbols-outlined btn-icon">photo_library</span>
+                                            Select from library
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Image Horizontal Focus Point: {{ item.imageFocusX }}%
+                                            <input v-model.number="item.imageFocusX" type="range" min="0" max="100" class="mt-2 w-full">
+                                        </label>
+                                        <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Image Vertical Focus Point: {{ item.imageFocusY }}%
+                                            <input v-model.number="item.imageFocusY" type="range" min="0" max="100" class="mt-2 w-full">
+                                        </label>
+                                    </div>
+
+                                    <div class="mt-[30px] overflow-hidden border border-soft bg-white aspect-square">
+                                        <img
+                                            v-if="item.image"
+                                            :src="item.image"
+                                            alt="Gallery preview"
+                                            class="h-full w-full object-cover"
+                                            :style="{ objectPosition: `${item.imageFocusX ?? 50}% ${item.imageFocusY ?? 50}%` }"
+                                        >
+                                        <div v-else class="flex h-full w-full items-center justify-center px-6 text-center text-sm text-wedding-muted">
+                                            Upload an image or select one from your library.
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="admin-btn admin-btn-danger mt-4 inline-flex w-full items-center justify-center gap-2 px-3 py-3 text-xs uppercase tracking-[0.12em]" @click="removeGalleryImage(index)">
+                                        <span class="material-symbols-outlined btn-icon">close</span>
+                                        Remove Image
+                                    </button>
+                                </div>
+
+                                <button
+                                    v-if="!isGalleryAtMax"
+                                    type="button"
+                                    class="gallery-add-card flex min-h-[18rem] w-full flex-col items-center justify-center border border-dashed border-[#848484]/50 bg-[#F7F7F7] p-6 text-center transition hover:border-[#466369] hover:bg-[#F2ECE3]"
+                                    @click="addGalleryImage"
+                                >
+                                    <span class="material-symbols-outlined text-[#848484]" style="font-size:52px;">add</span>
+                                    <span class="mt-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#848484]">Add a picture</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
-                                <span class="section-step-badge">10</span>
+                                <span class="section-step-badge">11</span>
                                 <span class="font-heading text-3xl">Final RSVP Request</span>
                             </h3>
 
@@ -1483,6 +1606,35 @@
             </div>
         </div>
 
+        <div v-if="imageLibraryModalOpen" class="fixed inset-0 z-[89] bg-black/50 p-4 md:p-8" @click.self="closeImageLibrary">
+            <div class="mx-auto mt-8 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:mt-16">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="font-heading text-3xl">Select from your library</h3>
+                        <p class="mt-2 text-sm text-wedding-muted">Choose from images already uploaded to this wedding website.</p>
+                    </div>
+                    <button type="button" class="modal-close-x" aria-label="Close image library" title="Close" @click="closeImageLibrary">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div v-if="imageLibrary.length" class="mt-6 grid max-h-[60vh] gap-4 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <button
+                        v-for="imagePath in imageLibrary"
+                        :key="imagePath"
+                        type="button"
+                        class="group aspect-square overflow-hidden border border-soft bg-wedding-bg p-2 transition hover:border-wedding-band"
+                        @click="selectGalleryImageFromLibrary(imagePath)"
+                    >
+                        <img :src="imagePath" alt="Uploaded library item" class="h-full w-full object-cover transition group-hover:scale-[1.03]">
+                    </button>
+                </div>
+                <p v-else class="mt-6 border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
+                    No uploaded images are available yet. Upload an image first, then it will appear here for reuse.
+                </p>
+            </div>
+        </div>
+
         <div v-if="confirmModal.open" class="fixed inset-0 z-[90] bg-black/40 p-4" @click.self="closeConfirmModal(false)">
             <div class="mx-auto mt-20 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
                 <h3 class="font-heading text-3xl">{{ confirmModal.title }}</h3>
@@ -1659,6 +1811,9 @@ const qrModalOpen = ref(false);
 const copyLinkCopied = ref(false);
 let copyLinkResetTimer = null;
 const mobileNavOpen = ref(false);
+const imageLibrary = ref([]);
+const imageLibraryModalOpen = ref(false);
+const selectedGalleryLibraryIndex = ref(null);
 
 const stats = ref({
     total_households: 0,
@@ -1774,6 +1929,22 @@ const hasUnsavedChanges = computed(() => {
 });
 const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
 const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
+const galleryImageCount = computed(() => {
+    const items = content.value?.gallery?.items;
+    return Array.isArray(items) ? items.filter((item) => item?.image).length : 0;
+});
+const isGalleryAtMax = computed(() => (content.value?.gallery?.items?.length || 0) >= 8);
+const galleryValidationMessage = computed(() => {
+    if (!isSectionVisible('gallery')) {
+        return '';
+    }
+
+    if (galleryImageCount.value === 1) {
+        return 'Please upload at least 2 images, or hide this section.';
+    }
+
+    return '';
+});
 const canAddMenuOptions = computed(() => rsvpSettings.value?.meal_mode === 'options');
 const qrImageUrl = computed(() =>
     `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&format=png&data=${encodeURIComponent(previewUrl)}`
@@ -1908,6 +2079,7 @@ async function loadContent() {
         content.value = response.data.content;
         ensureImageFocusDefaults();
         ensureSectionVisibilityDefaults();
+        imageLibrary.value = Array.isArray(response.data.image_library) ? response.data.image_library : [];
         lastSavedAt.value = formatDateTime(response.data.last_saved_at);
         const legacyMealChoicesEnabled = response.data.rsvp_settings?.meal_choices_enabled;
         const defaultMealMode = legacyMealChoicesEnabled === true ? 'options' : 'set_menu';
@@ -2263,6 +2435,71 @@ async function removeFaqItem(index) {
     content.value.details.faqs.splice(index, 1);
 }
 
+function addGalleryImage() {
+    ensureImageFocusDefaults();
+
+    if (isGalleryAtMax.value) {
+        openNoticeModal('Gallery limit reached', 'You can only add a maximum of 8 gallery images.');
+        return;
+    }
+
+    content.value.gallery.items.push({
+        image: '',
+        imageFocusX: 50,
+        imageFocusY: 50,
+    });
+
+    const targetIndex = content.value.gallery.items.length - 1;
+    scrollToElementById(`gallery-item-${targetIndex}`);
+}
+
+async function removeGalleryImage(index) {
+    const confirmed = await openConfirmModal('Remove Gallery Image', 'Are you sure you want to remove this gallery image?');
+    if (!confirmed) {
+        return;
+    }
+
+    content.value.gallery.items.splice(index, 1);
+}
+
+function moveGalleryImage(index, offset) {
+    const items = content.value?.gallery?.items;
+    if (!Array.isArray(items)) {
+        return;
+    }
+
+    moveInArray(items, index, index + offset);
+}
+
+function openImageLibrary(index) {
+    selectedGalleryLibraryIndex.value = index;
+    imageLibraryModalOpen.value = true;
+}
+
+function closeImageLibrary() {
+    imageLibraryModalOpen.value = false;
+    selectedGalleryLibraryIndex.value = null;
+}
+
+function selectGalleryImageFromLibrary(imagePath) {
+    const index = selectedGalleryLibraryIndex.value;
+    if (index === null || !content.value?.gallery?.items?.[index]) {
+        closeImageLibrary();
+        return;
+    }
+
+    content.value.gallery.items[index].image = imagePath;
+    if (typeof content.value.gallery.items[index].imageFocusX !== 'number') {
+        content.value.gallery.items[index].imageFocusX = 50;
+    }
+    if (typeof content.value.gallery.items[index].imageFocusY !== 'number') {
+        content.value.gallery.items[index].imageFocusY = 50;
+    }
+
+    closeImageLibrary();
+    scrollToElementById(`gallery-item-${index}`);
+}
+
 async function resetThemeColours() {
     const confirmed = await openConfirmModal(
         'Reset Theme Colours',
@@ -2295,6 +2532,16 @@ async function saveContent(openPreviewAfterSave = false) {
     clearError();
     if (!content.value?.hero?.names?.trim()) {
         setError('Couple names are required.');
+        return;
+    }
+
+    if (isSectionVisible('gallery') && galleryImageCount.value === 1) {
+        openNoticeModal(
+            'More gallery images needed',
+            'Please upload at least 2 images for the photo gallery, or hide this section if you do not want it to appear.',
+            '',
+            'gallery-section'
+        );
         return;
     }
 
@@ -2470,6 +2717,27 @@ function ensureImageFocusDefaults() {
         content.value.theme.button_color = '#22363A';
     }
 
+    if (typeof content.value.gallery !== 'object' || content.value.gallery === null) {
+        content.value.gallery = {
+            heading: "Photo's of us across the years",
+            items: [],
+        };
+    }
+
+    if (!Array.isArray(content.value.gallery.items)) {
+        content.value.gallery.items = [];
+    }
+
+    if (!content.value.gallery.heading) {
+        content.value.gallery.heading = "Photo's of us across the years";
+    }
+
+    content.value.gallery.items = content.value.gallery.items.slice(0, 8).map((item) => ({
+        image: item?.image || '',
+        imageFocusX: typeof item?.imageFocusX === 'number' ? item.imageFocusX : 50,
+        imageFocusY: typeof item?.imageFocusY === 'number' ? item.imageFocusY : 50,
+    }));
+
     const defaults = [
         ['hero', 'imageFocusX'],
         ['hero', 'imageFocusY'],
@@ -2505,6 +2773,7 @@ function ensureSectionVisibilityDefaults() {
         travel: true,
         menu: true,
         faqs: true,
+        gallery: true,
     };
 
     Object.entries(defaults).forEach(([key, defaultValue]) => {
@@ -2648,14 +2917,52 @@ async function uploadContentImage(event, field) {
             },
         });
 
-        content.value = response.data.content;
+        if (response.data?.path) {
+            setNestedContentValue(field, response.data.path);
+        }
         ensureImageFocusDefaults();
+        ensureSectionVisibilityDefaults();
+        imageLibrary.value = mergeImageLibrary(response.data?.image_library, response.data?.path);
         setMessage(response.data.message || 'Image updated.');
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not upload image.'));
     } finally {
         event.target.value = '';
     }
+}
+
+function setNestedContentValue(path, value) {
+    if (!content.value || !path) {
+        return;
+    }
+
+    const keys = path.split('.');
+    let target = content.value;
+
+    keys.slice(0, -1).forEach((key) => {
+        if (/^\d+$/.test(key)) {
+            key = Number(key);
+        }
+
+        if (target[key] === undefined || target[key] === null) {
+            target[key] = {};
+        }
+
+        target = target[key];
+    });
+
+    const finalKey = keys[keys.length - 1];
+    target[finalKey] = value;
+}
+
+function mergeImageLibrary(serverLibrary, uploadedPath = '') {
+    const paths = [
+        ...(Array.isArray(imageLibrary.value) ? imageLibrary.value : []),
+        ...(Array.isArray(serverLibrary) ? serverLibrary : []),
+        uploadedPath,
+    ];
+
+    return [...new Set(paths.filter(Boolean))];
 }
 
 async function createParty() {
@@ -3336,6 +3643,9 @@ function buildFieldHelp(labelText) {
     if (lower.includes('set menu description')) return resolveFieldHelpText('menu.set_menu_description', 'Shown when set menu mode is enabled. Example: A chef-curated menu will be served.');
     if (lower.includes('question')) return resolveFieldHelpText('faq.question', 'Example: Is there parking at the venue?');
     if (lower.includes('answer')) return resolveFieldHelpText('faq.answer', 'Example: Yes, there is free onsite parking available.');
+    if (lower.includes('photo gallery heading')) return resolveFieldHelpText('gallery.heading', 'Example: Photo\'s of us across the years.');
+    if (lower.includes('image horizontal focus point')) return resolveFieldHelpText('gallery.focus_x', 'Adjust horizontal crop focus for this gallery image.');
+    if (lower.includes('image vertical focus point')) return resolveFieldHelpText('gallery.focus_y', 'Adjust vertical crop focus for this gallery image.');
     if (lower.includes('rsvp request title')) return resolveFieldHelpText('rsvp.title', 'Example: Ready to celebrate with us?');
     if (lower.includes('rsvp request button label')) return resolveFieldHelpText('rsvp.button_label', 'Example: Go to RSVP.');
     if (lower.includes('final rsvp request text')) return resolveFieldHelpText('rsvp.text', 'Example: Please RSVP using your invitation code.');
@@ -3702,6 +4012,10 @@ function serialize(value) {
 
 .content-section-block .grid > label {
     margin-top: 0.85rem;
+}
+
+.content-section-block .grid > label.gallery-action-label {
+    margin-top: 0 !important;
 }
 
 .content-section-even {

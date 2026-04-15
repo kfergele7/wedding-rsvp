@@ -97,6 +97,10 @@ return [
             'imageFocusX' => 50,
             'imageFocusY' => 50,
         ],
+        'gallery' => [
+            'heading' => "Photo's of us across the years",
+            'items' => [],
+        ],
         'cta' => [
             'title' => 'Ready to Celebrate With Us?',
             'text' => 'RSVP online in just a few moments using your invitation code.',
@@ -114,6 +118,7 @@ return [
             'travel' => true,
             'menu' => true,
             'faqs' => true,
+            'gallery' => true,
         ],
     ],
     'admin_field_help_texts' => [
@@ -296,6 +301,22 @@ return [
         'faq.answer' => [
             'label' => 'FAQ - Answer',
             'default' => 'Example: Yes, there is free onsite parking available.',
+        ],
+        'gallery.heading' => [
+            'label' => 'Photo Gallery - Heading',
+            'default' => "Example: Photo's of us across the years.",
+        ],
+        'gallery.upload_image' => [
+            'label' => 'Photo Gallery - Upload Image',
+            'default' => 'Upload a square-friendly photo for the gallery. Add at least 2 and up to 8 images.',
+        ],
+        'gallery.focus_x' => [
+            'label' => 'Photo Gallery - Image Horizontal Focus Point',
+            'default' => 'Adjust horizontal crop focus for this gallery image.',
+        ],
+        'gallery.focus_y' => [
+            'label' => 'Photo Gallery - Image Vertical Focus Point',
+            'default' => 'Adjust vertical crop focus for this gallery image.',
         ],
         'rsvp.title' => [
             'label' => 'Final RSVP Request - Title',

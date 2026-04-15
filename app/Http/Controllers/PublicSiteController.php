@@ -93,6 +93,15 @@ class PublicSiteController extends Controller
 
     public function demo(Request $request)
     {
+        if (config('app.marketing_coming_soon')) {
+            return view('marketing.coming-soon', [
+                'meta' => [
+                    'title' => 'Magic Invitation is coming soon',
+                    'description' => 'Magic Invitation is preparing to launch. Existing customers can still log in and published wedding websites remain available.',
+                ],
+            ]);
+        }
+
         [$content, $rsvpSettings, $publicSlug, $siteTitle] = $this->demoTemplatePayload();
 
         return response()

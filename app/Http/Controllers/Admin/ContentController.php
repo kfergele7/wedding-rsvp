@@ -18,9 +18,12 @@ class ContentController extends Controller
             ->where('key', 'homepage_content')
             ->first();
 
+        $content = $this->resolvedContent();
+
         return response()->json([
-            'content' => $this->resolvedContent(),
+            'content' => $content,
             'rsvp_settings' => $this->resolvedRsvpSettings(),
+            'image_library' => $this->imageLibrary($content),
             'last_saved_at' => $contentSetting?->updated_at?->toISOString(),
         ]);
     }
@@ -111,6 +114,7 @@ class ContentController extends Controller
 
         $content = $this->resolvedContent();
         data_set($content, $field, $relativePath);
+        $content = $this->normalizeHomepageContent($content, $content);
 
         SiteSetting::query()->updateOrCreate(
             ['site_id' => $this->currentSiteId(), 'key' => 'homepage_content'],
@@ -121,6 +125,7 @@ class ContentController extends Controller
             'message' => 'Image uploaded and content updated.',
             'path' => $relativePath,
             'content' => $content,
+            'image_library' => $this->imageLibrary($content),
         ]);
     }
 
@@ -149,7 +154,38 @@ class ContentController extends Controller
             data_set($content, 'details.venue.blurb', (string) ($incomingVenue['blurb'] ?? data_get($content, 'details.venue.blurb', '')));
         }
 
+        $galleryItems = data_get($content, 'gallery.items', []);
+        data_set($content, 'gallery.heading', trim((string) data_get($content, 'gallery.heading', "Photo's of us across the years")));
+        data_set($content, 'gallery.items', $this->normalizeGalleryItems(is_array($galleryItems) ? $galleryItems : []));
+
         return $content;
+    }
+
+    private function normalizeGalleryItems(array $items): array
+    {
+        return collect($items)
+            ->map(function ($item) {
+                $image = trim((string) ($item['image'] ?? ''));
+
+                return [
+                    'image' => $image,
+                    'imageFocusX' => $this->normalizeFocusValue($item['imageFocusX'] ?? 50),
+                    'imageFocusY' => $this->normalizeFocusValue($item['imageFocusY'] ?? 50),
+                ];
+            })
+            ->filter(fn ($item) => $item['image'] !== '')
+            ->take(8)
+            ->values()
+            ->all();
+    }
+
+    private function normalizeFocusValue(mixed $value): int
+    {
+        if (! is_numeric($value)) {
+            return 50;
+        }
+
+        return max(0, min(100, (int) $value));
     }
 
     private function resolvedRsvpSettings(): array
@@ -305,6 +341,26 @@ class ContentController extends Controller
             ['id' => 'main', 'name' => 'Main', 'items' => []],
             ['id' => 'dessert', 'name' => 'Dessert', 'items' => []],
         ];
+    }
+
+    private function imageLibrary(array $content): array
+    {
+        $paths = [
+            data_get($content, 'hero.image'),
+            data_get($content, 'welcome.image'),
+            data_get($content, 'story.image'),
+            data_get($content, 'details.image'),
+            ...collect(data_get($content, 'gallery.items', []))
+                ->pluck('image')
+                ->all(),
+        ];
+
+        return collect($paths)
+            ->map(fn ($path) => trim((string) $path))
+            ->filter(fn ($path) => str_starts_with($path, '/images/wedding/uploads/'))
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**
