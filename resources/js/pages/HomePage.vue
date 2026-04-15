@@ -41,16 +41,10 @@
             <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
         </main>
 
-        <div class="bg-[#22363a]">
+        <div class="bg-[#0F1B1D]">
             <footer class="w-full py-[5px] text-white/85">
-                <div class="site-shell flex items-center justify-between text-xs uppercase tracking-[0.12em]">
-                    <span>&copy; Copyright {{ currentYear }}</span>
-                    <span>
-                        Built by
-                        <a href="https://elementseven.co/" target="_blank" rel="noopener noreferrer" class="ml-1 text-white underline-offset-2 hover:underline">
-                            Element Seven
-                        </a>
-                    </span>
+                <div class="site-shell flex items-center justify-center text-center text-[10px] uppercase tracking-[0.12em]">
+                    <span>&copy; Copyright Magic Invitation {{ currentYear }}</span>
                 </div>
             </footer>
         </div>

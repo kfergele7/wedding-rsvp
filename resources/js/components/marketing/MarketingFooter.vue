@@ -33,9 +33,14 @@
       </div>
     </div>
     <div class="border-t border-soft bg-[#0f1b1d] py-2">
-      <div class="mx-auto flex w-full max-w-[1180px] items-center justify-between px-4 text-[11px] tracking-[0.12em] text-white/75">
-        <p>Privacy-first by design.</p>
-        <p>© {{ new Date().getFullYear() }} Magic Invitation</p>
+      <div class="mx-auto flex w-full max-w-[1180px] items-center justify-between gap-3 px-4 text-[11px] uppercase tracking-[0.12em] text-white/75">
+        <p>© Copyright Magic Invitation {{ new Date().getFullYear() }}</p>
+        <p>
+          Built by
+          <a href="https://elementseven.co/" target="_blank" rel="noopener noreferrer" class="ml-1 text-white underline-offset-2 hover:underline">
+            Element Seven
+          </a>
+        </p>
       </div>
     </div>
   </footer>
