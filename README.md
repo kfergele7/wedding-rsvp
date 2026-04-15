@@ -104,6 +104,31 @@ Keep local queue synchronous so verification emails send immediately:
 QUEUE_CONNECTION=sync
 ```
 
+## Production Email With Mailgun
+For production transactional email, use Mailgun via Laravel's API mail transport.
+
+Install support packages:
+```bash
+composer require symfony/mailgun-mailer symfony/http-client
+```
+
+Production `.env` example:
+```env
+MAIL_MAILER=mailgun
+MAILGUN_DOMAIN=mg.magicinvitation.com
+MAILGUN_SECRET=your-mailgun-private-api-key
+MAILGUN_ENDPOINT=api.eu.mailgun.net
+MAIL_FROM_ADDRESS=hello@mg.magicinvitation.com
+MAIL_FROM_NAME="Magic Invitation"
+```
+
+Use `MAILGUN_ENDPOINT=api.mailgun.net` for US Mailgun accounts.
+After changing production mail settings, run:
+```bash
+php artisan optimize:clear
+php artisan config:cache
+```
+
 ## Guest RSVP Flow
 - Guests use an invitation code (3-10 letters, case-insensitive).
 - Supported formats:
