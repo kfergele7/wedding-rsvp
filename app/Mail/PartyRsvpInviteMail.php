@@ -14,16 +14,19 @@ class PartyRsvpInviteMail extends Mailable
     use SerializesModels;
 
     public function __construct(
+        public string $siteTitle,
         public string $partyName,
+        public string $guestTypeLabel,
         public string $rsvpCode,
         public string $websiteUrl,
         public string $rsvpUrl,
+        public ?string $responseDeadline = null,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Wedding RSVP Invitation'
+            subject: $this->guestTypeLabel.' RSVP Invitation'
         );
     }
 
@@ -34,4 +37,3 @@ class PartyRsvpInviteMail extends Mailable
         );
     }
 }
-

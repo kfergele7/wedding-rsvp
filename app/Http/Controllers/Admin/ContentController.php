@@ -157,6 +157,11 @@ class ContentController extends Controller
         $galleryItems = data_get($content, 'gallery.items', []);
         data_set($content, 'gallery.heading', trim((string) data_get($content, 'gallery.heading', "Photo's of us across the years")));
         data_set($content, 'gallery.items', $this->normalizeGalleryItems(is_array($galleryItems) ? $galleryItems : []));
+        data_set(
+            $content,
+            'guest_list.responseDeadline',
+            trim((string) data_get($content, 'guest_list.responseDeadline', '2026-08-15'))
+        );
 
         return $content;
     }

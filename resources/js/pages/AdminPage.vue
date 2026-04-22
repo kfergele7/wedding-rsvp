@@ -1040,6 +1040,33 @@
                 </div>
 
                 <div class="content-section-block content-section-even">
+                    <h3 class="font-heading text-2xl">RSVP Email Settings</h3>
+                    <div v-if="content" class="mt-4 grid gap-3 md:grid-cols-[1fr_320px] md:items-end">
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                RSVP Response Date Deadline
+                                <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(this will appear on emails sent to users)</span>
+                            </label>
+                            <input
+                                v-model="content.guest_list.responseDeadline"
+                                type="date"
+                                class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                            >
+                        </div>
+                        <div class="md:text-right">
+                            <button
+                                class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                type="button"
+                                @click="saveGuestListEmailSettings"
+                            >
+                                <span class="material-symbols-outlined btn-icon">save</span>
+                                Save RSVP Email Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section-block content-section-odd">
                     <h3 class="font-heading text-2xl">Create a Party</h3>
                     <div class="mt-3 grid gap-3 md:grid-cols-2">
                         <div>
@@ -1217,7 +1244,7 @@
                         </button>
                     </div>
 
-                    <div class="your-guests-table max-h-[620px] overflow-x-auto overflow-y-auto border border-soft/60 bg-white">
+                    <div class="your-guests-table overflow-x-auto border border-soft/60 bg-white">
                         <table class="min-w-full text-left text-sm">
                             <thead class="sticky top-0 bg-white">
                                 <tr class="border-b border-soft text-xs uppercase tracking-[0.12em] text-wedding-muted">
@@ -2705,6 +2732,36 @@ async function saveContent(openPreviewAfterSave = false) {
     }
 }
 
+async function saveGuestListEmailSettings() {
+    clearError();
+
+    try {
+        const response = await window.axios.put(`${apiBaseUrl}/content`, {
+            content: content.value,
+            rsvp_settings: rsvpSettings.value,
+        });
+
+        if (response.data?.content) {
+            content.value = response.data.content;
+            ensureImageFocusDefaults();
+            ensureSectionVisibilityDefaults();
+        }
+
+        if (response.data?.rsvp_settings) {
+            rsvpSettings.value = {
+                ...response.data.rsvp_settings,
+                menu_courses: normalizeMenuCourses(response.data.rsvp_settings?.menu_courses),
+            };
+        }
+
+        lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
+        captureSavedSnapshots();
+        setMessage('RSVP email settings saved.', 5000);
+    } catch (error) {
+        setError(extractErrorMessage(error, 'Could not save RSVP email settings.'));
+    }
+}
+
 async function toggleSitePublished() {
     clearError();
 
@@ -2857,6 +2914,16 @@ function ensureImageFocusDefaults() {
 
     if (!content.value.countdown.targetDateTime) {
         content.value.countdown.targetDateTime = '2026-09-12T15:30';
+    }
+
+    if (typeof content.value.guest_list !== 'object' || content.value.guest_list === null) {
+        content.value.guest_list = {
+            responseDeadline: '2026-08-15',
+        };
+    }
+
+    if (!content.value.guest_list.responseDeadline) {
+        content.value.guest_list.responseDeadline = '2026-08-15';
     }
 
     content.value.gallery.items = content.value.gallery.items.slice(0, 8).map((item) => ({

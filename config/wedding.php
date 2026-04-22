@@ -100,6 +100,9 @@ return [
         'countdown' => [
             'targetDateTime' => '2026-09-12T15:30',
         ],
+        'guest_list' => [
+            'responseDeadline' => '2026-08-15',
+        ],
         'gallery' => [
             'heading' => "Photo's of us across the years",
             'items' => [],

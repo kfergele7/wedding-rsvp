@@ -12,8 +12,10 @@ use App\Mail\PartyRsvpInviteMail;
 use App\Models\Guest;
 use App\Models\Party;
 use App\Models\RsvpEmailLog;
+use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -299,6 +301,10 @@ class PartyController extends Controller
 
         $site = $this->currentSite();
         $siteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
+        $content = $this->resolvedHomepageContent();
+        $formattedResponseDeadline = $this->formatResponseDeadline(
+            (string) data_get($content, 'guest_list.responseDeadline', '')
+        );
 
         $parties = Party::query()
             ->forSite($this->currentSiteId())
@@ -315,10 +321,13 @@ class PartyController extends Controller
             $rsvpUrl = route('wedding.public', ['public_slug' => $site->public_slug]).'?code='.$party->code;
 
             Mail::to($party->email)->send(new PartyRsvpInviteMail(
+                siteTitle: $site->title,
                 partyName: $party->display_name,
+                guestTypeLabel: $party->guestTypeLabel(),
                 rsvpCode: $party->code,
                 websiteUrl: $siteUrl,
                 rsvpUrl: $rsvpUrl,
+                responseDeadline: $formattedResponseDeadline,
             ));
 
             RsvpEmailLog::query()->create([
@@ -409,5 +418,30 @@ class PartyController extends Controller
         $plusOneCount = $party->guests->where('allow_plus_one', true)->count();
 
         return max(1, $guestCount + $plusOneCount);
+    }
+
+    private function resolvedHomepageContent(): array
+    {
+        $fallback = config('wedding.homepage_content', []);
+        $saved = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'homepage_content')
+            ->first();
+
+        return is_array($saved?->value) ? array_replace_recursive($fallback, $saved->value) : $fallback;
+    }
+
+    private function formatResponseDeadline(string $value): ?string
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($trimmed)->translatedFormat('j F Y');
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

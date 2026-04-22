@@ -25,6 +25,8 @@ class SaveSiteSettingsRequest extends FormRequest
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
             ],
+            'content.guest_list' => ['nullable', 'array'],
+            'content.guest_list.responseDeadline' => ['nullable', 'date'],
             'rsvp_settings' => ['nullable', 'array'],
             'rsvp_settings.meal_mode' => ['nullable', Rule::in(['options', 'set_menu'])],
             'rsvp_settings.menu_heading' => ['nullable', 'string', 'max:120'],
