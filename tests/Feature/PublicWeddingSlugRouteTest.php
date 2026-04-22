@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\HostRsvpNotificationMail;
 use App\Models\Account;
 use App\Models\Party;
 use App\Models\PlatformSetting;
@@ -9,6 +10,7 @@ use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PublicWeddingSlugRouteTest extends TestCase
@@ -158,6 +160,37 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_EVENING)
             ->assertJsonPath('party.rsvp.status', 'attending')
             ->assertJsonPath('party.rsvp.attending_count', 2);
+    }
+
+    public function test_public_rsvp_save_sends_notification_email_to_account_owner(): void
+    {
+        Mail::fake();
+
+        $site = $this->makeSite('notification-account', 'notification-site', true, 'Notification Couple');
+        $owner = $this->makeUserForAccount($site->account_id, 'owner@example.test');
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Kane Party',
+            'guest_type' => Party::GUEST_TYPE_DAY,
+            'code' => 'HOSTN',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/HOSTN', [
+            'status' => 'attending',
+            'attending_count' => 2,
+            'meal_choices' => [],
+            'dietary_restrictions' => 'No nuts please',
+            'message' => 'Looking forward to it.',
+        ])->assertOk();
+
+        Mail::assertSent(HostRsvpNotificationMail::class, function (HostRsvpNotificationMail $mail) use ($owner) {
+            return $mail->hasTo($owner->email)
+                && $mail->partyName === 'Kane Party'
+                && $mail->statusLabel === 'Attending'
+                && $mail->responsesUrl === route('customer.admin.rsvps.page');
+        });
     }
 
     public function test_staff_user_can_preview_any_unpublished_site_and_use_rsvp_lookup(): void

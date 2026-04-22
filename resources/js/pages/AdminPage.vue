@@ -1123,10 +1123,11 @@
                                 <button
                                     type="button"
                                     class="admin-btn admin-btn-danger guest-row-button inline-flex items-center justify-center gap-1 px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                    :disabled="newPartyGuests.length <= 1"
+                                    :disabled="newPartyGuests.length <= 1 || index === 0"
+                                    :title="index === 0 ? 'The first guest in the party cannot be removed.' : 'Remove guest'"
                                     @click="removeNewPartyGuestRow(index)"
                                 >
-                                    <span class="material-symbols-outlined btn-icon">{{ newPartyGuests.length <= 1 ? 'block' : 'close' }}</span>
+                                    <span class="material-symbols-outlined btn-icon">{{ newPartyGuests.length <= 1 || index === 0 ? 'block' : 'close' }}</span>
                                     Remove
                                 </button>
                             </div>
@@ -1294,11 +1295,22 @@
                                                 {{ rsvpStatusMeta(partyItem).icon }}
                                             </span>
                                         </p>
-                                        <p v-if="partyItem.guests.length" class="mt-1 text-xs text-wedding-muted">
-                                            Guests: {{ partyItem.guests.map((guest) => `${guest.first_name} ${guest.last_name}`.trim()).join(', ') }}
+                                        <p
+                                            v-if="partyItem.guests.length"
+                                            class="mt-1 max-w-[24rem] truncate text-xs text-wedding-muted"
+                                            :title="guestSummary(partyItem)"
+                                        >
+                                            Guests: {{ guestSummary(partyItem) }}
                                         </p>
                                     </td>
-                                    <td class="px-3 py-2 normal-case tracking-normal text-wedding-muted">{{ partyItem.email || '—' }}</td>
+                                    <td class="px-3 py-2 normal-case tracking-normal text-wedding-muted">
+                                        <span
+                                            class="inline-block max-w-[12rem] truncate align-middle"
+                                            :title="partyItem.email || ''"
+                                        >
+                                            {{ partyItem.email || '—' }}
+                                        </span>
+                                    </td>
                                     <td class="px-3 py-2">
                                         <button
                                             v-if="partyItem.rsvp_email_sent"
@@ -1315,7 +1327,7 @@
                                     <td class="px-3 py-2">{{ partyItem.max_guests }}</td>
                                     <td class="px-3 py-2">
                                         <div class="flex flex-wrap gap-2">
-                                            <button class="admin-btn admin-btn-view inline-flex items-center px-2 py-2 text-xs" type="button" title="View" @click="openEditPartyModal(partyItem.id)">
+                                            <button class="admin-btn admin-btn-view inline-flex items-center px-2 py-2 text-xs" type="button" title="View" @click="openViewPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">visibility</span>
                                             </button>
                                             <button class="admin-btn inline-flex items-center px-2 py-2 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
@@ -1336,14 +1348,93 @@
                 </div>
             </section>
 
-            <div v-if="editPartyModalOpen && selectedParty" class="fixed inset-0 z-[80] bg-black/40 p-4 md:p-8" @click.self="closeEditPartyModal">
-                <div class="guest-help-scope mx-auto mt-6 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:mt-12 md:p-8">
+            <div v-if="viewPartyModalOpen && selectedParty" class="fixed inset-0 z-[79] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeViewPartyModal">
+                <div class="guest-help-scope mx-auto my-4 flex w-full max-w-3xl flex-col border border-soft bg-white p-6 shadow-soft md:my-12 md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:p-8">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-heading text-3xl">Party Details</h3>
+                            <p class="mt-2 text-sm text-wedding-muted">{{ selectedParty.display_name }}</p>
+                        </div>
+                        <button class="modal-close-x" type="button" aria-label="Close party details modal" title="Close" @click="closeViewPartyModal">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Party Name</p>
+                            <p class="mt-1 text-base text-wedding-text">{{ selectedParty.display_name }}</p>
+                        </div>
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</p>
+                            <p class="mt-1 text-base text-wedding-text">{{ selectedParty.guest_type_label || (selectedParty.guest_type === 'evening' ? 'Evening Guest' : 'Day Guest') }}</p>
+                        </div>
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Email</p>
+                            <p class="mt-1 break-all text-base normal-case tracking-normal text-wedding-text">{{ selectedParty.email || 'No email address has been entered for this party' }}</p>
+                        </div>
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP Code</p>
+                            <p class="mt-1 text-base uppercase text-wedding-text">{{ selectedParty.code }}</p>
+                        </div>
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Seats</p>
+                            <p class="mt-1 text-base text-wedding-text">{{ selectedParty.max_guests }}</p>
+                        </div>
+                        <div class="rounded border border-soft bg-[#F7F7F7] p-4">
+                            <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Email RSVP Request Sent</p>
+                            <p class="mt-1 text-base text-wedding-text">
+                                <template v-if="selectedParty.rsvp_email_sent">
+                                    Yes, email sent at {{ formatDateTime(selectedParty.rsvp_email_sent_at) }}
+                                </template>
+                                <template v-else>
+                                    No
+                                </template>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 rounded border border-soft bg-[#F7F7F7] p-4">
+                        <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Guests</p>
+                        <div class="mt-3 space-y-2">
+                            <div
+                                v-for="(guest, index) in selectedParty.guests"
+                                :key="`view-guest-${guest.id}`"
+                                class="flex items-center justify-between gap-3 rounded border border-soft bg-white px-4 py-3"
+                            >
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-wedding-text">{{ formatGuestName(guest) }}</p>
+                                    <p class="mt-1 text-xs text-wedding-muted">
+                                        {{ index === 0 ? 'Lead guest' : 'Additional guest' }}<span v-if="guest.is_child"> · Child guest</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedParty.notes" class="mt-5 rounded border border-soft bg-[#F7F7F7] p-4">
+                        <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Additional Notes</p>
+                        <p class="mt-2 text-sm text-wedding-text">{{ selectedParty.notes }}</p>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="openEditFromViewModal">
+                            <span class="material-symbols-outlined btn-icon">edit</span>
+                            Edit this Party
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="editPartyModalOpen && selectedParty" class="fixed inset-0 z-[80] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeEditPartyModal">
+                <div class="guest-help-scope mx-auto my-4 flex w-full max-w-4xl flex-col border border-soft bg-white p-6 shadow-soft md:my-12 md:max-h-[calc(100vh-6rem)] md:p-8">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">Edit Party · {{ selectedParty.display_name }}</h3>
                         <button class="modal-close-x" type="button" aria-label="Close edit party modal" title="Close" @click="closeEditPartyModal">
                             <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
+                    <div class="party-modal-scroll mt-4 min-h-0 flex-1 overflow-y-scroll pr-3">
                     <p class="mt-3 text-sm text-wedding-muted">
                         RSVP request sent:
                         <button
@@ -1412,7 +1503,7 @@
 
                     <h4 class="mt-8 font-heading text-2xl">Guests</h4>
                     <div class="mt-3 space-y-2">
-                        <div v-for="guest in selectedParty.guests" :key="guest.id" class="guest-row-grid grid gap-2 border border-soft p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(190px,0.75fr)_170px]">
+                        <div v-for="(guest, index) in selectedParty.guests" :key="guest.id" class="guest-row-grid grid gap-2 border border-soft p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(190px,0.75fr)_170px]">
                             <input v-model="guest.first_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
                             <input v-model="guest.last_name" class="guest-row-input guest-name-input border border-soft bg-white px-3 py-2">
                             <label class="guest-option-control guest-row-input">
@@ -1424,15 +1515,21 @@
                                     <span class="material-symbols-outlined btn-icon">save</span>
                                     Save
                                 </button>
-                                <button class="admin-btn admin-btn-danger guest-row-button inline-flex items-center gap-1 px-3 py-2 text-xs" type="button" @click="deleteGuest(guest)">
-                                    <span class="material-symbols-outlined btn-icon">close</span>
+                                <button
+                                    class="admin-btn admin-btn-danger guest-row-button inline-flex items-center gap-1 px-3 py-2 text-xs"
+                                    type="button"
+                                    :disabled="index === 0"
+                                    :title="index === 0 ? 'The first guest in the party cannot be removed.' : 'Remove guest'"
+                                    @click="deleteGuest(guest, index)"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">{{ index === 0 ? 'block' : 'close' }}</span>
                                     Remove
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 grid items-end gap-2 md:grid-cols-4">
+                    <div class="mt-4 grid items-end gap-2 pb-6 md:grid-cols-4">
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">First Name</label>
                             <input v-model="newGuest.first_name" placeholder="First name" class="w-full border border-soft bg-white px-3 py-2">
@@ -1454,11 +1551,12 @@
                             Add Anonymous +1
                         </button>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <div v-if="sendRsvpConfirmModal.open" class="fixed inset-0 z-[82] bg-black/40 p-4 md:p-8" @click.self="closeSendRsvpConfirmModal">
-                <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
+            <div v-if="sendRsvpConfirmModal.open" class="fixed inset-0 z-[82] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeSendRsvpConfirmModal">
+                <div class="mx-auto my-4 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft md:my-12">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">Send Email RSVP Request</h3>
                         <button class="modal-close-x" type="button" aria-label="Close send RSVP confirmation" title="Close" @click="closeSendRsvpConfirmModal">
@@ -1487,8 +1585,8 @@
                 </div>
             </div>
 
-            <div v-if="emailHistoryModal.open" class="fixed inset-0 z-[83] bg-black/40 p-4 md:p-8" @click.self="closePartyEmailHistory">
-                <div class="mx-auto mt-12 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft">
+            <div v-if="emailHistoryModal.open" class="fixed inset-0 z-[83] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closePartyEmailHistory">
+                <div class="mx-auto my-4 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft md:my-12">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-heading text-3xl">RSVP Request History · {{ emailHistoryModal.partyName }}</h3>
                         <button class="modal-close-x" type="button" aria-label="Close RSVP request history" title="Close" @click="closePartyEmailHistory">
@@ -1604,8 +1702,8 @@
             </section>
         </main>
 
-        <div v-if="editingRsvp" class="fixed inset-0 z-[70] bg-black/40 p-4 md:p-8" @click.self="closeRsvpModal">
-            <div class="mx-auto mt-6 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:mt-16 md:p-8">
+        <div v-if="editingRsvp" class="fixed inset-0 z-[70] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeRsvpModal">
+            <div class="mx-auto my-4 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:my-16 md:p-8">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="font-heading text-3xl">{{ editingRsvp.rsvp?.status ? 'Update RSVP' : 'Manually RSVP' }} · {{ editingRsvp.party_name }}</h3>
                     <button class="modal-close-x" type="button" aria-label="Close manual RSVP modal" title="Close" @click="closeRsvpModal">
@@ -1672,8 +1770,8 @@
             </div>
         </div>
 
-        <div v-if="qrModalOpen" class="fixed inset-0 z-[88] bg-black/50 p-4 md:p-8" @click.self="closeQrModal">
-            <div class="mx-auto mt-8 w-full max-w-xl border border-soft bg-wedding-bg p-6 shadow-soft md:mt-16">
+        <div v-if="qrModalOpen" class="fixed inset-0 z-[88] overflow-y-auto bg-black/50 p-4 md:p-8" @click.self="closeQrModal">
+            <div class="mx-auto my-4 w-full max-w-xl border border-soft bg-wedding-bg p-6 shadow-soft md:my-16">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="font-heading text-3xl">Share QR Code</h3>
                     <button type="button" class="modal-close-x" aria-label="Close QR code modal" title="Close" @click="closeQrModal">
@@ -1707,8 +1805,8 @@
             </div>
         </div>
 
-        <div v-if="imageLibraryModalOpen" class="fixed inset-0 z-[89] bg-black/50 p-4 md:p-8" @click.self="closeImageLibrary">
-            <div class="mx-auto mt-8 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:mt-16">
+        <div v-if="imageLibraryModalOpen" class="fixed inset-0 z-[89] overflow-y-auto bg-black/50 p-4 md:p-8" @click.self="closeImageLibrary">
+            <div class="mx-auto my-4 w-full max-w-4xl border border-soft bg-white p-6 shadow-soft md:my-16">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h3 class="font-heading text-3xl">Select from your library</h3>
@@ -1736,8 +1834,8 @@
             </div>
         </div>
 
-        <div v-if="confirmModal.open" class="fixed inset-0 z-[90] bg-black/40 p-4" @click.self="closeConfirmModal(false)">
-            <div class="mx-auto mt-20 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
+        <div v-if="confirmModal.open" class="fixed inset-0 z-[90] overflow-y-auto bg-black/40 p-4" @click.self="closeConfirmModal(false)">
+            <div class="mx-auto my-4 w-full max-w-lg border border-soft bg-white p-6 shadow-soft md:my-20">
                 <h3 class="font-heading text-3xl">{{ confirmModal.title }}</h3>
                 <p class="mt-3 text-wedding-muted">{{ confirmModal.message }}</p>
                 <div class="mt-6 flex justify-end gap-3">
@@ -1753,8 +1851,8 @@
             </div>
         </div>
 
-        <div v-if="noticeModal.open" class="fixed inset-0 z-[85] bg-black/40 p-4" @click.self="closeNoticeModal">
-            <div class="mx-auto mt-24 w-full max-w-lg border border-soft bg-white p-6 shadow-soft">
+        <div v-if="noticeModal.open" class="fixed inset-0 z-[85] overflow-y-auto bg-black/40 p-4" @click.self="closeNoticeModal">
+            <div class="mx-auto my-4 w-full max-w-lg border border-soft bg-white p-6 shadow-soft md:my-24">
                 <h3 class="font-heading text-3xl">{{ noticeModal.title }}</h3>
                 <p class="mt-3 text-wedding-muted">{{ noticeModal.message }}</p>
                 <p v-if="noticeModal.note" class="mt-2 text-sm italic text-wedding-muted">{{ noticeModal.note }}</p>
@@ -1950,6 +2048,7 @@ const parties = ref([]);
 const partySearchTerm = ref('');
 const selectedPartyId = ref(null);
 const editPartyModalOpen = ref(false);
+const viewPartyModalOpen = ref(false);
 const selectedPartyIdsForEmail = ref([]);
 const sendRsvpConfirmModal = reactive({
     open: false,
@@ -2289,14 +2388,26 @@ function addAnonymousPlusOneRow() {
 }
 
 function removeNewPartyGuestRow(index) {
-    if (newPartyGuests.value.length <= 1) {
+    if (newPartyGuests.value.length <= 1 || index === 0) {
         return;
     }
     newPartyGuests.value.splice(index, 1);
 }
 
+function openViewPartyModal(partyId) {
+    selectedPartyId.value = partyId;
+    viewPartyModalOpen.value = true;
+    editPartyModalOpen.value = false;
+    clearError();
+}
+
+function closeViewPartyModal() {
+    viewPartyModalOpen.value = false;
+}
+
 function openEditPartyModal(partyId) {
     selectedPartyId.value = partyId;
+    viewPartyModalOpen.value = false;
     editPartyModalOpen.value = true;
     clearError();
     nextTick(() => applyFieldHelpAttributes());
@@ -2304,6 +2415,15 @@ function openEditPartyModal(partyId) {
 
 function closeEditPartyModal() {
     editPartyModalOpen.value = false;
+}
+
+function openEditFromViewModal() {
+    if (!selectedPartyId.value) {
+        return;
+    }
+
+    viewPartyModalOpen.value = false;
+    openEditPartyModal(selectedPartyId.value);
 }
 
 function togglePartyEmailSelection(partyItem) {
@@ -2528,6 +2648,15 @@ function guestTypeMeta(partyItem) {
         color: '#D79A2B',
         title: 'Day guest invitation',
     };
+}
+
+function formatGuestName(guest) {
+    const fullName = `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim();
+    return fullName || 'Unnamed guest';
+}
+
+function guestSummary(partyItem) {
+    return (partyItem?.guests || []).map((guest) => formatGuestName(guest)).join(', ');
 }
 
 function addTimelineItem() {
@@ -3431,8 +3560,12 @@ async function updateGuest(guest) {
     }
 }
 
-async function deleteGuest(guest) {
+async function deleteGuest(guest, index = -1) {
     clearError();
+    if (index === 0) {
+        setError('The first guest in the party cannot be removed.');
+        return;
+    }
     const confirmed = await openConfirmModal('Remove Guest', 'Are you sure you want to remove this guest?');
     if (!confirmed) {
         return;
@@ -4365,6 +4498,39 @@ function serialize(value) {
 .guest-row-grid input[type='email'],
 .guest-row-grid input[type='number'] {
     background-color: #ffffff !important;
+}
+
+.party-modal-scroll,
+.party-modal-guest-list {
+    scrollbar-gutter: stable;
+}
+
+.party-modal-scroll::-webkit-scrollbar,
+.party-modal-guest-list::-webkit-scrollbar {
+    width: 12px;
+}
+
+.party-modal-scroll::-webkit-scrollbar-track,
+.party-modal-guest-list::-webkit-scrollbar-track {
+    background: #f2ece3;
+    border-left: 1px solid rgba(34, 54, 58, 0.12);
+}
+
+.party-modal-scroll::-webkit-scrollbar-thumb,
+.party-modal-guest-list::-webkit-scrollbar-thumb {
+    background: #466369;
+    border: 2px solid #f2ece3;
+    border-radius: 9999px;
+}
+
+.party-modal-scroll::-webkit-scrollbar-thumb:hover,
+.party-modal-guest-list::-webkit-scrollbar-thumb:hover {
+    background: #22363a;
+}
+
+.party-modal-scroll {
+    border-top: 1px solid rgba(34, 54, 58, 0.12);
+    padding-top: 0.5rem;
 }
 
 .guest-option-control > .guest-option-checkbox {

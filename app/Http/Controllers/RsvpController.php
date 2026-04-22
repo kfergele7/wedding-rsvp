@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RsvpLookupRequest;
 use App\Http\Requests\SaveRsvpRequest;
+use App\Mail\HostRsvpNotificationMail;
 use App\Models\Party;
 use App\Models\Rsvp;
 use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class RsvpController extends Controller
 {
@@ -77,7 +80,7 @@ class RsvpController extends Controller
             $data['meal_choices'] = [];
         }
 
-        $party->rsvp()->updateOrCreate(
+        $rsvp = $party->rsvp()->updateOrCreate(
             ['party_id' => $party->id, 'site_id' => $party->site_id],
             [
                 'site_id' => $party->site_id,
@@ -90,6 +93,7 @@ class RsvpController extends Controller
         );
 
         $party->load(['guests', 'rsvp']);
+        $this->sendHostNotification($request, $party, $rsvp);
 
         return response()->json([
             'message' => 'Your RSVP has been saved.',
@@ -260,6 +264,58 @@ class RsvpController extends Controller
 
         if ((int) $user->account_id !== (int) $this->currentSite()->account_id) {
             abort(404);
+        }
+    }
+
+    private function sendHostNotification(Request $request, Party $party, Rsvp $rsvp): void
+    {
+        $site = $this->currentSite()->loadMissing(['account.users']);
+        $owner = $site->account?->users
+            ?->where('is_staff', false)
+            ->sortByDesc(fn ($user) => ($user->role ?? '') === 'owner')
+            ->first();
+
+        if (! $owner?->email) {
+            $previewUser = $request->user();
+            if (
+                $previewUser
+                && ! $previewUser->is_staff
+                && (int) $previewUser->account_id === (int) $site->account_id
+                && $previewUser->email
+            ) {
+                $owner = $previewUser;
+            }
+        }
+
+        if (! $owner?->email) {
+            Log::info('Skipping host RSVP notification because no customer owner email was found.', [
+                'party_id' => $party->id,
+                'site_id' => $party->site_id,
+                'account_id' => $site->account_id,
+            ]);
+            return;
+        }
+
+        try {
+            Mail::to($owner->email)->send(new HostRsvpNotificationMail(
+                siteTitle: $site->title ?: 'Your wedding website',
+                partyName: $party->display_name,
+                guestTypeLabel: $party->guestTypeLabel(),
+                statusLabel: $rsvp->status === Rsvp::STATUS_ATTENDING ? 'Attending' : 'Not attending',
+                attendingCount: (int) $rsvp->attending_count,
+                maxGuests: (int) $party->max_guests,
+                dietaryRestrictions: $rsvp->dietary_restrictions,
+                messageFromGuest: $rsvp->message,
+                mealChoices: is_array($rsvp->meal_choices) ? $rsvp->meal_choices : [],
+                responsesUrl: route('customer.admin.rsvps.page'),
+            ));
+        } catch (\Throwable $exception) {
+            Log::warning('Failed to send host RSVP notification email.', [
+                'party_id' => $party->id,
+                'site_id' => $party->site_id,
+                'owner_email' => $owner->email,
+                'error' => $exception->getMessage(),
+            ]);
         }
     }
 }
