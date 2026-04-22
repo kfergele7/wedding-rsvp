@@ -1,7 +1,7 @@
 <template>
     <div class="fixed inset-0 z-[90] bg-black/50 p-4 md:p-8" @click.self="$emit('close')">
         <div class="mx-auto mt-4 max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-soft bg-wedding-bg p-6 shadow-soft md:mt-8 md:p-8">
-            <div class="flex items-start justify-between gap-3">
+            <div v-if="!submittedConfirmation" class="flex items-start justify-between gap-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Wedding RSVP</p>
                     <h2 class="mt-2 font-heading text-4xl">RSVP</h2>
@@ -18,6 +18,15 @@
                 </button>
             </div>
 
+            <section v-if="submittedConfirmation" class="card-frame mt-2 bg-white text-center md:mt-4">
+                <p class="text-xs uppercase tracking-[0.22em] text-wedding-muted">Thank you</p>
+                <h2 class="mt-3 font-heading text-4xl">Your RSVP has been submitted</h2>
+                <p class="mx-auto mt-4 max-w-2xl text-wedding-muted">
+                    Thank you for sending your response. This window will close in a moment, and you can reopen it any time if you need to review your RSVP again.
+                </p>
+            </section>
+
+            <template v-else>
             <section class="card-frame mt-6 bg-white">
                 <form class="flex flex-col gap-4 md:flex-row" @submit.prevent="lookupCode">
                     <input
@@ -162,12 +171,13 @@
                     <p v-if="party.rsvp.updated_at" class="mt-1 text-sm text-wedding-muted">Updated: {{ party.rsvp.updated_at }}</p>
                 </div>
             </section>
+            </template>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 const props = defineProps({
     initialCode: {
@@ -214,6 +224,8 @@ const savingRsvp = ref(false);
 const lookupError = ref('');
 const saveError = ref('');
 const saveSuccess = ref('');
+const submittedConfirmation = ref(false);
+let closeAfterSubmitTimer = null;
 
 const form = reactive({
     status: '',
@@ -297,10 +309,17 @@ onMounted(() => {
     }
 });
 
+onBeforeUnmount(() => {
+    if (closeAfterSubmitTimer) {
+        clearTimeout(closeAfterSubmitTimer);
+    }
+});
+
 async function lookupCode() {
     lookupError.value = '';
     saveError.value = '';
     saveSuccess.value = '';
+    submittedConfirmation.value = false;
     loadingLookup.value = true;
 
     try {
@@ -385,6 +404,13 @@ async function saveRsvp() {
         saveSuccess.value = response.data.message || 'RSVP saved.';
         hydrateFormFromExistingRsvp();
         emit('party-resolved', party.value);
+        submittedConfirmation.value = true;
+        if (closeAfterSubmitTimer) {
+            clearTimeout(closeAfterSubmitTimer);
+        }
+        closeAfterSubmitTimer = window.setTimeout(() => {
+            emit('close');
+        }, 10000);
     } catch (error) {
         saveError.value = error.response?.data?.message || 'Unable to save RSVP right now.';
     } finally {

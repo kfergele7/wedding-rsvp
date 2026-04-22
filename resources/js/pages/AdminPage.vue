@@ -1246,16 +1246,16 @@
                     </div>
 
                     <div class="your-guests-table overflow-x-auto border border-soft/60 bg-white">
-                        <table class="min-w-full text-left text-sm">
+                        <table class="min-w-full table-fixed text-left text-sm">
                             <thead class="sticky top-0 bg-white">
                                 <tr class="border-b border-soft text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                                    <th class="px-3 py-2">Select</th>
-                                    <th class="px-3 py-2">Party</th>
-                                    <th class="px-3 py-2">Email</th>
-                                    <th class="px-3 py-2">Email Sent</th>
-                                    <th class="px-3 py-2">Code</th>
-                                    <th class="px-3 py-2">Seats</th>
-                                    <th class="px-3 py-2">Actions</th>
+                                    <th class="w-[6%] px-2 py-2"><span class="sr-only">Select</span></th>
+                                    <th class="w-[39%] px-2 py-2">Party</th>
+                                    <th class="w-[14%] px-2 py-2">Email</th>
+                                    <th class="w-[12%] whitespace-nowrap px-2 py-2 text-center">Email Sent</th>
+                                    <th class="w-[7%] px-2 py-2 text-center">Code</th>
+                                    <th class="w-[4%] px-1 py-2 text-center">Seats</th>
+                                    <th class="w-[18%] px-2 py-2 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1265,16 +1265,18 @@
                                     class="border-b border-soft/60"
                                     :class="partyIndex % 2 === 0 ? 'bg-white' : 'bg-[#F7F7F7]'"
                                 >
-                                    <td class="px-3 py-2">
+                                    <td class="py-2 pl-[13px] pr-2">
                                     <input
+                                        class="h-4 w-4 cursor-pointer align-middle"
                                         type="checkbox"
                                         :checked="selectedPartyIdsForEmail.includes(partyItem.id)"
                                         :title="partyItem.email ? 'Select for email or delete action' : 'Select for delete action (no email set)'"
                                         @change="togglePartyEmailSelection(partyItem)"
                                     >
                                     </td>
-                                    <td class="px-3 py-2">
-                                        <p class="inline-flex items-center gap-2 font-medium">
+                                    <td class="px-2 py-2">
+                                        <div class="min-w-0">
+                                        <p class="inline-flex max-w-full items-center gap-2 font-medium">
                                             <span
                                                 class="material-symbols-outlined rsvp-status-icon"
                                                 :style="{ color: guestTypeMeta(partyItem).color }"
@@ -1284,7 +1286,7 @@
                                             >
                                                 {{ guestTypeMeta(partyItem).icon }}
                                             </span>
-                                            <span>{{ partyItem.display_name }}</span>
+                                            <span class="truncate">{{ partyItem.display_name }}</span>
                                             <span
                                                 class="material-symbols-outlined rsvp-status-icon"
                                                 :style="{ color: rsvpStatusMeta(partyItem).color }"
@@ -1297,21 +1299,22 @@
                                         </p>
                                         <p
                                             v-if="partyItem.guests.length"
-                                            class="mt-1 max-w-[24rem] truncate text-xs text-wedding-muted"
+                                            class="mt-1 block max-w-full truncate text-xs text-wedding-muted"
                                             :title="guestSummary(partyItem)"
                                         >
-                                            Guests: {{ guestSummary(partyItem) }}
+                                            Guests: {{ truncateText(guestSummary(partyItem), 42) }}
                                         </p>
+                                        </div>
                                     </td>
-                                    <td class="px-3 py-2 normal-case tracking-normal text-wedding-muted">
+                                    <td class="px-2 py-2 normal-case tracking-normal text-wedding-muted">
                                         <span
-                                            class="inline-block max-w-[12rem] truncate align-middle"
+                                            class="inline-block max-w-full truncate align-middle"
                                             :title="partyItem.email || ''"
                                         >
-                                            {{ partyItem.email || '—' }}
+                                            {{ partyItem.email ? truncateText(partyItem.email, 24) : '—' }}
                                         </span>
                                     </td>
-                                    <td class="px-3 py-2">
+                                    <td class="px-2 py-2 text-center">
                                         <button
                                             v-if="partyItem.rsvp_email_sent"
                                             type="button"
@@ -1323,20 +1326,20 @@
                                         </button>
                                         <span v-else class="text-red-700">No</span>
                                     </td>
-                                    <td class="px-3 py-2 uppercase">{{ partyItem.code }}</td>
-                                    <td class="px-3 py-2">{{ partyItem.max_guests }}</td>
-                                    <td class="px-3 py-2">
-                                        <div class="flex flex-wrap gap-2">
-                                            <button class="admin-btn admin-btn-view inline-flex items-center px-2 py-2 text-xs" type="button" title="View" @click="openViewPartyModal(partyItem.id)">
+                                    <td class="px-2 py-2 text-center uppercase">{{ partyItem.code }}</td>
+                                    <td class="px-1 py-2 text-center">{{ partyItem.max_guests }}</td>
+                                    <td class="px-2 py-2">
+                                        <div class="mx-auto grid w-fit grid-cols-2 gap-1.5">
+                                            <button class="admin-btn admin-btn-view inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="View" @click="openViewPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">visibility</span>
                                             </button>
-                                            <button class="admin-btn inline-flex items-center px-2 py-2 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
+                                            <button class="admin-btn inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">edit</span>
                                             </button>
-                                            <button class="admin-btn admin-btn-success inline-flex items-center px-2 py-2 text-xs" type="button" title="Email RSVP" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
+                                            <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Email RSVP" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
                                                 <span class="material-symbols-outlined btn-icon">mail</span>
                                             </button>
-                                            <button class="admin-btn admin-btn-danger inline-flex items-center px-2 py-2 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
+                                            <button class="admin-btn admin-btn-danger inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
                                                 <span class="material-symbols-outlined btn-icon">delete</span>
                                             </button>
                                         </div>
@@ -2653,6 +2656,20 @@ function guestTypeMeta(partyItem) {
 function formatGuestName(guest) {
     const fullName = `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim();
     return fullName || 'Unnamed guest';
+}
+
+function truncateText(value, maxLength) {
+    if (!value) {
+        return '';
+    }
+
+    const text = String(value);
+
+    if (text.length <= maxLength) {
+        return text;
+    }
+
+    return `${text.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
 }
 
 function guestSummary(partyItem) {
