@@ -42,6 +42,11 @@
                                         <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#466369;">
                                             Attending count: {{ $attendingCount }} of {{ $maxGuests }}
                                         </p>
+                                        @if(count($attendingGuestNames))
+                                            <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#0F1B1D;">
+                                                Attending guests: {{ implode(', ', $attendingGuestNames) }}
+                                            </p>
+                                        @endif
                                     </td>
                                 </tr>
                                 @if(!empty($dietaryRestrictions))

@@ -36,6 +36,8 @@ class RsvpController extends Controller
                 'rsvp' => $party->rsvp ? [
                     'status' => $party->rsvp->status,
                     'attending_count' => $party->rsvp->attending_count,
+                    'attending_guest_ids' => collect($party->rsvp->attending_guest_ids ?? [])->values()->all(),
+                    'attending_guest_names' => $this->attendingGuestNames($party),
                     'meal_choices' => $party->rsvp->meal_choices ?? [],
                     'dietary_restrictions' => $party->rsvp->dietary_restrictions,
                     'message' => $party->rsvp->message,
@@ -90,7 +92,7 @@ class RsvpController extends Controller
 
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['party_name', 'code', 'status', 'attending_count', 'dietary_restrictions', 'message', 'meal_choices']);
+            fputcsv($handle, ['party_name', 'code', 'status', 'attending_count', 'attending_guest_names', 'dietary_restrictions', 'message', 'meal_choices']);
 
             Party::query()
                 ->forSite($this->currentSiteId())
@@ -105,6 +107,7 @@ class RsvpController extends Controller
                         $party->code,
                         $rsvp?->status ?? 'no_response',
                         $rsvp?->attending_count ?? 0,
+                        $rsvp ? implode(', ', $this->attendingGuestNames($party)) : '',
                         $rsvp?->dietary_restrictions,
                         $rsvp?->message,
                         $rsvp ? json_encode($rsvp->meal_choices ?? []) : '',
@@ -114,5 +117,43 @@ class RsvpController extends Controller
 
             fclose($handle);
         }, 200, $headers);
+    }
+
+    private function attendingGuestNames(Party $party): array
+    {
+        $rsvp = $party->rsvp;
+
+        if (! $rsvp) {
+            return [];
+        }
+
+        $guests = $party->guests->values();
+        $savedIds = collect($rsvp->attending_guest_ids ?? [])->map(fn ($id) => (int) $id)->filter()->values();
+
+        if ($savedIds->isNotEmpty()) {
+            return $guests
+                ->filter(fn ($guest) => $savedIds->contains((int) $guest->id))
+                ->map(fn ($guest) => trim($guest->first_name.' '.$guest->last_name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        $namedChoices = collect($rsvp->meal_choices ?? [])
+            ->pluck('guest_name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values();
+
+        if ($namedChoices->isNotEmpty()) {
+            return $namedChoices->all();
+        }
+
+        return $guests
+            ->take((int) $rsvp->attending_count)
+            ->map(fn ($guest) => trim($guest->first_name.' '.$guest->last_name))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

@@ -1673,6 +1673,9 @@
                             </span>
                             <span class="ml-2">· Attending: {{ row.rsvp?.attending_count || 0 }} / {{ row.max_guests }}</span>
                         </p>
+                        <p v-if="row.rsvp?.attending_guest_names?.length" class="mt-2 text-sm text-wedding-muted">
+                            Attending guests: {{ row.rsvp.attending_guest_names.join(', ') }}
+                        </p>
                         <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
                             <span>Email RSVP request sent:</span>
                             <template v-if="row.rsvp_email_sent">

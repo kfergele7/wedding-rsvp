@@ -20,12 +20,14 @@ class Rsvp extends Model
         'party_id',
         'status',
         'attending_count',
+        'attending_guest_ids',
         'meal_choices',
         'dietary_restrictions',
         'message',
     ];
 
     protected $casts = [
+        'attending_guest_ids' => 'array',
         'meal_choices' => 'array',
     ];
 

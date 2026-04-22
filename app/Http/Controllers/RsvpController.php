@@ -8,6 +8,7 @@ use App\Mail\HostRsvpNotificationMail;
 use App\Models\Party;
 use App\Models\Rsvp;
 use App\Models\SiteSetting;
+use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -53,8 +54,8 @@ class RsvpController extends Controller
         $data = $request->validated();
         $rsvpSettings = $this->rsvpSettings();
         $mealChoicesEnabled = $this->partyUsesMealChoices($party, $rsvpSettings);
-
-        $attendingCount = (int) $data['attending_count'];
+        $attendingGuestIds = $this->resolveAttendingGuestIds($party, $data);
+        $attendingCount = count($attendingGuestIds);
 
         if ($attendingCount > $party->max_guests) {
             return response()->json([
@@ -64,7 +65,14 @@ class RsvpController extends Controller
 
         if ($data['status'] === Rsvp::STATUS_NOT_ATTENDING) {
             $attendingCount = 0;
+            $attendingGuestIds = [];
             $data['meal_choices'] = [];
+        }
+
+        if ($data['status'] === Rsvp::STATUS_ATTENDING && $attendingCount === 0) {
+            return response()->json([
+                'message' => 'Please select which guests are attending.',
+            ], 422);
         }
 
         if ($mealChoicesEnabled && $data['status'] === Rsvp::STATUS_ATTENDING && $attendingCount > 0) {
@@ -86,6 +94,7 @@ class RsvpController extends Controller
                 'site_id' => $party->site_id,
                 'status' => $data['status'],
                 'attending_count' => $attendingCount,
+                'attending_guest_ids' => $attendingGuestIds,
                 'meal_choices' => $data['meal_choices'] ?? [],
                 'dietary_restrictions' => $data['dietary_restrictions'] ?? null,
                 'message' => $data['message'] ?? null,
@@ -129,6 +138,8 @@ class RsvpController extends Controller
 
     private function partyPayload(Party $party): array
     {
+        $attendingGuests = $this->attendingGuestsForParty($party);
+
         return [
             'id' => $party->id,
             'code' => $party->code,
@@ -146,6 +157,8 @@ class RsvpController extends Controller
             'rsvp' => $party->rsvp ? [
                 'status' => $party->rsvp->status,
                 'attending_count' => $party->rsvp->attending_count,
+                'attending_guest_ids' => $attendingGuests->pluck('id')->values()->all(),
+                'attending_guest_names' => $attendingGuests->map(fn ($guest) => trim($guest->first_name.' '.$guest->last_name))->values()->all(),
                 'meal_choices' => $party->rsvp->meal_choices ?? [],
                 'dietary_restrictions' => $party->rsvp->dietary_restrictions,
                 'message' => $party->rsvp->message,
@@ -270,6 +283,7 @@ class RsvpController extends Controller
     private function sendHostNotification(Request $request, Party $party, Rsvp $rsvp): void
     {
         $site = $this->currentSite()->loadMissing(['account.users']);
+        $attendingGuestNames = $this->attendingGuestsForParty($party)->map(fn ($guest) => trim($guest->first_name.' '.$guest->last_name))->filter()->values()->all();
         $owner = $site->account?->users
             ?->where('is_staff', false)
             ->sortByDesc(fn ($user) => ($user->role ?? '') === 'owner')
@@ -303,6 +317,7 @@ class RsvpController extends Controller
                 guestTypeLabel: $party->guestTypeLabel(),
                 statusLabel: $rsvp->status === Rsvp::STATUS_ATTENDING ? 'Attending' : 'Not attending',
                 attendingCount: (int) $rsvp->attending_count,
+                attendingGuestNames: $attendingGuestNames,
                 maxGuests: (int) $party->max_guests,
                 dietaryRestrictions: $rsvp->dietary_restrictions,
                 messageFromGuest: $rsvp->message,
@@ -317,5 +332,65 @@ class RsvpController extends Controller
                 'error' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function resolveAttendingGuestIds(Party $party, array $data): array
+    {
+        if (($data['status'] ?? null) !== Rsvp::STATUS_ATTENDING) {
+            return [];
+        }
+
+        $validGuestIds = $party->guests->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $requestedIds = collect($data['attending_guest_ids'] ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        return $requestedIds
+            ->filter(fn ($id) => in_array($id, $validGuestIds, true))
+            ->values()
+            ->all();
+    }
+
+    private function attendingGuestsForParty(Party $party): Collection
+    {
+        $rsvp = $party->rsvp;
+
+        if (! $rsvp) {
+            return collect();
+        }
+
+        $guests = $party->guests->values();
+        $savedIds = collect($rsvp->attending_guest_ids ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->values();
+
+        if ($savedIds->isNotEmpty()) {
+            return $guests
+                ->filter(fn ($guest) => $savedIds->contains((int) $guest->id))
+                ->values();
+        }
+
+        $namedChoices = collect($rsvp->meal_choices ?? [])
+            ->pluck('guest_name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values();
+
+        if ($namedChoices->isNotEmpty()) {
+            $matched = $guests->filter(function ($guest) use ($namedChoices) {
+                $fullName = trim($guest->first_name.' '.$guest->last_name);
+
+                return $namedChoices->contains($fullName);
+            })->values();
+
+            if ($matched->isNotEmpty()) {
+                return $matched;
+            }
+        }
+
+        return $guests->take((int) $rsvp->attending_count)->values();
     }
 }

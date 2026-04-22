@@ -19,6 +19,7 @@ class HostRsvpNotificationMail extends Mailable
         public string $guestTypeLabel,
         public string $statusLabel,
         public int $attendingCount,
+        public array $attendingGuestNames,
         public int $maxGuests,
         public ?string $dietaryRestrictions,
         public ?string $messageFromGuest,

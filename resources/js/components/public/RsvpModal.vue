@@ -84,23 +84,36 @@
                     </div>
 
                     <div v-if="form.status === 'attending'">
-                        <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">How many attending?</label>
-                        <select v-model.number="form.attending_count" class="mt-2 w-full border border-soft bg-white px-4 py-3">
-                            <option v-for="count in countOptions" :key="count" :value="count">{{ count }}</option>
-                        </select>
+                        <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Which guests are attending?</label>
+                        <div class="mt-3 grid gap-3">
+                            <label
+                                v-for="guest in party.guests"
+                                :key="guest.id"
+                                class="flex cursor-pointer items-center justify-between gap-3 border px-4 py-3 transition"
+                                :class="form.attending_guest_ids.includes(guest.id) ? 'border-wedding-band bg-wedding-band/5' : 'border-soft bg-white'"
+                            >
+                                <div>
+                                    <p class="font-medium text-wedding-text">{{ formatGuestName(guest) }}</p>
+                                    <p v-if="guest.is_child" class="mt-1 text-xs uppercase tracking-[0.12em] text-wedding-muted">Child guest</p>
+                                </div>
+                                <input
+                                    :checked="form.attending_guest_ids.includes(guest.id)"
+                                    type="checkbox"
+                                    class="h-4 w-4"
+                                    @change="toggleAttendingGuest(guest.id)"
+                                >
+                            </label>
+                        </div>
                     </div>
 
-                    <div v-if="effectiveMealChoicesEnabled && form.status === 'attending' && form.attending_count > 0" class="space-y-4">
+                    <div v-if="effectiveMealChoicesEnabled && form.status === 'attending' && selectedGuests.length > 0" class="space-y-4">
                         <p class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Meal choices</p>
-                        <div v-for="(meal, index) in form.meal_choices" :key="index" class="space-y-3 border border-soft bg-wedding-bg p-4">
-                            <input
-                                v-model="meal.guest_name"
-                                type="text"
-                                class="w-full border border-soft bg-white px-4 py-3"
-                                :placeholder="`Guest ${index + 1} name`"
-                            >
+                        <div v-for="(meal, index) in form.meal_choices" :key="meal.guest_id || index" class="space-y-3 border border-soft bg-wedding-bg p-4">
+                            <div class="w-full border border-soft bg-white px-4 py-3 font-medium text-wedding-text">
+                                {{ meal.guest_name }}
+                            </div>
                             <div class="grid gap-3 md:grid-cols-2">
-                                <div v-for="course in mealSectionsForGuest(index)" :key="`${index}-${course.id}`">
+                                <div v-for="course in mealSectionsForGuest(meal.guest_id)" :key="`${meal.guest_id}-${course.id}`">
                                     <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">{{ course.name }}</label>
                                     <select v-model="meal.selections[course.id]" class="mt-2 w-full border border-soft bg-white px-4 py-3">
                                         <option disabled value="">Select {{ course.name }}</option>
@@ -168,6 +181,9 @@
                         <span class="font-medium">{{ party.rsvp.status === 'attending' ? 'Attending' : 'Not Attending' }}</span>
                         · Attending Count: {{ party.rsvp.attending_count }}
                     </p>
+                    <p v-if="party.rsvp.attending_guest_names?.length" class="mt-2 text-sm text-wedding-muted">
+                        Attending guests: {{ party.rsvp.attending_guest_names.join(', ') }}
+                    </p>
                     <p v-if="party.rsvp.updated_at" class="mt-1 text-sm text-wedding-muted">Updated: {{ party.rsvp.updated_at }}</p>
                 </div>
             </section>
@@ -230,14 +246,10 @@ let closeAfterSubmitTimer = null;
 const form = reactive({
     status: '',
     attending_count: 0,
+    attending_guest_ids: [],
     meal_choices: [],
     dietary_restrictions: '',
     message: '',
-});
-
-const countOptions = computed(() => {
-    const maxGuests = party.value?.max_guests || 0;
-    return Array.from({ length: maxGuests + 1 }, (_, i) => i);
 });
 
 const availableCourseSections = computed(() => mealCourses.value.filter((course) => Array.isArray(course.items) && course.items.length > 0));
@@ -245,6 +257,13 @@ const hasKidsMenu = computed(() => rsvpSettings.value.kids_menu_enabled && kidsM
 const isEveningGuest = computed(() => party.value?.guest_type === 'evening');
 const showSetMenuNotice = computed(() => !effectiveMealChoicesEnabled.value && form.status === 'attending' && !isEveningGuest.value);
 const showEveningGuestNotice = computed(() => form.status === 'attending' && isEveningGuest.value);
+const selectedGuests = computed(() => {
+    if (!party.value?.guests?.length) {
+        return [];
+    }
+
+    return party.value.guests.filter((guest) => form.attending_guest_ids.includes(guest.id));
+});
 const guestTypeMeta = computed(() => {
     if (isEveningGuest.value) {
         return {
@@ -277,14 +296,16 @@ const guestTypeBadgeStyle = computed(() => {
 });
 
 watch(
-    () => form.attending_count,
-    (count) => {
+    () => [...form.attending_guest_ids],
+    () => {
+        form.attending_count = form.attending_guest_ids.length;
+
         if (form.status !== 'attending' || !effectiveMealChoicesEnabled.value) {
             form.meal_choices = [];
             return;
         }
 
-        ensureSelectionsShape(count);
+        ensureSelectionsShape();
     }
 );
 
@@ -293,11 +314,11 @@ watch(
     (status) => {
         if (status === 'not_attending') {
             form.attending_count = 0;
+            form.attending_guest_ids = [];
             form.meal_choices = [];
-        } else if (status === 'attending' && form.attending_count === 0) {
-            form.attending_count = Math.min(1, party.value?.max_guests || 1);
         } else if (!status) {
             form.attending_count = 0;
+            form.attending_guest_ids = [];
             form.meal_choices = [];
         }
     }
@@ -360,6 +381,7 @@ function hydrateFormFromExistingRsvp() {
     if (!existing) {
         form.status = '';
         form.attending_count = 0;
+        form.attending_guest_ids = [];
         form.meal_choices = [];
         form.dietary_restrictions = '';
         form.message = '';
@@ -367,7 +389,8 @@ function hydrateFormFromExistingRsvp() {
     }
 
     form.status = existing.status;
-    form.attending_count = existing.attending_count;
+    form.attending_guest_ids = normalizeAttendingGuestIds(existing);
+    form.attending_count = form.attending_guest_ids.length;
     form.meal_choices = normalizeSavedMealChoices(existing.meal_choices || []);
     form.dietary_restrictions = existing.dietary_restrictions || '';
     form.message = existing.message || '';
@@ -383,6 +406,11 @@ async function saveRsvp() {
         return;
     }
 
+    if (form.status === 'attending' && form.attending_guest_ids.length === 0) {
+        saveError.value = 'Please select which guests are attending.';
+        return;
+    }
+
     saveError.value = '';
     saveSuccess.value = '';
     savingRsvp.value = true;
@@ -394,7 +422,8 @@ async function saveRsvp() {
 
         const response = await window.axios.post(saveEndpoint.value || fallbackSaveEndpoint, {
             status: form.status,
-            attending_count: form.attending_count,
+            attending_count: form.attending_guest_ids.length,
+            attending_guest_ids: form.attending_guest_ids,
             meal_choices: effectiveMealChoicesEnabled.value && form.status === 'attending' ? buildMealChoicesPayload() : [],
             dietary_restrictions: form.dietary_restrictions,
             message: form.message,
@@ -418,12 +447,8 @@ async function saveRsvp() {
     }
 }
 
-function guestAt(index) {
-    return party.value?.guests?.[index] || null;
-}
-
-function mealSectionsForGuest(index) {
-    const guest = guestAt(index);
+function mealSectionsForGuest(guestId) {
+    const guest = party.value?.guests?.find((item) => item.id === guestId) || null;
     if (guest?.is_child && hasKidsMenu.value) {
         return [
             {
@@ -437,42 +462,78 @@ function mealSectionsForGuest(index) {
     return availableCourseSections.value;
 }
 
-function normalizeSavedMealChoices(items) {
-    return Array.isArray(items) ? items.map((item, index) => {
-        const guest = guestAt(index);
-        return {
-            guest_name: item?.guest_name || (guest ? `${guest.first_name} ${guest.last_name}` : ''),
-            meal: item?.meal || '',
-            selections: item?.selections && typeof item.selections === 'object' ? { ...item.selections } : {},
-        };
-    }) : [];
-}
+function normalizeAttendingGuestIds(existing) {
+    const validGuestIds = (party.value?.guests || []).map((guest) => guest.id);
+    const savedIds = Array.isArray(existing?.attending_guest_ids)
+        ? existing.attending_guest_ids.filter((id) => validGuestIds.includes(id))
+        : [];
 
-function ensureSelectionsShape(count) {
-    const current = form.meal_choices;
-    const next = [];
-
-    for (let index = 0; index < count; index += 1) {
-        const existing = current[index];
-        const guest = guestAt(index);
-        next.push({
-            guest_name: existing?.guest_name || (guest ? `${guest.first_name} ${guest.last_name}` : ''),
-            meal: existing?.meal || '',
-            selections: existing?.selections && typeof existing.selections === 'object' ? { ...existing.selections } : {},
-        });
+    if (savedIds.length) {
+        return savedIds;
     }
 
-    form.meal_choices = next;
-    form.meal_choices.forEach((choice, index) => {
-        const validIds = mealSectionsForGuest(index).map((section) => section.id);
+    const namedChoices = Array.isArray(existing?.meal_choices)
+        ? existing.meal_choices
+            .map((choice) => {
+                if (choice?.guest_id && validGuestIds.includes(choice.guest_id)) {
+                    return choice.guest_id;
+                }
+
+                const match = (party.value?.guests || []).find((guest) => formatGuestName(guest) === choice?.guest_name);
+                return match?.id || null;
+            })
+            .filter(Boolean)
+        : [];
+
+    if (namedChoices.length) {
+        return [...new Set(namedChoices)];
+    }
+
+    return (party.value?.guests || []).slice(0, existing?.attending_count || 0).map((guest) => guest.id);
+}
+
+function normalizeSavedMealChoices(items) {
+    const existingByGuestId = new Map(
+        Array.isArray(items)
+            ? items
+                .map((item) => [item?.guest_id || null, item])
+                .filter(([guestId]) => guestId)
+            : []
+    );
+
+    const existingByGuestName = new Map(
+        Array.isArray(items)
+            ? items
+                .map((item) => [item?.guest_name || null, item])
+                .filter(([guestName]) => guestName)
+            : []
+    );
+
+    return selectedGuests.value.map((guest) => {
+        const fullName = formatGuestName(guest);
+        const existing = existingByGuestId.get(guest.id) || existingByGuestName.get(fullName);
+
+        return {
+            guest_id: guest.id,
+            guest_name: existing?.guest_name || fullName,
+            meal: existing?.meal || '',
+            selections: existing?.selections && typeof existing.selections === 'object' ? { ...existing.selections } : {},
+        };
+    });
+}
+
+function ensureSelectionsShape() {
+    form.meal_choices = normalizeSavedMealChoices(form.meal_choices);
+    form.meal_choices.forEach((choice) => {
+        const validIds = mealSectionsForGuest(choice.guest_id).map((section) => section.id);
         choice.selections = Object.fromEntries(
             Object.entries(choice.selections || {}).filter(([key]) => validIds.includes(key))
         );
     });
 }
 
-function buildMealSummary(choice, guestIndex) {
-    const sections = mealSectionsForGuest(guestIndex);
+function buildMealSummary(choice) {
+    const sections = mealSectionsForGuest(choice.guest_id);
     return sections
         .map((section) => {
             const value = choice.selections?.[section.id];
@@ -483,10 +544,24 @@ function buildMealSummary(choice, guestIndex) {
 }
 
 function buildMealChoicesPayload() {
-    return form.meal_choices.map((choice, index) => ({
+    return form.meal_choices.map((choice) => ({
+        guest_id: choice.guest_id,
         guest_name: choice.guest_name,
-        meal: buildMealSummary(choice, index).slice(0, 60),
+        meal: buildMealSummary(choice).slice(0, 60),
         selections: choice.selections || {},
     }));
+}
+
+function toggleAttendingGuest(guestId) {
+    if (form.attending_guest_ids.includes(guestId)) {
+        form.attending_guest_ids = form.attending_guest_ids.filter((id) => id !== guestId);
+        return;
+    }
+
+    form.attending_guest_ids = [...form.attending_guest_ids, guestId];
+}
+
+function formatGuestName(guest) {
+    return `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim() || 'Unnamed guest';
 }
 </script>

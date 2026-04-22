@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\HostRsvpNotificationMail;
 use App\Models\Account;
+use App\Models\Guest;
 use App\Models\Party;
 use App\Models\PlatformSetting;
 use App\Models\Site;
@@ -92,23 +93,38 @@ class PublicWeddingSlugRouteTest extends TestCase
     {
         $site = $this->makeSite('save-route-account', 'save-route-site', true, 'Save Route Couple');
 
-        Party::query()->create([
+        $party = Party::query()->create([
             'site_id' => $site->id,
             'display_name' => 'Kane',
             'code' => 'VQVA',
             'max_guests' => 2,
         ]);
 
+        $guestOne = Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Jonny',
+            'last_name' => 'Kane',
+        ]);
+
+        $guestTwo = Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Ellie',
+            'last_name' => 'Kane',
+        ]);
+
         $this->postJson('/w/'.$site->public_slug.'/rsvp/VQVA', [
             'status' => 'attending',
             'attending_count' => 2,
+            'attending_guest_ids' => [$guestOne->id, $guestTwo->id],
             'meal_choices' => [
-                ['guest_name' => 'Jonny Kane', 'meal' => 'Starter: Tart | Main: Beef | Dessert: Lemon', 'selections' => [
+                ['guest_id' => $guestOne->id, 'guest_name' => 'Jonny Kane', 'meal' => 'Starter: Tart | Main: Beef | Dessert: Lemon', 'selections' => [
                     'starter' => 'Heirloom Tomato Tart',
                     'main' => 'Beef Fillet',
                     'dessert' => 'Lemon Posset',
                 ]],
-                ['guest_name' => 'Ellie Kane', 'meal' => 'Starter: Tart | Main: Seabass | Dessert: Lemon', 'selections' => [
+                ['guest_id' => $guestTwo->id, 'guest_name' => 'Ellie Kane', 'meal' => 'Starter: Tart | Main: Seabass | Dessert: Lemon', 'selections' => [
                     'starter' => 'Heirloom Tomato Tart',
                     'main' => 'Seabass',
                     'dessert' => 'Lemon Posset',
@@ -117,7 +133,9 @@ class PublicWeddingSlugRouteTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('party.code', 'VQVA')
             ->assertJsonPath('party.rsvp.status', 'attending')
-            ->assertJsonPath('party.rsvp.attending_count', 2);
+            ->assertJsonPath('party.rsvp.attending_count', 2)
+            ->assertJsonPath('party.rsvp.attending_guest_names.0', 'Jonny Kane')
+            ->assertJsonPath('party.rsvp.attending_guest_names.1', 'Ellie Kane');
     }
 
     public function test_evening_guest_lookup_returns_evening_type_and_disables_meal_choices(): void
@@ -143,7 +161,7 @@ class PublicWeddingSlugRouteTest extends TestCase
     {
         $site = $this->makeSite('evening-save-account', 'evening-save-site', true, 'Evening Save Couple');
 
-        Party::query()->create([
+        $party = Party::query()->create([
             'site_id' => $site->id,
             'display_name' => 'Evening Save Guests',
             'guest_type' => Party::GUEST_TYPE_EVENING,
@@ -151,15 +169,32 @@ class PublicWeddingSlugRouteTest extends TestCase
             'max_guests' => 2,
         ]);
 
+        $guestOne = Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Mark',
+            'last_name' => 'Skilldog',
+        ]);
+
+        $guestTwo = Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Mel',
+            'last_name' => 'Skilldog',
+        ]);
+
         $this->postJson('/w/'.$site->public_slug.'/rsvp/DUSK', [
             'status' => 'attending',
             'attending_count' => 2,
+            'attending_guest_ids' => [$guestOne->id, $guestTwo->id],
             'meal_choices' => [],
         ])->assertOk()
             ->assertJsonPath('party.code', 'DUSK')
             ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_EVENING)
             ->assertJsonPath('party.rsvp.status', 'attending')
-            ->assertJsonPath('party.rsvp.attending_count', 2);
+            ->assertJsonPath('party.rsvp.attending_count', 2)
+            ->assertJsonPath('party.rsvp.attending_guest_names.0', 'Mark Skilldog')
+            ->assertJsonPath('party.rsvp.attending_guest_names.1', 'Mel Skilldog');
     }
 
     public function test_public_rsvp_save_sends_notification_email_to_account_owner(): void
@@ -169,7 +204,7 @@ class PublicWeddingSlugRouteTest extends TestCase
         $site = $this->makeSite('notification-account', 'notification-site', true, 'Notification Couple');
         $owner = $this->makeUserForAccount($site->account_id, 'owner@example.test');
 
-        Party::query()->create([
+        $party = Party::query()->create([
             'site_id' => $site->id,
             'display_name' => 'Kane Party',
             'guest_type' => Party::GUEST_TYPE_DAY,
@@ -177,9 +212,24 @@ class PublicWeddingSlugRouteTest extends TestCase
             'max_guests' => 2,
         ]);
 
+        $guestOne = Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Jonny',
+            'last_name' => 'Kane',
+        ]);
+
+        Guest::query()->create([
+            'party_id' => $party->id,
+            'site_id' => $site->id,
+            'first_name' => 'Emma',
+            'last_name' => 'Kane',
+        ]);
+
         $this->postJson('/w/'.$site->public_slug.'/rsvp/HOSTN', [
             'status' => 'attending',
-            'attending_count' => 2,
+            'attending_count' => 1,
+            'attending_guest_ids' => [$guestOne->id],
             'meal_choices' => [],
             'dietary_restrictions' => 'No nuts please',
             'message' => 'Looking forward to it.',

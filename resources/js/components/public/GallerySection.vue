@@ -1,5 +1,5 @@
 <template>
-    <section v-if="visibleImages.length >= 2" class="bg-[#F2ECE3] pb-20 md:pb-28">
+    <section v-if="visibleImages.length >= 2" class="bg-[#F2ECE3] pt-20 pb-20 md:pt-28 md:pb-28">
         <div class="site-shell">
             <div class="card-frame bg-white">
                 <h2 class="section-heading text-center">{{ content.heading || "Photo's of us across the years" }}</h2>
