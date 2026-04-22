@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Party;
 use App\Support\TenantContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,6 +29,7 @@ class StorePartyRequest extends FormRequest
 
         return [
             'display_name' => ['required', 'string', 'max:255'],
+            'guest_type' => ['nullable', Rule::in(Party::guestTypes())],
             'email' => ['nullable', 'email:rfc,dns', 'max:255'],
             'code' => [
                 'nullable',

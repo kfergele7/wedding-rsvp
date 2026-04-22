@@ -97,6 +97,9 @@ return [
             'imageFocusX' => 50,
             'imageFocusY' => 50,
         ],
+        'countdown' => [
+            'targetDateTime' => '2026-09-12T15:30',
+        ],
         'gallery' => [
             'heading' => "Photo's of us across the years",
             'items' => [],
@@ -118,6 +121,7 @@ return [
             'travel' => true,
             'menu' => true,
             'faqs' => true,
+            'countdown' => true,
             'gallery' => true,
         ],
     ],

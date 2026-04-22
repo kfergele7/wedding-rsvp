@@ -29,6 +29,7 @@ class UpdatePartyRequest extends FormRequest
 
         return [
             'display_name' => ['required', 'string', 'max:255'],
+            'guest_type' => ['required', Rule::in(Party::guestTypes())],
             'email' => ['nullable', 'email:rfc,dns', 'max:255'],
             'code' => [
                 'required',

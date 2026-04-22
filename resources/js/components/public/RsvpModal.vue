@@ -36,7 +36,17 @@
 
             <section v-if="party" class="card-frame mt-6 bg-white">
                 <h3 class="font-heading text-3xl">Welcome, {{ party.display_name }}</h3>
-                <p class="mt-2 text-wedding-muted">
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <span
+                        class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"
+                        :style="guestTypeBadgeStyle"
+                    >
+                        <span class="material-symbols-outlined text-base">{{ guestTypeMeta.icon }}</span>
+                        {{ guestTypeMeta.label }}
+                    </span>
+                    <p class="text-sm text-wedding-muted">{{ guestTypeMeta.description }}</p>
+                </div>
+                <p class="mt-3 text-wedding-muted">
                     Code: <span class="font-medium uppercase">{{ party.code }}</span>
                     · Max Guests: {{ party.max_guests }}
                 </p>
@@ -71,7 +81,7 @@
                         </select>
                     </div>
 
-                    <div v-if="mealChoicesEnabled && form.status === 'attending' && form.attending_count > 0" class="space-y-4">
+                    <div v-if="effectiveMealChoicesEnabled && form.status === 'attending' && form.attending_count > 0" class="space-y-4">
                         <p class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Meal choices</p>
                         <div v-for="(meal, index) in form.meal_choices" :key="index" class="space-y-3 border border-soft bg-wedding-bg p-4">
                             <input
@@ -93,10 +103,17 @@
                     </div>
 
                     <div
-                        v-if="!mealChoicesEnabled && form.status === 'attending'"
+                        v-if="showSetMenuNotice"
                         class="cms-rich rounded border border-soft bg-wedding-bg p-4 text-sm text-wedding-muted"
                         v-html="rsvpSettings.set_menu_description"
                     ></div>
+
+                    <div
+                        v-if="showEveningGuestNotice"
+                        class="rounded border border-soft bg-wedding-bg p-4 text-sm text-wedding-muted"
+                    >
+                        Evening guests do not need to choose a meal here. Please let us know any dietary requirements below.
+                    </div>
 
                     <div>
                         <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Dietary requirements</label>
@@ -167,7 +184,7 @@ const props = defineProps({
     },
 });
 
-defineEmits(['close']);
+const emit = defineEmits(['close', 'party-resolved']);
 
 const rsvpSettings = ref({
     meal_mode: props.rsvpSettingsPayload?.meal_mode || 'options',
@@ -179,6 +196,7 @@ const rsvpSettings = ref({
 });
 const mealOptions = ref(rsvpSettings.value.meal_options);
 const mealChoicesEnabled = computed(() => rsvpSettings.value.meal_mode === 'options');
+const effectiveMealChoicesEnabled = ref(mealChoicesEnabled.value);
 const mealCourses = ref([]);
 const kidsMenuItems = ref([]);
 const saveEndpoint = ref('');
@@ -212,11 +230,44 @@ const countOptions = computed(() => {
 
 const availableCourseSections = computed(() => mealCourses.value.filter((course) => Array.isArray(course.items) && course.items.length > 0));
 const hasKidsMenu = computed(() => rsvpSettings.value.kids_menu_enabled && kidsMenuItems.value.length > 0);
+const isEveningGuest = computed(() => party.value?.guest_type === 'evening');
+const showSetMenuNotice = computed(() => !effectiveMealChoicesEnabled.value && form.status === 'attending' && !isEveningGuest.value);
+const showEveningGuestNotice = computed(() => form.status === 'attending' && isEveningGuest.value);
+const guestTypeMeta = computed(() => {
+    if (isEveningGuest.value) {
+        return {
+            icon: 'dark_mode',
+            label: 'Evening Guest',
+            description: 'You are invited to the evening celebration.',
+        };
+    }
+
+    return {
+        icon: 'sunny',
+        label: 'Day Guest',
+        description: 'You are invited to join us for the full day.',
+    };
+});
+const guestTypeBadgeStyle = computed(() => {
+    if (isEveningGuest.value) {
+        return {
+            color: '#22363A',
+            borderColor: 'rgba(34, 54, 58, 0.24)',
+            backgroundColor: 'rgba(34, 54, 58, 0.08)',
+        };
+    }
+
+    return {
+        color: '#D79A2B',
+        borderColor: 'rgba(215, 154, 43, 0.24)',
+        backgroundColor: 'rgba(215, 154, 43, 0.08)',
+    };
+});
 
 watch(
     () => form.attending_count,
     (count) => {
-        if (form.status !== 'attending' || !mealChoicesEnabled.value) {
+        if (form.status !== 'attending' || !effectiveMealChoicesEnabled.value) {
             form.meal_choices = [];
             return;
         }
@@ -261,6 +312,7 @@ async function lookupCode() {
         saveEndpoint.value = response.data.saveUrl || '';
         mealCourses.value = response.data.mealCourses || [];
         kidsMenuItems.value = response.data.kidsMenuItems || [];
+        effectiveMealChoicesEnabled.value = Boolean(response.data.mealChoicesEnabled);
         if (response.data.rsvpSettings) {
             rsvpSettings.value = {
                 ...rsvpSettings.value,
@@ -274,6 +326,7 @@ async function lookupCode() {
         }
         mealOptions.value = response.data.mealOptions || rsvpSettings.value.meal_options;
         hydrateFormFromExistingRsvp();
+        emit('party-resolved', party.value);
     } catch (error) {
         party.value = null;
         lookupError.value = error.response?.data?.message || 'Unable to find that RSVP code.';
@@ -323,7 +376,7 @@ async function saveRsvp() {
         const response = await window.axios.post(saveEndpoint.value || fallbackSaveEndpoint, {
             status: form.status,
             attending_count: form.attending_count,
-            meal_choices: mealChoicesEnabled.value && form.status === 'attending' ? buildMealChoicesPayload() : [],
+            meal_choices: effectiveMealChoicesEnabled.value && form.status === 'attending' ? buildMealChoicesPayload() : [],
             dietary_restrictions: form.dietary_restrictions,
             message: form.message,
         });
@@ -331,6 +384,7 @@ async function saveRsvp() {
         party.value = response.data.party;
         saveSuccess.value = response.data.message || 'RSVP saved.';
         hydrateFormFromExistingRsvp();
+        emit('party-resolved', party.value);
     } catch (error) {
         saveError.value = error.response?.data?.message || 'Unable to save RSVP right now.';
     } finally {

@@ -30,7 +30,7 @@ class RsvpController extends Controller
             'mealOptions' => $this->mealOptionsFromSettings($rsvpSettings),
             'mealCourses' => $this->mealCoursesFromSettings($rsvpSettings),
             'kidsMenuItems' => $this->kidsMenuItemsFromSettings($rsvpSettings),
-            'mealChoicesEnabled' => (($rsvpSettings['meal_mode'] ?? 'options') === 'options'),
+            'mealChoicesEnabled' => $this->partyUsesMealChoices($party, $rsvpSettings),
             'rsvpSettings' => $rsvpSettings,
             'saveUrl' => $this->saveUrlForParty($party),
         ]);
@@ -49,7 +49,7 @@ class RsvpController extends Controller
 
         $data = $request->validated();
         $rsvpSettings = $this->rsvpSettings();
-        $mealChoicesEnabled = (($rsvpSettings['meal_mode'] ?? 'options') === 'options');
+        $mealChoicesEnabled = $this->partyUsesMealChoices($party, $rsvpSettings);
 
         $attendingCount = (int) $data['attending_count'];
 
@@ -129,6 +129,8 @@ class RsvpController extends Controller
             'id' => $party->id,
             'code' => $party->code,
             'display_name' => $party->display_name,
+            'guest_type' => $party->guest_type ?: Party::GUEST_TYPE_DAY,
+            'guest_type_label' => $party->guestTypeLabel(),
             'max_guests' => $party->max_guests,
             'notes' => $party->notes,
             'guests' => $party->guests->map(fn ($guest) => [
@@ -146,6 +148,15 @@ class RsvpController extends Controller
                 'updated_at' => $party->rsvp->updated_at?->toDateTimeString(),
             ] : null,
         ];
+    }
+
+    private function partyUsesMealChoices(Party $party, array $rsvpSettings): bool
+    {
+        if (($party->guest_type ?: Party::GUEST_TYPE_DAY) === Party::GUEST_TYPE_EVENING) {
+            return false;
+        }
+
+        return (($rsvpSettings['meal_mode'] ?? 'options') === 'options');
     }
 
     private function mealOptionsFromSettings(array $rsvpSettings): array

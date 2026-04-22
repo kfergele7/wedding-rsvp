@@ -77,6 +77,7 @@ class PartyController extends Controller
         $party = Party::query()->create([
             'site_id' => $siteId,
             'display_name' => $data['display_name'],
+            'guest_type' => $data['guest_type'] ?? Party::GUEST_TYPE_DAY,
             'email' => $data['email'] ?? null,
             'code' => $code,
             'max_guests' => $maxGuests,
@@ -112,6 +113,7 @@ class PartyController extends Controller
 
         $party->update([
             'display_name' => $data['display_name'],
+            'guest_type' => $data['guest_type'],
             'email' => $data['email'] ?? null,
             'code' => strtoupper(trim($data['code'])),
             'max_guests' => max($data['max_guests'], $this->minimumSeatsForParty($party)),
@@ -210,6 +212,9 @@ class PartyController extends Controller
                     [
                         'site_id' => $siteId,
                         'display_name' => $payload['party_display_name'],
+                        'guest_type' => in_array(strtolower((string) ($payload['guest_type'] ?? 'day')), Party::guestTypes(), true)
+                            ? strtolower((string) $payload['guest_type'])
+                            : Party::GUEST_TYPE_DAY,
                         'email' => $payload['email'] !== '' ? strtolower($payload['email']) : null,
                         'max_guests' => max(1, (int) ($payload['max_guests'] ?: 1)),
                         'notes' => $payload['notes'] ?: null,
@@ -251,7 +256,7 @@ class PartyController extends Controller
 
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['party_display_name', 'email', 'code', 'max_guests', 'notes', 'first_name', 'last_name', 'is_child', 'allow_plus_one']);
+            fputcsv($handle, ['party_display_name', 'guest_type', 'email', 'code', 'max_guests', 'notes', 'first_name', 'last_name', 'is_child', 'allow_plus_one']);
 
             Party::query()
                 ->forSite($this->currentSiteId())
@@ -260,13 +265,14 @@ class PartyController extends Controller
                 ->chunk(200, function ($parties) use ($handle) {
                 foreach ($parties as $party) {
                     if ($party->guests->isEmpty()) {
-                        fputcsv($handle, [$party->display_name, $party->email, $party->code, $party->max_guests, $party->notes, '', '', '', '']);
+                        fputcsv($handle, [$party->display_name, $party->guest_type, $party->email, $party->code, $party->max_guests, $party->notes, '', '', '', '']);
                         continue;
                     }
 
                     foreach ($party->guests as $guest) {
                         fputcsv($handle, [
                             $party->display_name,
+                            $party->guest_type,
                             $party->email,
                             $party->code,
                             $party->max_guests,
@@ -355,6 +361,8 @@ class PartyController extends Controller
         return [
             'id' => $party->id,
             'display_name' => $party->display_name,
+            'guest_type' => $party->guest_type ?: Party::GUEST_TYPE_DAY,
+            'guest_type_label' => $party->guestTypeLabel(),
             'email' => $party->email,
             'code' => $party->code,
             'max_guests' => $party->max_guests,

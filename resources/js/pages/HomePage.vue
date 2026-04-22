@@ -29,16 +29,20 @@
         <HeroSection :content="content.hero" @open-rsvp="openRsvpModal" />
 
         <main class="bg-[#F7F5F2]">
-            <WelcomeSection v-if="sectionVisibility.welcome" :content="content.welcome" />
-            <TimelineSection v-if="sectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" />
-            <StorySection v-if="sectionVisibility.story" :content="content.story" />
+            <WelcomeSection v-if="effectiveSectionVisibility.welcome" :content="content.welcome" />
+            <TimelineSection v-if="effectiveSectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" />
+            <StorySection v-if="effectiveSectionVisibility.story" :content="content.story" />
             <DetailsSection
                 :content="content.details"
                 :rsvp-settings="rsvpSettings"
                 :primary-color="content.theme.primary_color"
-                :section-visibility="sectionVisibility"
+                :section-visibility="effectiveSectionVisibility"
             />
-            <GallerySection v-if="sectionVisibility.gallery" :content="content.gallery" />
+            <CountdownSection
+                v-if="effectiveSectionVisibility.countdown"
+                :target-date-time="content.countdown.targetDateTime"
+            />
+            <GallerySection v-if="effectiveSectionVisibility.gallery" :content="content.gallery" />
             <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
         </main>
 
@@ -55,6 +59,7 @@
             :initial-code="rsvpInitialCode"
             :public-slug="payload.publicSlug || ''"
             :rsvp-settings-payload="rsvpSettings"
+            @party-resolved="handleResolvedParty"
             @close="closeRsvpModal"
         />
     </div>
@@ -67,6 +72,7 @@ import WelcomeSection from '../components/public/WelcomeSection.vue';
 import TimelineSection from '../components/public/TimelineSection.vue';
 import StorySection from '../components/public/StorySection.vue';
 import DetailsSection from '../components/public/DetailsSection.vue';
+import CountdownSection from '../components/public/CountdownSection.vue';
 import GallerySection from '../components/public/GallerySection.vue';
 import RsvpCtaSection from '../components/public/RsvpCtaSection.vue';
 import RsvpModal from '../components/public/RsvpModal.vue';
@@ -142,6 +148,9 @@ const fallbackContent = {
         imageFocusX: 50,
         imageFocusY: 50,
     },
+    countdown: {
+        targetDateTime: '2026-09-12T15:30',
+    },
     gallery: {
         heading: "Photo's of us across the years",
         items: [],
@@ -163,6 +172,7 @@ const fallbackContent = {
         travel: true,
         menu: true,
         faqs: true,
+        countdown: true,
         gallery: true,
     },
 };
@@ -187,6 +197,7 @@ const content = computed(() => {
             venue: { ...fallbackContent.details.venue, ...(incoming.details?.venue || {}) },
             faqs: incoming.details?.faqs || fallbackContent.details.faqs,
         },
+        countdown: { ...fallbackContent.countdown, ...(incoming.countdown || {}) },
         gallery: {
             ...fallbackContent.gallery,
             ...(incoming.gallery || {}),
@@ -199,6 +210,24 @@ const content = computed(() => {
 });
 
 const sectionVisibility = computed(() => content.value.section_visibility || fallbackContent.section_visibility);
+const resolvedGuestParty = ref(null);
+const resolvedGuestType = computed(() => resolvedGuestParty.value?.guest_type || null);
+const effectiveSectionVisibility = computed(() => {
+    const baseVisibility = { ...sectionVisibility.value };
+
+    if (resolvedGuestType.value !== 'evening') {
+        return baseVisibility;
+    }
+
+    return {
+        ...baseVisibility,
+        welcome: false,
+        story: false,
+        timeline: false,
+        menu: false,
+        gallery: false,
+    };
+});
 const previewBanner = computed(() => props.payload?.previewBanner || null);
 const previewBannerRef = ref(null);
 const previewBannerHeight = ref(0);
@@ -310,6 +339,10 @@ function openRsvpModal() {
 
 function closeRsvpModal() {
     isRsvpModalOpen.value = false;
+}
+
+function handleResolvedParty(resolvedParty) {
+    resolvedGuestParty.value = resolvedParty || null;
 }
 
 function normalizeMenuCourses(courses) {

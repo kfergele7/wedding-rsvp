@@ -13,10 +13,14 @@ class Party extends Model
     use BelongsToSite;
     use HasFactory;
 
+    public const GUEST_TYPE_DAY = 'day';
+    public const GUEST_TYPE_EVENING = 'evening';
+
     protected $fillable = [
         'site_id',
         'code',
         'display_name',
+        'guest_type',
         'email',
         'max_guests',
         'notes',
@@ -35,6 +39,21 @@ class Party extends Model
     public function rsvpEmailLogs(): HasMany
     {
         return $this->hasMany(RsvpEmailLog::class);
+    }
+
+    public static function guestTypes(): array
+    {
+        return [
+            self::GUEST_TYPE_DAY,
+            self::GUEST_TYPE_EVENING,
+        ];
+    }
+
+    public function guestTypeLabel(): string
+    {
+        return $this->guest_type === self::GUEST_TYPE_EVENING
+            ? 'Evening Guest'
+            : 'Day Guest';
     }
 
     public static function generateCode(int $siteId, int $length = 5): string

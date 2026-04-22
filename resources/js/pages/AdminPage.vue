@@ -841,10 +841,46 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div id="gallery-section" class="content-section-block content-section-odd">
+                        <div id="countdown-section" class="content-section-block content-section-odd">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">10</span>
+                                <span class="font-heading text-3xl">Countdown Timer</span>
+                            </h3>
+                            <div class="section-toggle-row">
+                                <button type="button" class="section-toggle" :class="{ 'is-active': isSectionVisible('countdown') }" @click="toggleSectionVisibility('countdown')">
+                                    <span class="section-toggle-thumb">
+                                        <span v-if="isSectionVisible('countdown')" class="material-symbols-outlined">check</span>
+                                    </span>
+                                </button>
+                                <span class="section-toggle-note">Show or hide this section.</span>
+                            </div>
+
+                            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">
+                                    Ceremony Date &amp; Time
+                                    <input
+                                        v-model="content.countdown.targetDateTime"
+                                        type="datetime-local"
+                                        class="mt-2 w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                    >
+                                </label>
+                                <div class="rounded border border-soft bg-white px-4 py-4 text-sm text-wedding-muted">
+                                    <p class="font-medium text-wedding-text">What this controls</p>
+                                    <p class="mt-2">
+                                        The countdown timer on your website will count down to this ceremony date and time.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full py-8">
+                            <hr class="w-full border-t-2 border-wedding-band">
+                        </div>
+
+                        <div id="gallery-section" class="content-section-block content-section-even">
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                                 <h3 class="section-heading-with-badge">
-                                    <span class="section-step-badge">10</span>
+                                    <span class="section-step-badge">11</span>
                                     <span class="font-heading text-3xl">Photo Gallery</span>
                                 </h3>
                                 <button
@@ -964,9 +1000,9 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-even">
+                        <div class="content-section-block content-section-odd">
                             <h3 class="section-heading-with-badge">
-                                <span class="section-step-badge">11</span>
+                                <span class="section-step-badge">12</span>
                                 <span class="font-heading text-3xl">Final RSVP Request</span>
                             </h3>
 
@@ -1005,11 +1041,20 @@
 
                 <div class="content-section-block content-section-even">
                     <h3 class="font-heading text-2xl">Create a Party</h3>
-                    <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    <div class="mt-3 grid gap-3 md:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Party Name</label>
                             <input v-model="newParty.display_name" placeholder="Party name" class="w-full border border-soft px-4 py-3">
                         </div>
+                        <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</label>
+                            <select v-model="newParty.guest_type" class="w-full border border-soft bg-white px-4 py-3">
+                                <option value="day">Day Guest</option>
+                                <option value="evening">Evening Guest</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3 grid gap-3 md:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
                                 EMAIL
@@ -1136,10 +1181,21 @@
                         <p class="text-sm text-wedding-muted">Showing {{ filteredParties.length }} of {{ parties.length }}</p>
                     </div>
 
-                    <div class="mb-4 flex flex-wrap items-center gap-4 border border-soft bg-[#F7F7F7] px-4 py-3 text-xs text-wedding-muted">
+                    <div class="mb-4 flex flex-wrap items-center gap-5 border border-soft bg-[#F7F7F7] px-4 py-3 text-xs text-wedding-muted">
                         <span class="uppercase tracking-[0.14em] text-wedding-text">RSVP key</span>
                         <span
                             v-for="item in rsvpStatusLegend"
+                            :key="item.title"
+                            class="inline-flex items-center gap-1"
+                            :title="item.title"
+                        >
+                            <span class="material-symbols-outlined rsvp-status-icon-small" :style="{ color: item.color }">{{ item.icon }}</span>
+                            {{ item.label }}
+                        </span>
+                        <span class="mx-1 text-wedding-muted/70" aria-hidden="true">|</span>
+                        <span class="uppercase tracking-[0.14em] text-wedding-text">Guest key</span>
+                        <span
+                            v-for="item in guestTypeLegend"
                             :key="item.title"
                             class="inline-flex items-center gap-1"
                             :title="item.title"
@@ -1191,6 +1247,15 @@
                                     </td>
                                     <td class="px-3 py-2">
                                         <p class="inline-flex items-center gap-2 font-medium">
+                                            <span
+                                                class="material-symbols-outlined rsvp-status-icon"
+                                                :style="{ color: guestTypeMeta(partyItem).color }"
+                                                :title="guestTypeMeta(partyItem).title"
+                                                :aria-label="guestTypeMeta(partyItem).title"
+                                                role="img"
+                                            >
+                                                {{ guestTypeMeta(partyItem).icon }}
+                                            </span>
                                             <span>{{ partyItem.display_name }}</span>
                                             <span
                                                 class="material-symbols-outlined rsvp-status-icon"
@@ -1272,6 +1337,15 @@
                             <input v-model="selectedParty.display_name" class="w-full border border-soft px-4 py-3">
                         </div>
                         <div>
+                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</label>
+                            <select v-model="selectedParty.guest_type" class="w-full border border-soft bg-white px-4 py-3">
+                                <option value="day">Day Guest</option>
+                                <option value="evening">Evening Guest</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3 grid gap-3 md:grid-cols-2">
+                        <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
                                 EMAIL
                                 <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(only required if sending via email)</span>
@@ -1292,7 +1366,7 @@
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Max Guests</label>
                             <input v-model.number="selectedParty.max_guests" type="number" min="1" max="20" class="w-full border border-soft px-4 py-3">
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="md:col-span-2 mt-1">
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Notes</label>
                             <textarea v-model="selectedParty.notes" rows="3" class="w-full border border-soft px-4 py-3" placeholder="Notes"></textarea>
                         </div>
@@ -1876,6 +1950,7 @@ const rsvpForm = reactive({
 
 const newParty = reactive({
     display_name: '',
+    guest_type: 'day',
     email: '',
     code: '',
     max_guests: 1,
@@ -2011,6 +2086,20 @@ const rsvpStatusLegend = [
         title: 'Guest has not yet responded',
     },
 ];
+const guestTypeLegend = [
+    {
+        icon: 'sunny',
+        color: '#D79A2B',
+        label: 'Day Guest',
+        title: 'Day guest invitation',
+    },
+    {
+        icon: 'dark_mode',
+        color: '#22363A',
+        label: 'Evening Guest',
+        title: 'Evening guest invitation',
+    },
+];
 
 const navItems = [
     { key: 'dashboard', label: 'Dashboard', href: adminBaseUrl, icon: 'dashboard' },
@@ -2108,6 +2197,8 @@ async function loadParties() {
         const response = await window.axios.get(`${apiBaseUrl}/parties`);
         parties.value = (response.data.parties || []).map((party) => ({
             ...party,
+            guest_type: party.guest_type || 'day',
+            guest_type_label: party.guest_type_label || (party.guest_type === 'evening' ? 'Evening Guest' : 'Day Guest'),
             guests: (party.guests || []).map((guest) => ({
                 ...guest,
                 allow_plus_one: Boolean(guest.allow_plus_one),
@@ -2396,6 +2487,22 @@ function rsvpStatusMeta(partyItem) {
     };
 }
 
+function guestTypeMeta(partyItem) {
+    if ((partyItem?.guest_type || 'day') === 'evening') {
+        return {
+            icon: 'dark_mode',
+            color: '#22363A',
+            title: 'Evening guest invitation',
+        };
+    }
+
+    return {
+        icon: 'sunny',
+        color: '#D79A2B',
+        title: 'Day guest invitation',
+    };
+}
+
 function addTimelineItem() {
     if (!content.value) {
         return;
@@ -2541,6 +2648,16 @@ async function saveContent(openPreviewAfterSave = false) {
             'Please upload at least 2 images for the photo gallery, or hide this section if you do not want it to appear.',
             '',
             'gallery-section'
+        );
+        return;
+    }
+
+    if (isSectionVisible('countdown') && !content.value?.countdown?.targetDateTime?.trim()) {
+        openNoticeModal(
+            'Ceremony date and time needed',
+            'Please add the ceremony date and time for the countdown section, or hide this section if you do not want it to appear.',
+            '',
+            'countdown-section'
         );
         return;
     }
@@ -2732,6 +2849,16 @@ function ensureImageFocusDefaults() {
         content.value.gallery.heading = "Photo's of us across the years";
     }
 
+    if (typeof content.value.countdown !== 'object' || content.value.countdown === null) {
+        content.value.countdown = {
+            targetDateTime: '2026-09-12T15:30',
+        };
+    }
+
+    if (!content.value.countdown.targetDateTime) {
+        content.value.countdown.targetDateTime = '2026-09-12T15:30';
+    }
+
     content.value.gallery.items = content.value.gallery.items.slice(0, 8).map((item) => ({
         image: item?.image || '',
         imageFocusX: typeof item?.imageFocusX === 'number' ? item.imageFocusX : 50,
@@ -2773,6 +2900,7 @@ function ensureSectionVisibilityDefaults() {
         travel: true,
         menu: true,
         faqs: true,
+        countdown: true,
         gallery: true,
     };
 
@@ -3014,6 +3142,7 @@ async function createParty() {
             max_guests: invitedSeats,
         });
         newParty.display_name = '';
+        newParty.guest_type = 'day';
         newParty.email = '';
         newParty.max_guests = 1;
         newParty.notes = '';

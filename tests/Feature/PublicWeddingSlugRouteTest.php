@@ -118,6 +118,48 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->assertJsonPath('party.rsvp.attending_count', 2);
     }
 
+    public function test_evening_guest_lookup_returns_evening_type_and_disables_meal_choices(): void
+    {
+        $site = $this->makeSite('evening-account', 'evening-site', true, 'Evening Couple');
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Evening Guests',
+            'guest_type' => Party::GUEST_TYPE_EVENING,
+            'code' => 'MOON',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'MOON'])
+            ->assertOk()
+            ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_EVENING)
+            ->assertJsonPath('party.guest_type_label', 'Evening Guest')
+            ->assertJsonPath('mealChoicesEnabled', false);
+    }
+
+    public function test_evening_guest_can_save_rsvp_without_meal_choices(): void
+    {
+        $site = $this->makeSite('evening-save-account', 'evening-save-site', true, 'Evening Save Couple');
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Evening Save Guests',
+            'guest_type' => Party::GUEST_TYPE_EVENING,
+            'code' => 'DUSK',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/DUSK', [
+            'status' => 'attending',
+            'attending_count' => 2,
+            'meal_choices' => [],
+        ])->assertOk()
+            ->assertJsonPath('party.code', 'DUSK')
+            ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_EVENING)
+            ->assertJsonPath('party.rsvp.status', 'attending')
+            ->assertJsonPath('party.rsvp.attending_count', 2);
+    }
+
     public function test_staff_user_can_preview_any_unpublished_site_and_use_rsvp_lookup(): void
     {
         $site = $this->makeSite('staff-preview-account', 'staff-preview-site', false, 'Staff Preview Couple');

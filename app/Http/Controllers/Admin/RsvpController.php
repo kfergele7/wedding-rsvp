@@ -24,6 +24,8 @@ class RsvpController extends Controller
             return [
                 'party_id' => $party->id,
                 'party_name' => $party->display_name,
+                'guest_type' => $party->guest_type ?: Party::GUEST_TYPE_DAY,
+                'guest_type_label' => $party->guestTypeLabel(),
                 'email' => $party->email,
                 'code' => $party->code,
                 'max_guests' => $party->max_guests,
