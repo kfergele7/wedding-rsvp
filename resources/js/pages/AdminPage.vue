@@ -1790,15 +1790,19 @@
                     <img :src="qrImageUrl" alt="Public URL QR code" class="h-72 w-72 border border-soft object-contain">
                 </div>
 
-                <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                    <a
-                        :href="qrImageUrl"
-                        :download="`${qrDownloadName}-qr.png`"
+                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                    <button
+                        type="button"
                         class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                        @click="downloadQrImage('png')"
                     >
                         <span class="material-symbols-outlined btn-icon">download</span>
-                        Download
-                    </a>
+                        Download PNG
+                    </button>
+                    <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="downloadQrImage('jpg')">
+                        <span class="material-symbols-outlined btn-icon">image</span>
+                        Download JPG
+                    </button>
                     <button type="button" class="admin-tool-btn inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" @click="shareQrImage">
                         <span class="material-symbols-outlined btn-icon">share</span>
                         Share Image
@@ -2561,6 +2565,31 @@ function closeQrModal() {
     qrModalOpen.value = false;
 }
 
+async function downloadQrImage(format = 'png') {
+    if (!previewUrl) {
+        setError('Public URL is not available.');
+        return;
+    }
+
+    try {
+        const response = await fetch(qrImageUrl.value);
+        const blob = await response.blob();
+
+        if (format === 'jpg') {
+            const jpgUrl = await convertImageBlobToJpg(blob);
+            triggerQrDownload(jpgUrl, `${qrDownloadName.value}-qr.jpg`);
+            URL.revokeObjectURL(jpgUrl);
+            return;
+        }
+
+        const transparentPngUrl = await convertImageBlobToTransparentPng(blob);
+        triggerQrDownload(transparentPngUrl, `${qrDownloadName.value}-qr.png`);
+        URL.revokeObjectURL(transparentPngUrl);
+    } catch {
+        setError(`Could not download the QR code as ${format.toUpperCase()}.`);
+    }
+}
+
 async function shareQrImage() {
     if (!previewUrl) {
         setError('Public URL is not available.');
@@ -2583,6 +2612,101 @@ async function shareQrImage() {
     }
 
     await copyToClipboard(previewUrl);
+}
+
+function triggerQrDownload(fileUrl, fileName) {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function convertImageBlobToTransparentPng(blob) {
+    return convertQrImageBlob(blob, ({ context, canvas }) => {
+        context.drawImage(canvas.sourceImage, 0, 0);
+
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+
+        for (let index = 0; index < pixels.length; index += 4) {
+            const red = pixels[index];
+            const green = pixels[index + 1];
+            const blue = pixels[index + 2];
+
+            if (red > 245 && green > 245 && blue > 245) {
+                pixels[index + 3] = 0;
+            }
+        }
+
+        context.putImageData(imageData, 0, 0);
+
+        return new Promise((resolve, reject) => {
+            canvas.toBlob((pngBlob) => {
+                if (!pngBlob) {
+                    reject(new Error('Could not create transparent PNG image.'));
+                    return;
+                }
+
+                resolve(URL.createObjectURL(pngBlob));
+            }, 'image/png');
+        });
+    });
+}
+
+function convertImageBlobToJpg(blob) {
+    return convertQrImageBlob(blob, ({ context, canvas }) => {
+        context.fillStyle = '#FFFFFF';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(canvas.sourceImage, 0, 0);
+
+        return new Promise((resolve, reject) => {
+            canvas.toBlob((jpgBlob) => {
+                if (!jpgBlob) {
+                    reject(new Error('Could not create JPG image.'));
+                    return;
+                }
+
+                resolve(URL.createObjectURL(jpgBlob));
+            }, 'image/jpeg', 0.92);
+        });
+    });
+}
+
+function convertQrImageBlob(blob, renderCanvas) {
+    return new Promise((resolve, reject) => {
+        const sourceUrl = URL.createObjectURL(blob);
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth || image.width;
+            canvas.height = image.naturalHeight || image.height;
+            canvas.sourceImage = image;
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                URL.revokeObjectURL(sourceUrl);
+                reject(new Error('Canvas context is not available.'));
+                return;
+            }
+
+            Promise.resolve(renderCanvas({ context, canvas }))
+                .then((objectUrl) => {
+                    URL.revokeObjectURL(sourceUrl);
+                    resolve(objectUrl);
+                })
+                .catch((error) => {
+                    URL.revokeObjectURL(sourceUrl);
+                    reject(error);
+                });
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(sourceUrl);
+            reject(new Error('Could not load QR image.'));
+        };
+        image.src = sourceUrl;
+    });
 }
 
 function printQrImage() {

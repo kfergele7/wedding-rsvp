@@ -137,7 +137,7 @@
                         Evening guests do not need to choose a meal here. Please let us know any dietary requirements below.
                     </div>
 
-                    <div>
+                    <div v-if="form.status === 'attending'">
                         <label class="text-sm uppercase tracking-[0.15em] text-wedding-muted">Dietary requirements</label>
                         <textarea
                             v-model="form.dietary_restrictions"
@@ -316,10 +316,12 @@ watch(
             form.attending_count = 0;
             form.attending_guest_ids = [];
             form.meal_choices = [];
+            form.dietary_restrictions = '';
         } else if (!status) {
             form.attending_count = 0;
             form.attending_guest_ids = [];
             form.meal_choices = [];
+            form.dietary_restrictions = '';
         }
     }
 );
@@ -425,7 +427,7 @@ async function saveRsvp() {
             attending_count: form.attending_guest_ids.length,
             attending_guest_ids: form.attending_guest_ids,
             meal_choices: effectiveMealChoicesEnabled.value && form.status === 'attending' ? buildMealChoicesPayload() : [],
-            dietary_restrictions: form.dietary_restrictions,
+            dietary_restrictions: form.status === 'attending' ? form.dietary_restrictions : '',
             message: form.message,
         });
 
