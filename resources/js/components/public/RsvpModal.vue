@@ -275,7 +275,7 @@ const guestTypeMeta = computed(() => {
 
     return {
         icon: 'sunny',
-        label: 'Day Guest',
+        label: 'All Day Guest',
         description: 'You are invited to join us for the full day.',
     };
 });

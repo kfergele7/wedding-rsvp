@@ -35,7 +35,7 @@
                                         RSVP Invitation
                                     </p>
                                     <h1 style="margin:0; font-family: Georgia, 'Times New Roman', serif; font-size:34px; line-height:1.15; color:#0F1B1D;">
-                                        You're invited as a {{ $guestTypeLabel }}
+                                        Your invitation is for: {{ $guestTypeLabel }}
                                     </h1>
                                 </td>
                             </tr>
@@ -45,7 +45,7 @@
                                         Hello {{ $partyName }},
                                     </p>
                                     <p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#0F1B1D;">
-                                        We would love for you to join us. Your invitation is marked as a
+                                        We would love for you to join us. Your invitation is marked as
                                         <strong>{{ $guestTypeLabel }}</strong>, and you can submit your RSVP using the details below.
                                     </p>
                                 </td>
@@ -73,7 +73,7 @@
                                             <tr>
                                                 <td style="padding:22px 24px; text-align:center;">
                                                     <p style="margin:0 0 8px; color:#FFFFFF; font-size:12px; letter-spacing:0.18em; text-transform:uppercase;">
-                                                        RSVP Deadline
+                                                        Please RSVP by
                                                     </p>
                                                     <p style="margin:0; color:#FFFFFF; font-family: Georgia, 'Times New Roman', serif; font-size:32px; line-height:1.2;">
                                                         {{ $responseDeadline }}

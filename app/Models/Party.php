@@ -53,7 +53,7 @@ class Party extends Model
     {
         return $this->guest_type === self::GUEST_TYPE_EVENING
             ? 'Evening Guest'
-            : 'Day Guest';
+            : 'All Day Guest';
     }
 
     public static function generateCode(int $siteId, int $length = 5): string

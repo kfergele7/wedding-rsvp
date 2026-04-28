@@ -22,7 +22,7 @@
                                 {{ $partyName }} has sent their RSVP
                             </h1>
                             <p style="margin:14px 0 0;font-size:15px;line-height:1.6;color:#F7F5F2;">
-                                A {{ strtolower($guestTypeLabel) }} has just responded to your wedding invitation for {{ $siteTitle }}.
+                                {{ $guestTypeLabel }} response received for {{ $siteTitle }}.
                             </p>
                         </td>
                     </tr>
@@ -94,7 +94,7 @@
                                 <tr>
                                     <td align="center">
                                         <p style="margin:0;font-size:13px;line-height:1.6;color:#848484;">
-                                            You can review and manage this response from your RSVP Requests page.
+                                            You can review and manage this response from your RSVP Responses page.
                                         </p>
                                     </td>
                                 </tr>

@@ -1076,7 +1076,7 @@
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</label>
                             <select v-model="newParty.guest_type" class="w-full border border-soft bg-white px-4 py-3">
-                                <option value="day">Day Guest</option>
+                                <option value="day">All Day Guest</option>
                                 <option value="evening">Evening Guest</option>
                             </select>
                         </div>
@@ -1336,9 +1336,11 @@
                                             <button class="admin-btn inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">edit</span>
                                             </button>
-                                            <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Email RSVP" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
-                                                <span class="material-symbols-outlined btn-icon">mail</span>
-                                            </button>
+                                            <span class="inline-flex" :class="{ 'disabled-action-tooltip': !partyItem.email }" :title="emailActionTitle(partyItem.email, 'Email RSVP')">
+                                                <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
+                                                    <span class="material-symbols-outlined btn-icon">mail</span>
+                                                </button>
+                                            </span>
                                             <button class="admin-btn admin-btn-danger inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
                                                 <span class="material-symbols-outlined btn-icon">delete</span>
                                             </button>
@@ -1370,7 +1372,7 @@
                         </div>
                         <div class="rounded border border-soft bg-[#F7F7F7] p-4">
                             <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</p>
-                            <p class="mt-1 text-base text-wedding-text">{{ selectedParty.guest_type_label || (selectedParty.guest_type === 'evening' ? 'Evening Guest' : 'Day Guest') }}</p>
+                            <p class="mt-1 text-base text-wedding-text">{{ selectedParty.guest_type_label || (selectedParty.guest_type === 'evening' ? 'Evening Guest' : 'All Day Guest') }}</p>
                         </div>
                         <div class="rounded border border-soft bg-[#F7F7F7] p-4">
                             <p class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Email</p>
@@ -1460,7 +1462,7 @@
                         <div>
                             <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Guest Type</label>
                             <select v-model="selectedParty.guest_type" class="w-full border border-soft bg-white px-4 py-3">
-                                <option value="day">Day Guest</option>
+                                <option value="day">All Day Guest</option>
                                 <option value="evening">Evening Guest</option>
                             </select>
                         </div>
@@ -1612,12 +1614,12 @@
 
             <section v-if="section === 'rsvps'" class="card-frame bg-white">
                 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="font-heading text-3xl">RSVP Requests</h2>
+                    <h2 class="font-heading text-3xl">RSVP Responses</h2>
                     <a class="admin-btn border border-soft px-4 py-2 text-xs uppercase tracking-[0.12em]" :href="rsvpsExportUrl">Export RSVP CSV</a>
                 </div>
 
-                <div class="mb-4 grid gap-3 md:grid-cols-3">
-                    <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted md:col-span-3">
+                <div class="mb-4 grid gap-3 md:grid-cols-4">
+                    <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted md:col-span-4">
                         Search RSVP Responses
                         <input
                             v-model="rsvpSearchTerm"
@@ -1635,69 +1637,129 @@
                             <option value="no_response">No Response</option>
                         </select>
                     </label>
+                    <label class="text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                        Guest Type Filter
+                        <select v-model="rsvpGuestTypeFilter" class="mt-1 w-full border border-soft bg-white px-3 py-2 text-sm normal-case tracking-normal text-wedding-text">
+                            <option value="all">All Guest Types</option>
+                            <option value="day">All Day Guests</option>
+                            <option value="evening">Evening Guests</option>
+                        </select>
+                    </label>
                     <div class="flex items-end text-sm text-wedding-muted">
                         Showing {{ filteredRsvpRows.length }} of {{ rsvpRows.length }} guest lists
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <article v-for="row in filteredRsvpRows" :key="row.party_id" class="border border-soft p-4">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h3 class="font-heading text-2xl">{{ row.party_name }}</h3>
+                    <article
+                        v-for="(row, rowIndex) in filteredRsvpRows"
+                        :key="row.party_id"
+                        class="border border-soft p-4"
+                        :class="rowIndex % 2 === 0 ? 'bg-white' : 'bg-[#F7F7F7]'"
+                    >
+                        <div class="grid gap-4 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.65fr)_auto] md:items-center">
+                            <div class="min-w-0 space-y-2.5">
+                                <h3 class="inline-flex items-center gap-2 font-heading text-2xl">
+                                    <span class="truncate">{{ row.party_name }}</span>
+                                </h3>
                                 <p class="text-sm text-wedding-muted uppercase">Code: {{ row.code }}</p>
+                                <p class="inline-flex items-center gap-1 text-sm text-wedding-muted">
+                                    <span
+                                        class="material-symbols-outlined rsvp-status-icon-small"
+                                        :style="{ color: guestTypeMeta(row).color }"
+                                        :title="guestTypeMeta(row).title"
+                                        :aria-label="guestTypeMeta(row).title"
+                                        role="img"
+                                    >
+                                        {{ guestTypeMeta(row).icon }}
+                                    </span>
+                                    {{ guestTypeMeta(row).label.toLowerCase() }}
+                                </p>
                             </div>
 
-                            <button
-                                class="admin-btn inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
-                                :class="!row.rsvp?.status ? 'admin-btn-success' : ''"
-                                type="button"
-                                @click="editRsvp(row)"
-                            >
-                                <span class="material-symbols-outlined btn-icon">{{ row.rsvp?.status ? 'edit' : 'add' }}</span>
-                                {{ row.rsvp?.status ? 'Edit RSVP' : 'Manually RSVP' }}
-                            </button>
-                        </div>
+                            <div class="space-y-2 border-soft text-sm text-wedding-muted md:border-l md:pl-5">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Status</span>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium uppercase tracking-[0.08em]"
+                                        :class="{
+                                            'border-emerald-200 bg-emerald-50 text-emerald-700': row.rsvp?.status === 'attending',
+                                            'border-red-200 bg-red-50 text-red-700': row.rsvp?.status === 'not_attending',
+                                            'border-[#D79A2B] bg-[#D79A2B]/10 text-[#D79A2B]': !row.rsvp?.status,
+                                        }"
+                                    >
+                                        {{ row.rsvp ? formatStatus(row.rsvp.status) : 'No Response' }}
+                                    </span>
+                                    <span>Attending: {{ row.rsvp?.attending_count || 0 }} / {{ row.max_guests }}</span>
+                                </div>
 
-                        <p class="mt-2 text-wedding-muted">
-                            Status:
-                            <span
-                                class="ml-1 inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium uppercase tracking-[0.08em]"
-                                :class="{
-                                    'border-emerald-200 bg-emerald-50 text-emerald-700': row.rsvp?.status === 'attending',
-                                    'border-red-200 bg-red-50 text-red-700': row.rsvp?.status === 'not_attending',
-                                    'border-[#D79A2B] bg-[#D79A2B]/10 text-[#D79A2B]': !row.rsvp?.status,
-                                }"
-                            >
-                                {{ row.rsvp ? formatStatus(row.rsvp.status) : 'No Response' }}
-                            </span>
-                            <span class="ml-2">· Attending: {{ row.rsvp?.attending_count || 0 }} / {{ row.max_guests }}</span>
-                        </p>
-                        <p v-if="row.rsvp?.attending_guest_names?.length" class="mt-2 text-sm text-wedding-muted">
-                            Attending guests: {{ row.rsvp.attending_guest_names.join(', ') }}
-                        </p>
-                        <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
-                            <span>Email RSVP request sent:</span>
-                            <template v-if="row.rsvp_email_sent">
-                                <span class="text-emerald-700">Yes, email sent at {{ formatDateTime(row.rsvp_email_sent_at) }}</span>
+                                <p v-if="row.rsvp?.attending_guest_names?.length" class="max-w-full truncate" :title="row.rsvp.attending_guest_names.join(', ')">
+                                    <span class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Attending guests</span>
+                                    <span class="ml-2">{{ row.rsvp.attending_guest_names.join(', ') }}</span>
+                                </p>
+                                <p v-else class="text-wedding-muted">
+                                    <span class="text-xs uppercase tracking-[0.12em] text-wedding-muted">Attending guests</span>
+                                    <span class="ml-2">None selected yet</span>
+                                </p>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs uppercase tracking-[0.12em] text-wedding-muted">RSVP request sent</span>
+                                    <template v-if="row.rsvp_email_sent">
+                                        <span class="text-emerald-700">Yes, email sent at {{ formatDate(row.rsvp_email_sent_at) }}</span>
+                                        <span class="text-wedding-muted">-</span>
+                                        <button
+                                            type="button"
+                                            class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
+                                            title="View RSVP email history"
+                                            @click="openPartyEmailHistory(row.party_id, row.party_name)"
+                                        >
+                                            View RSVP History
+                                        </button>
+                                    </template>
+                                    <span v-else-if="row.email" class="text-red-700">No</span>
+                                    <span v-else class="text-wedding-muted">No email address entered</span>
+                                </div>
+                            </div>
+
+                            <div class="grid w-fit grid-cols-4 gap-1.5 md:grid-cols-2 md:justify-self-end">
+                                <span class="inline-flex" :class="{ 'disabled-action-tooltip': !row.rsvp }" :title="viewResponseActionTitle(row)">
+                                    <button
+                                        class="admin-btn admin-btn-view inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                        type="button"
+                                        :disabled="!row.rsvp"
+                                        @click="openRsvpResponseModal(row)"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">visibility</span>
+                                    </button>
+                                </span>
                                 <button
+                                    class="admin-btn inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                    :class="!row.rsvp?.status ? 'admin-btn-success' : ''"
                                     type="button"
-                                    class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
-                                    title="View RSVP email history"
-                                    @click="openPartyEmailHistory(row.party_id, row.party_name)"
+                                    :title="row.rsvp?.status ? 'Edit RSVP' : 'Manually RSVP'"
+                                    @click="editRsvp(row)"
                                 >
-                                    View RSVP History
+                                    <span class="material-symbols-outlined btn-icon">{{ row.rsvp?.status ? 'edit' : 'add' }}</span>
                                 </button>
-                            </template>
-                            <button
-                                v-else-if="row.email"
-                                type="button"
-                                class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
-                                @click="openSendRsvpConfirmModal([row.party_id])"
-                            >
-                                Send email now
-                            </button>
-                            <span v-else class="text-wedding-muted">No email address has been entered for this guest</span>
+                                <span class="inline-flex" :class="{ 'disabled-action-tooltip': !row.email }" :title="emailActionTitle(row.email, 'Email Guest')">
+                                    <button
+                                        class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                        type="button"
+                                        :disabled="!row.email"
+                                        @click="openSendRsvpConfirmModal([row.party_id])"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">mail</span>
+                                    </button>
+                                </span>
+                                <button
+                                    class="admin-btn admin-btn-danger inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                    type="button"
+                                    title="Delete Guest"
+                                    @click="deletePartyById(row.party_id, row.party_name)"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">delete</span>
+                                </button>
+                            </div>
                         </div>
                     </article>
                     <p v-if="filteredRsvpRows.length === 0" class="border border-soft bg-wedding-bg px-4 py-3 text-sm text-wedding-muted">
@@ -1707,6 +1769,99 @@
 
             </section>
         </main>
+
+        <div v-if="selectedRsvpResponse" class="fixed inset-0 z-[72] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeRsvpResponseModal">
+            <div class="mx-auto my-4 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:my-16 md:p-8">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">RSVP Response</p>
+                        <h3 class="mt-1 font-heading text-3xl">{{ selectedRsvpResponse.party_name }}</h3>
+                        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-wedding-muted">
+                            <span class="inline-flex items-center gap-1">
+                                <span
+                                    class="material-symbols-outlined rsvp-status-icon-small"
+                                    :style="{ color: guestTypeMeta(selectedRsvpResponse).color }"
+                                    :title="guestTypeMeta(selectedRsvpResponse).title"
+                                    aria-hidden="true"
+                                >
+                                    {{ guestTypeMeta(selectedRsvpResponse).icon }}
+                                </span>
+                                {{ selectedRsvpResponse.guest_type_label || (selectedRsvpResponse.guest_type === 'evening' ? 'Evening Guest' : 'All Day Guest') }}
+                            </span>
+                            <span>Code: {{ selectedRsvpResponse.code }}</span>
+                        </div>
+                    </div>
+                    <button class="modal-close-x" type="button" aria-label="Close RSVP response details" title="Close" @click="closeRsvpResponseModal">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="mt-6 grid gap-3 md:grid-cols-3">
+                    <article class="border border-soft bg-wedding-bg p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Status</p>
+                        <p class="mt-2 text-lg font-medium">{{ selectedRsvpResponse.rsvp ? formatStatus(selectedRsvpResponse.rsvp.status) : 'No Response' }}</p>
+                    </article>
+                    <article class="border border-soft bg-wedding-bg p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Attending</p>
+                        <p class="mt-2 text-lg font-medium">{{ selectedRsvpResponse.rsvp?.attending_count || 0 }} / {{ selectedRsvpResponse.max_guests }}</p>
+                    </article>
+                    <article class="border border-soft bg-wedding-bg p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Submitted</p>
+                        <p class="mt-2 text-sm text-wedding-text">{{ selectedRsvpResponse.rsvp?.updated_at ? formatDateTime(selectedRsvpResponse.rsvp.updated_at) : 'Not submitted yet' }}</p>
+                    </article>
+                </div>
+
+                <div class="mt-5 space-y-4">
+                    <article class="border border-soft bg-[#F7F7F7] p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Attending Guests</p>
+                        <p v-if="selectedRsvpResponse.rsvp?.attending_guest_names?.length" class="mt-2 text-wedding-text">
+                            {{ selectedRsvpResponse.rsvp.attending_guest_names.join(', ') }}
+                        </p>
+                        <p v-else class="mt-2 text-wedding-muted">No attending guests have been selected.</p>
+                    </article>
+
+                    <article class="border border-soft bg-white p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Dietary Requirements</p>
+                        <p v-if="selectedRsvpResponse.rsvp?.dietary_restrictions" class="mt-2 whitespace-pre-line text-wedding-text">
+                            {{ selectedRsvpResponse.rsvp.dietary_restrictions }}
+                        </p>
+                        <p v-else class="mt-2 text-wedding-muted">No dietary requirements provided.</p>
+                    </article>
+
+                    <article class="border border-soft bg-[#F7F7F7] p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Message To The Couple</p>
+                        <p v-if="selectedRsvpResponse.rsvp?.message" class="mt-2 whitespace-pre-line text-wedding-text">
+                            {{ selectedRsvpResponse.rsvp.message }}
+                        </p>
+                        <p v-else class="mt-2 text-wedding-muted">No message provided.</p>
+                    </article>
+
+                    <article class="border border-soft bg-white p-4">
+                        <p class="text-xs uppercase tracking-[0.14em] text-wedding-muted">Meal Choices</p>
+                        <div v-if="rsvpMealChoiceRows(selectedRsvpResponse).length" class="mt-3 space-y-3">
+                            <div v-for="(choice, choiceIndex) in rsvpMealChoiceRows(selectedRsvpResponse)" :key="`${choice.guest}-${choiceIndex}`" class="border border-soft bg-wedding-bg p-3">
+                                <p class="font-medium">{{ choice.guest }}</p>
+                                <p class="mt-1 text-sm text-wedding-muted">{{ choice.summary }}</p>
+                                <ul v-if="choice.selections.length" class="mt-2 space-y-1 text-sm text-wedding-muted">
+                                    <li v-for="selection in choice.selections" :key="selection">{{ selection }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p v-else class="mt-2 text-wedding-muted">No meal choices recorded.</p>
+                    </article>
+                </div>
+
+                <div class="mt-6 flex flex-wrap justify-end gap-3">
+                    <button class="admin-btn border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="editRsvp(selectedRsvpResponse); closeRsvpResponseModal();">
+                        Edit RSVP
+                    </button>
+                    <button class="admin-btn admin-btn-danger inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="closeRsvpResponseModal">
+                        <span class="material-symbols-outlined btn-icon">close</span>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <div v-if="editingRsvp" class="fixed inset-0 z-[70] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeRsvpModal">
             <div class="mx-auto my-4 w-full max-w-3xl border border-soft bg-white p-6 shadow-soft md:my-16 md:p-8">
@@ -2073,8 +2228,10 @@ const emailHistoryModal = reactive({
 });
 const rsvpRows = ref([]);
 const rsvpStatusFilter = ref('all');
+const rsvpGuestTypeFilter = ref('all');
 const rsvpSearchTerm = ref('');
 const editingRsvp = ref(null);
+const selectedRsvpResponse = ref(null);
 
 const rsvpForm = reactive({
     status: 'attending',
@@ -2191,6 +2348,11 @@ const filteredRsvpRows = computed(() =>
                 return false;
             }
         }
+
+        if (rsvpGuestTypeFilter.value !== 'all' && (row.guest_type || 'day') !== rsvpGuestTypeFilter.value) {
+            return false;
+        }
+
         return true;
     }),
 );
@@ -2226,8 +2388,8 @@ const guestTypeLegend = [
     {
         icon: 'sunny',
         color: '#D79A2B',
-        label: 'Day Guest',
-        title: 'Day guest invitation',
+        label: 'All Day Guest',
+        title: 'All Day Guest invitation',
     },
     {
         icon: 'dark_mode',
@@ -2241,7 +2403,7 @@ const navItems = [
     { key: 'dashboard', label: 'Dashboard', href: adminBaseUrl, icon: 'dashboard' },
     { key: 'content', label: 'Create your website', href: `${adminBaseUrl}/content`, icon: 'edit_note' },
     { key: 'parties', label: 'Guest List', href: `${adminBaseUrl}/parties`, icon: 'groups' },
-    { key: 'rsvps', label: 'RSVP Requests', href: `${adminBaseUrl}/rsvps`, icon: 'event_note' },
+    { key: 'rsvps', label: 'RSVP Responses', href: `${adminBaseUrl}/rsvps`, icon: 'event_note' },
 ];
 const partiesExportUrl = `${apiBaseUrl}/parties/export`;
 const rsvpsExportUrl = `${apiBaseUrl}/rsvps/export`;
@@ -2334,7 +2496,7 @@ async function loadParties() {
         parties.value = (response.data.parties || []).map((party) => ({
             ...party,
             guest_type: party.guest_type || 'day',
-            guest_type_label: party.guest_type_label || (party.guest_type === 'evening' ? 'Evening Guest' : 'Day Guest'),
+            guest_type_label: party.guest_type_label || (party.guest_type === 'evening' ? 'Evening Guest' : 'All Day Guest'),
             guests: (party.guests || []).map((guest) => ({
                 ...guest,
                 allow_plus_one: Boolean(guest.allow_plus_one),
@@ -2486,6 +2648,15 @@ function closePartyEmailHistory() {
     emailHistoryModal.history = [];
     emailHistoryModal.loading = false;
     emailHistoryModal.error = '';
+}
+
+function openRsvpResponseModal(row) {
+    selectedRsvpResponse.value = row;
+    clearError();
+}
+
+function closeRsvpResponseModal() {
+    selectedRsvpResponse.value = null;
 }
 
 function openSendRsvpConfirmModal(partyIds = null) {
@@ -2738,6 +2909,36 @@ function formatStatus(status) {
     return status === 'attending' ? 'Attending' : 'Not Attending';
 }
 
+function rsvpMealChoiceRows(row) {
+    const choices = row?.rsvp?.meal_choices;
+
+    if (!Array.isArray(choices)) {
+        return [];
+    }
+
+    return choices
+        .map((choice, index) => {
+            const selections = choice?.selections && typeof choice.selections === 'object'
+                ? Object.entries(choice.selections)
+                    .filter(([, value]) => String(value || '').trim())
+                    .map(([course, value]) => `${formatCourseLabel(course)}: ${value}`)
+                : [];
+
+            return {
+                guest: choice?.guest_name || `Guest ${index + 1}`,
+                summary: choice?.meal || selections.join(', ') || 'No meal summary recorded',
+                selections,
+            };
+        })
+        .filter((choice) => choice.summary || choice.selections.length);
+}
+
+function formatCourseLabel(value) {
+    return String(value || '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function rsvpStatusMeta(partyItem) {
     const status = partyItem?.rsvp?.status;
 
@@ -2769,6 +2970,7 @@ function guestTypeMeta(partyItem) {
         return {
             icon: 'dark_mode',
             color: '#22363A',
+            label: 'Evening Guest',
             title: 'Evening guest invitation',
         };
     }
@@ -2776,8 +2978,17 @@ function guestTypeMeta(partyItem) {
     return {
         icon: 'sunny',
         color: '#D79A2B',
-        title: 'Day guest invitation',
+        label: 'All Day Guest',
+        title: 'All Day Guest invitation',
     };
+}
+
+function emailActionTitle(email, fallbackTitle = 'Email Guest') {
+    return email ? fallbackTitle : "this guest doesn't have an email address";
+}
+
+function viewResponseActionTitle(row) {
+    return row?.rsvp ? 'View Response' : 'no response has been given yet';
 }
 
 function formatGuestName(guest) {
@@ -4217,6 +4428,19 @@ function formatDateTime(value) {
     return parsed.toLocaleString();
 }
 
+function formatDate(value) {
+    if (!value) {
+        return '';
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+        return '';
+    }
+
+    return parsed.toLocaleDateString();
+}
+
 function captureSavedSnapshots() {
     lastSavedContentSnapshot.value = serialize(content.value);
     lastSavedRsvpSnapshot.value = serialize(rsvpSettings.value);
@@ -4238,7 +4462,13 @@ function serialize(value) {
     font-weight: 500;
 }
 
-.admin-shell,
+.admin-shell {
+    max-width: none;
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 .admin-main-shell {
     max-width: none;
     width: 100%;
@@ -4435,6 +4665,30 @@ function serialize(value) {
     box-shadow: none !important;
     cursor: not-allowed !important;
     opacity: 1 !important;
+}
+
+.admin-btn:disabled .btn-icon,
+.admin-btn-view:disabled .btn-icon,
+.admin-btn-success:disabled .btn-icon,
+.admin-btn-danger:disabled .btn-icon {
+    color: #ffffff !important;
+}
+
+.admin-btn:disabled:hover,
+.admin-btn-view:disabled:hover,
+.admin-btn-success:disabled:hover,
+.admin-btn-danger:disabled:hover {
+    border-color: #848484 !important;
+    background-color: #848484 !important;
+    color: #ffffff !important;
+}
+
+.disabled-action-tooltip {
+    cursor: not-allowed;
+}
+
+.disabled-action-tooltip .admin-btn:disabled {
+    pointer-events: none;
 }
 
 .content-section-block {
