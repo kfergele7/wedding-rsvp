@@ -10,8 +10,8 @@
     <link rel="alternate icon" href="/favicon.ico">
     @vite(['resources/css/app.css'])
 </head>
-<body class="min-h-screen bg-[#F7F5F2] text-[#0F1B1D] antialiased">
-    <main class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-16">
+<body class="flex min-h-screen flex-col bg-[#F7F5F2] text-[#0F1B1D] antialiased">
+    <main class="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
         <div class="absolute inset-x-0 top-0 h-2 bg-[#22363A]"></div>
         <div class="absolute -left-20 top-20 hidden h-72 w-72 rounded-full bg-[#F2ECE3] blur-3xl md:block"></div>
         <div class="absolute -right-20 bottom-20 hidden h-72 w-72 rounded-full bg-[#466369]/20 blur-3xl md:block"></div>
@@ -97,5 +97,17 @@
             </div>
         </section>
     </main>
+
+    <footer class="bg-[#0F1B1D] py-[5px] text-white/85">
+        <div class="mx-auto flex w-full max-w-[1180px] flex-col gap-1 px-4 text-[10px] uppercase tracking-[0.12em] sm:flex-row sm:items-center sm:justify-between">
+            <span>&copy; Copyright Magic Invitation {{ now()->year }}</span>
+            <span>
+                Built by
+                <a href="https://elementseven.co/" target="_blank" rel="noopener noreferrer" class="ml-1 underline-offset-2 hover:underline">
+                    Element Seven
+                </a>
+            </span>
+        </div>
+    </footer>
 </body>
 </html>

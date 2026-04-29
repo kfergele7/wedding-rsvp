@@ -30,7 +30,7 @@ class AdminController extends Controller
                 'siteTitle' => $site->title,
                 'siteSettingsUpdateUrl' => route('customer.site.settings.update'),
                 'hasPaidAccess' => (bool) $site->account?->hasActivePaidAccess(),
-                'billingUrl' => route('customer.dashboard', ['tab' => 'account']),
+                'billingUrl' => route('customer.dashboard').'#billing-section',
                 'sitePublished' => (bool) $site->is_published,
                 'sitePublishUrl' => route('customer.site.publish'),
             ],

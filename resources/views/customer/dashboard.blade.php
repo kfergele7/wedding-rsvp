@@ -42,13 +42,13 @@
                     <span class="material-symbols-outlined btn-icon">person</span>
                     My Account
                 </a>
-            </nav>
-
-            <div class="flex items-center gap-2 border-l border-soft pl-4">
                 <a href="{{ route('customer.admin.dashboard') }}" class="cust-tab inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
                     <span class="material-symbols-outlined btn-icon">edit_note</span>
                     Manage Wedding
                 </a>
+            </nav>
+
+            <div class="flex items-center gap-2 border-l border-soft pl-4">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="admin-btn cust-logout inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"><span class="material-symbols-outlined btn-icon">logout</span>Logout</button>
@@ -97,7 +97,7 @@
     </section>
 
     <section class="mt-8 grid gap-5 md:grid-cols-2">
-        <article class="card-frame bg-white">
+        <article id="billing-section" class="card-frame scroll-mt-28 bg-white">
             <h2 class="font-heading text-3xl">Billing</h2>
             <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Subscription Status</p>
             <p class="mt-1 text-lg {{ in_array($billing['status'], ['active', 'gifted'], true) ? 'text-emerald-700' : 'text-red-700' }}">

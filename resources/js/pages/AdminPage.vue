@@ -66,44 +66,51 @@
                         </div>
                     </div>
 
-                    <div class="mt-7 grid gap-4 md:grid-cols-2">
+                    <div class="mt-7 space-y-3">
                         <article
                             v-for="(item, index) in setupChecklistItems"
                             :key="item.key"
-                            class="content-section-block content-section-even flex h-full flex-col border transition"
+                            class="border px-4 py-4 transition md:grid md:grid-cols-[minmax(210px,0.7fr)_minmax(0,1fr)_210px] md:items-center md:gap-4"
                             :class="[
                                 item.completed ? 'border-wedding-success/40 bg-emerald-50/40' : 'border-soft bg-white',
                                 item.isNext ? 'ring-2 ring-wedding-band/20' : '',
                             ]"
                         >
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-full" :class="item.completed ? 'bg-wedding-success text-white' : 'bg-wedding-bg text-wedding-band'">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">{{ item.completed ? 'check' : item.icon }}</span>
-                                </div>
-                                <span class="text-xs uppercase tracking-[0.14em]" :class="item.completed ? 'text-wedding-successdark' : item.isNext ? 'text-wedding-band' : 'text-wedding-muted'">
-                                    {{ item.completed ? 'Complete' : item.isNext ? 'Next' : `Step ${index + 1}` }}
+                            <div class="flex items-center gap-8">
+                                <span
+                                    class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                                    :class="item.completed ? 'bg-wedding-success text-white' : 'border border-soft bg-white text-wedding-muted'"
+                                >
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">{{ item.completed ? 'check' : 'horizontal_rule' }}</span>
                                 </span>
-                            </div>
-                            <p class="mt-5 text-xs uppercase tracking-[0.16em] text-wedding-muted">Step {{ index + 1 }}</p>
-                            <h3 class="mt-2 font-heading text-2xl">{{ item.title }}</h3>
-                            <p class="mt-3 text-sm text-wedding-muted">{{ item.description }}</p>
-                            <p class="mt-4 text-sm font-medium" :class="item.completed ? 'text-wedding-successdark' : 'text-wedding-black'">
-                                {{ item.statusText }}
-                            </p>
-                            <div class="dashboard-card-footer">
-                                <div class="dashboard-card-footer-inner">
-                                    <a :href="item.href" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" :class="item.completed ? 'admin-tool-btn' : ''">
-                                        <span class="material-symbols-outlined btn-icon">{{ item.ctaIcon }}</span>
-                                        {{ item.ctaLabel }}
-                                    </a>
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step {{ index + 1 }}:</p>
+                                        <span class="text-xs uppercase tracking-[0.14em]" :class="item.completed ? 'text-wedding-successdark' : item.isNext ? 'text-wedding-band' : 'text-wedding-muted'">
+                                        {{ item.completed ? 'Complete' : item.isNext ? 'Next' : 'Pending' }}
+                                        </span>
+                                    </div>
+                                    <h3 class="mt-1 font-heading text-2xl leading-tight">{{ item.title }}</h3>
                                 </div>
+                            </div>
+                            <div class="mt-4 min-w-0 md:mt-0">
+                                <p class="truncate text-sm text-wedding-muted" :title="item.description">{{ item.description }}</p>
+                                <p class="mt-2 truncate text-sm font-medium" :class="item.completed ? 'text-wedding-successdark' : 'text-red-700'" :title="item.statusText">
+                                    {{ item.statusText }}
+                                </p>
+                            </div>
+                            <div class="mt-4 md:mt-0">
+                                <a :href="item.href" class="admin-btn setup-checklist-btn inline-flex w-full items-center justify-center gap-2 whitespace-nowrap px-4 py-3 text-center text-xs uppercase tracking-[0.12em]" :class="item.completed ? 'admin-tool-btn' : ''" @click="handleSetupChecklistClick($event, item)">
+                                    <span class="material-symbols-outlined btn-icon">{{ item.ctaIcon }}</span>
+                                    {{ item.ctaLabel }}
+                                </a>
                             </div>
                         </article>
                     </div>
                 </article>
 
                 <div class="grid gap-6 xl:grid-cols-[1.35fr_0.9fr]">
-                    <article class="content-section-block content-section-even">
+                    <article id="site-information-section" class="content-section-block content-section-even scroll-mt-28">
                         <h2 class="font-heading text-3xl">Site Information</h2>
 
                         <p class="mt-4 text-sm uppercase tracking-[0.14em] text-wedding-muted">Public URL</p>
@@ -1062,7 +1069,7 @@
                                 >
                             </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3 pb-4">
                             <button
                                 class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
                                 type="button"
@@ -1088,32 +1095,45 @@
                                 Send Test Email
                             </button>
                         </div>
-                        <div class="border border-soft bg-white p-4 md:flex md:items-center md:justify-between md:gap-6">
-                            <div>
-                                <h4 class="font-heading text-xl">RSVP Reminders</h4>
-                                <p class="mt-1 text-sm text-wedding-muted">
-                                    Send a reminder to parties with an email address who have not responded yet.
-                                </p>
-                                <p class="mt-2 text-sm text-wedding-muted">
-                                    To send an RSVP email to one party only, use the email icon in the Actions column within
-                                    <a href="#your-guests-section" class="font-semibold text-wedding-primary underline underline-offset-4 hover:text-wedding-green" @click.prevent="scrollToYourGuests">Your Guests</a>
-                                    below.
-                                </p>
-                            </div>
-                            <div class="mt-4 md:mt-0 md:text-right">
-                                <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                                    Eligible parties: <span class="font-semibold text-wedding-black">{{ reminderEligibleParties.length }}</span>
-                                </p>
-                                <button
-                                    class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
-                                    type="button"
-                                    :disabled="!canSendRsvpEmails || !hasRsvpDeadline() || reminderEligibleParties.length === 0"
-                                    :title="rsvpReminderSendTitle"
-                                    @click="openSendRsvpReminderConfirmModal"
-                                >
-                                    <span class="material-symbols-outlined btn-icon">notification_important</span>
-                                    Send RSVP Reminders
-                                </button>
+                        <div class="border-t border-soft pt-8">
+                            <div class="border border-soft bg-white p-4 md:flex md:items-center md:justify-between md:gap-6">
+                                <div>
+                                    <h4 class="font-heading text-xl">RSVP Reminders</h4>
+                                    <a
+                                        v-if="!sitePublished"
+                                        :href="`${adminBaseUrl}#site-information-section`"
+                                        class="mb-4 mt-3 inline-block text-sm font-semibold text-red-700 underline underline-offset-4 hover:text-red-900"
+                                        @click="handleSiteInformationLinkClick"
+                                    >
+                                        Your website must be published before before you can send RSVP emails.
+                                    </a>
+                                    <p class="mt-1 text-sm text-wedding-muted">
+                                        Send a reminder to parties with an email address who have not responded yet.
+                                    </p>
+                                    <p class="mt-2 text-sm text-wedding-muted">
+                                        To send an RSVP email to one party only, use the email icon in the Actions column within
+                                        <a href="#your-guests-section" class="font-semibold text-wedding-primary underline underline-offset-4 hover:text-wedding-green" @click.prevent="scrollToYourGuests">Your Guests</a>
+                                        below.
+                                    </p>
+                                </div>
+                                <div class="mt-4 md:mt-0 md:text-right">
+                                    <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                        Eligible parties: <span class="font-semibold text-wedding-black">{{ reminderEligibleParties.length }}</span>
+                                    </p>
+                                    <button
+                                        class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                        type="button"
+                                        :disabled="!canSendRsvpEmails || !hasRsvpDeadline() || reminderEligibleParties.length === 0"
+                                        :title="rsvpReminderSendTitle"
+                                        @click="openSendRsvpReminderConfirmModal"
+                                    >
+                                        <span class="material-symbols-outlined btn-icon">notification_important</span>
+                                        Send RSVP Reminders
+                                    </button>
+                                    <p v-if="rsvpReminderBlockedReason" class="mt-2 max-w-xs text-xs normal-case tracking-normal text-red-700 md:ml-auto">
+                                        {{ rsvpReminderBlockedReason }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <p v-if="rsvpEmailSettingsMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -1125,7 +1145,7 @@
                     </div>
                 </div>
 
-                <div id="your-guests-section" class="content-section-block content-section-odd scroll-mt-28">
+                <div id="create-party-section" class="content-section-block content-section-odd scroll-mt-28">
                     <h3 class="font-heading text-2xl">Create a Party</h3>
                     <div class="mt-3 grid gap-3 md:grid-cols-2">
                         <div>
@@ -1219,7 +1239,7 @@
                     </p>
                 </div>
 
-                <div class="content-section-block content-section-odd">
+                <div id="your-guests-section" class="content-section-block content-section-odd scroll-mt-28">
                     <p v-if="globalMessage" class="mb-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                         {{ globalMessage }}
                     </p>
@@ -2520,67 +2540,68 @@ const setupChecklistItems = computed(() => {
         {
             key: 'website',
             title: 'Create your website',
-            description: 'Add the core wedding details and save your website content.',
-            statusText: websiteComplete ? 'Website content has been saved.' : 'Add your couple names, date, venue, and save.',
+            description: 'Add names, date, venue, and website details.',
+            statusText: websiteComplete ? 'Website content has been saved.' : 'Add wedding details and save.',
             href: `${adminBaseUrl}/content`,
             icon: 'draw',
             ctaIcon: 'draw',
-            ctaLabel: websiteComplete ? 'Review website' : 'Create website',
+            ctaLabel: websiteComplete ? 'Review site' : 'Create site',
             completed: websiteComplete,
         },
         {
             key: 'guest-list',
             title: 'Build your guest list',
-            description: 'Create parties, add named guests, and confirm invited seats.',
-            statusText: guestListComplete ? `${parties.value.length} ${parties.value.length === 1 ? 'party' : 'parties'} added.` : 'Add at least one party with a named guest.',
-            href: `${adminBaseUrl}/parties`,
+            description: 'Create parties, named guests, and seats.',
+            statusText: guestListComplete ? `${parties.value.length} ${parties.value.length === 1 ? 'party' : 'parties'} added.` : 'Add one party with a named guest.',
+            href: `${adminBaseUrl}/parties#create-party-section`,
             icon: 'groups',
             ctaIcon: 'groups',
-            ctaLabel: guestListComplete ? 'Review guests' : 'Add guests',
+            ctaLabel: guestListComplete ? 'Guest list' : 'Add guests',
             completed: guestListComplete,
         },
         {
             key: 'emails',
             title: 'Prepare RSVP emails',
-            description: 'Set the RSVP deadline and add email addresses for digital invites.',
-            statusText: emailReady ? 'RSVP deadline and guest emails are ready.' : 'Set a deadline and add at least one guest email.',
+            description: 'Set the RSVP deadline and guest emails.',
+            statusText: emailReady ? 'RSVP email settings are ready.' : 'Set a deadline and guest email.',
             href: `${adminBaseUrl}/parties`,
             icon: 'forward_to_inbox',
             ctaIcon: 'mail',
-            ctaLabel: emailReady ? 'Review emails' : 'Set email details',
+            ctaLabel: 'Email setup',
             completed: emailReady,
         },
         {
             key: 'subscription',
             title: 'Subscribe to go live',
-            description: 'An active subscription is required before publishing and sending live RSVP emails.',
-            statusText: subscriptionReady ? 'Your account can publish and send live invites.' : 'Subscribe when you are ready to share with guests.',
+            description: 'Subscribe before publishing or sending emails.',
+            statusText: subscriptionReady ? 'Account can publish and send emails.' : 'Subscribe to publish and send emails.',
             href: billingUrl || adminBaseUrl,
             icon: 'workspace_premium',
             ctaIcon: subscriptionReady ? 'verified' : 'credit_card',
-            ctaLabel: subscriptionReady ? 'Subscription active' : 'View subscription',
+            ctaLabel: 'View plan',
             completed: subscriptionReady,
         },
         {
             key: 'publish',
             title: 'Publish your site',
-            description: 'Make the website live when you are ready to share it.',
-            statusText: published ? 'Your wedding website is published.' : 'Your website is still in draft mode.',
-            href: adminBaseUrl,
+            description: 'Make the website live when ready.',
+            statusText: published ? 'Website is published.' : 'Website is still in draft.',
+            href: '#site-information-section',
+            scrollTarget: 'site-information-section',
             icon: 'publish',
             ctaIcon: published ? 'visibility' : 'publish',
-            ctaLabel: published ? 'View site tools' : 'Publish when ready',
+            ctaLabel: published ? 'Site tools' : 'Publish site',
             completed: published,
         },
         {
             key: 'rsvp-check',
             title: 'Check RSVP flow',
-            description: 'Confirm at least one RSVP response has been received or added manually.',
-            statusText: rsvpChecked ? 'At least one RSVP response is recorded.' : 'Submit a test RSVP or manually add a response.',
+            description: 'Confirm the guest RSVP journey works.',
+            statusText: rsvpChecked ? 'An RSVP response is recorded.' : 'Submit a test RSVP or add one.',
             href: `${adminBaseUrl}/rsvps`,
             icon: 'fact_check',
             ctaIcon: 'event_note',
-            ctaLabel: rsvpChecked ? 'Review responses' : 'Check RSVPs',
+            ctaLabel: rsvpChecked ? 'Responses' : 'Check RSVP',
             completed: rsvpChecked,
         },
     ];
@@ -2627,6 +2648,9 @@ const rsvpReminderSendTitle = computed(() => {
 
     return 'Send RSVP reminders';
 });
+const rsvpReminderBlockedReason = computed(() =>
+    !sitePublished.value || rsvpReminderSendTitle.value === 'Send RSVP reminders' ? '' : rsvpReminderSendTitle.value
+);
 const rsvpStatusLegend = [
     {
         icon: 'check',
@@ -2684,6 +2708,7 @@ onMounted(async () => {
 
     await nextTick();
     applyFieldHelpAttributes();
+    scrollToHashTarget();
 });
 
 onBeforeUnmount(() => {
@@ -2990,7 +3015,39 @@ function closeSendRsvpReminderConfirmModal() {
 }
 
 function scrollToYourGuests() {
-    document.getElementById('your-guests-section')?.scrollIntoView({
+    scrollToElementId('your-guests-section');
+}
+
+function handleSetupChecklistClick(event, item) {
+    if (!item.scrollTarget) {
+        return;
+    }
+
+    event.preventDefault();
+    scrollToElementId(item.scrollTarget);
+}
+
+function handleSiteInformationLinkClick(event) {
+    if (section.value !== 'dashboard') {
+        return;
+    }
+
+    event.preventDefault();
+    window.history.replaceState(null, '', '#site-information-section');
+    scrollToElementId('site-information-section');
+}
+
+function scrollToHashTarget() {
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) {
+        return;
+    }
+
+    window.setTimeout(() => scrollToElementId(hash), 75);
+}
+
+function scrollToElementId(id) {
+    document.getElementById(id)?.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
     });
@@ -5008,6 +5065,10 @@ function serialize(value) {
 
 .dashboard-card-footer-inner .admin-btn {
     margin-top: 24px;
+}
+
+.setup-checklist-btn {
+    justify-content: center !important;
 }
 
 .site-tools-wrap {
