@@ -9,6 +9,7 @@ use App\Http\Requests\StorePartyRequest;
 use App\Http\Requests\UpdateGuestRequest;
 use App\Http\Requests\UpdatePartyRequest;
 use App\Mail\PartyRsvpInviteMail;
+use App\Mail\PartyRsvpReminderMail;
 use App\Models\Guest;
 use App\Models\Party;
 use App\Models\RsvpEmailLog;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class PartyController extends Controller
 {
@@ -300,6 +302,10 @@ class PartyController extends Controller
         ]);
 
         $site = $this->currentSite();
+        if ($blockedResponse = $this->blockedRsvpEmailResponse($site)) {
+            return $blockedResponse;
+        }
+
         $siteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
         $content = $this->resolvedHomepageContent();
         $formattedResponseDeadline = $this->formatResponseDeadline(
@@ -335,6 +341,7 @@ class PartyController extends Controller
                 'party_id' => $party->id,
                 'sent_by_user_id' => auth()->id(),
                 'sent_to_email' => $party->email,
+                'type' => RsvpEmailLog::TYPE_INVITE,
                 'sent_at' => now(),
             ]);
         }
@@ -342,6 +349,126 @@ class PartyController extends Controller
         return response()->json([
             'message' => 'RSVP request emails sent.',
             'sent' => $parties->count(),
+        ]);
+    }
+
+    public function sendRsvpReminderEmails(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'party_ids' => ['required', 'array', 'min:1'],
+            'party_ids.*' => ['required', 'integer'],
+        ]);
+
+        $site = $this->currentSite();
+        if ($blockedResponse = $this->blockedRsvpEmailResponse($site)) {
+            return $blockedResponse;
+        }
+
+        $siteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
+        $content = $this->resolvedHomepageContent();
+        $formattedResponseDeadline = $this->formatResponseDeadline(
+            (string) data_get($content, 'guest_list.responseDeadline', '')
+        );
+        if (! $formattedResponseDeadline) {
+            return response()->json([
+                'message' => 'Set an RSVP response deadline before sending reminders.',
+            ], 422);
+        }
+
+        $parties = Party::query()
+            ->forSite($this->currentSiteId())
+            ->whereIn('id', $validated['party_ids'])
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->where(function ($query) {
+                $query->whereDoesntHave('rsvp')
+                    ->orWhereHas('rsvp', function ($rsvpQuery) {
+                        $rsvpQuery->whereNull('status')
+                            ->orWhere('status', '');
+                    });
+            })
+            ->get();
+
+        if ($parties->isEmpty()) {
+            return response()->json([
+                'message' => 'No parties with email addresses are waiting for an RSVP response.',
+            ], 422);
+        }
+
+        foreach ($parties as $party) {
+            $rsvpUrl = route('wedding.public', ['public_slug' => $site->public_slug]).'?code='.$party->code;
+
+            Mail::to($party->email)->send(new PartyRsvpReminderMail(
+                siteTitle: $site->title,
+                partyName: $party->display_name,
+                guestTypeLabel: $party->guestTypeLabel(),
+                rsvpCode: $party->code,
+                websiteUrl: $siteUrl,
+                rsvpUrl: $rsvpUrl,
+                responseDeadline: $formattedResponseDeadline,
+            ));
+
+            RsvpEmailLog::query()->create([
+                'site_id' => $party->site_id,
+                'party_id' => $party->id,
+                'sent_by_user_id' => auth()->id(),
+                'sent_to_email' => $party->email,
+                'type' => RsvpEmailLog::TYPE_REMINDER,
+                'sent_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'RSVP reminder emails sent.',
+            'sent' => $parties->count(),
+        ]);
+    }
+
+    public function previewRsvpEmail(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'guest_type' => ['nullable', Rule::in(Party::guestTypes())],
+            'response_deadline' => ['nullable', 'date'],
+        ]);
+
+        return response()->json([
+            'html' => view('emails.party-rsvp-invite', $this->previewRsvpEmailData($validated))->render(),
+        ]);
+    }
+
+    public function sendTestRsvpEmail(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => ['nullable', 'email', 'max:255'],
+            'guest_type' => ['nullable', Rule::in(Party::guestTypes())],
+            'response_deadline' => ['nullable', 'date'],
+        ]);
+
+        $recipient = trim((string) ($validated['email'] ?? ''));
+        if ($recipient === '') {
+            $recipient = (string) $this->defaultTestEmailAddress();
+        }
+
+        if ($recipient === '') {
+            return response()->json([
+                'message' => 'Enter a test email address before sending a preview.',
+            ], 422);
+        }
+
+        $emailData = $this->previewRsvpEmailData($validated);
+
+        Mail::to($recipient)->send(new PartyRsvpInviteMail(
+            siteTitle: $emailData['siteTitle'],
+            partyName: $emailData['partyName'],
+            guestTypeLabel: $emailData['guestTypeLabel'],
+            rsvpCode: $emailData['rsvpCode'],
+            websiteUrl: $emailData['websiteUrl'],
+            rsvpUrl: $emailData['rsvpUrl'],
+            responseDeadline: $emailData['responseDeadline'],
+        ));
+
+        return response()->json([
+            'message' => "Test RSVP email sent to {$recipient}.",
         ]);
     }
 
@@ -354,6 +481,8 @@ class PartyController extends Controller
             ->map(fn (RsvpEmailLog $log) => [
                 'id' => $log->id,
                 'sent_to_email' => $log->sent_to_email,
+                'type' => $log->type ?: RsvpEmailLog::TYPE_INVITE,
+                'type_label' => $log->type === RsvpEmailLog::TYPE_REMINDER ? 'Reminder' : 'Invite',
                 'sent_at' => $log->sent_at?->toDateTimeString(),
             ])
             ->values();
@@ -418,6 +547,57 @@ class PartyController extends Controller
         $plusOneCount = $party->guests->where('allow_plus_one', true)->count();
 
         return max(1, $guestCount + $plusOneCount);
+    }
+
+    private function previewRsvpEmailData(array $overrides = []): array
+    {
+        $site = $this->currentSite();
+        $content = $this->resolvedHomepageContent();
+        $guestType = (string) ($overrides['guest_type'] ?? Party::GUEST_TYPE_DAY);
+        $responseDeadline = array_key_exists('response_deadline', $overrides)
+            ? (string) ($overrides['response_deadline'] ?? '')
+            : (string) data_get($content, 'guest_list.responseDeadline', '');
+        $websiteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
+
+        return [
+            'siteTitle' => $site->title ?: 'Your wedding website',
+            'partyName' => 'Example Guest Party',
+            'guestTypeLabel' => $guestType === Party::GUEST_TYPE_EVENING ? 'Evening Guest' : 'All Day Guest',
+            'rsvpCode' => 'DEMO',
+            'websiteUrl' => $websiteUrl,
+            'rsvpUrl' => $websiteUrl.'?code=DEMO',
+            'responseDeadline' => $this->formatResponseDeadline($responseDeadline),
+        ];
+    }
+
+    private function defaultTestEmailAddress(): ?string
+    {
+        if (auth()->user()?->email) {
+            return auth()->user()->email;
+        }
+
+        $site = $this->currentSite()->loadMissing('account.users');
+        $owner = $site->account?->users?->firstWhere('role', 'owner')
+            ?? $site->account?->users?->first();
+
+        return $owner?->email;
+    }
+
+    private function blockedRsvpEmailResponse($site): ?JsonResponse
+    {
+        if (! $site->is_published) {
+            return response()->json([
+                'message' => 'Publish your website before sending RSVP emails.',
+            ], 422);
+        }
+
+        if (! $site->account?->hasActivePaidAccess()) {
+            return response()->json([
+                'message' => 'An active subscription is required before sending RSVP emails.',
+            ], 422);
+        }
+
+        return null;
     }
 
     private function resolvedHomepageContent(): array

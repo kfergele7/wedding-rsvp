@@ -134,7 +134,10 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::post('/app/admin/api/parties', [PartyController::class, 'store'])->name('customer.admin.api.parties.store');
         Route::get('/app/admin/api/parties/export', [PartyController::class, 'export'])->name('customer.admin.api.parties.export');
         Route::post('/app/admin/api/parties/import', [PartyController::class, 'import'])->name('customer.admin.api.parties.import');
+        Route::post('/app/admin/api/parties/rsvp-email-preview', [PartyController::class, 'previewRsvpEmail'])->name('customer.admin.api.parties.rsvp-email-preview');
+        Route::post('/app/admin/api/parties/send-test-rsvp-email', [PartyController::class, 'sendTestRsvpEmail'])->name('customer.admin.api.parties.send-test-rsvp-email');
         Route::post('/app/admin/api/parties/send-rsvp-emails', [PartyController::class, 'sendRsvpEmails'])->name('customer.admin.api.parties.send-rsvp-emails');
+        Route::post('/app/admin/api/parties/send-rsvp-reminders', [PartyController::class, 'sendRsvpReminderEmails'])->name('customer.admin.api.parties.send-rsvp-reminders');
         Route::get('/app/admin/api/parties/{party}/email-history', [PartyController::class, 'emailHistory'])->name('customer.admin.api.parties.email-history');
         Route::get('/app/admin/api/parties/{party}', [PartyController::class, 'show'])->name('customer.admin.api.parties.show');
         Route::put('/app/admin/api/parties/{party}', [PartyController::class, 'update'])->name('customer.admin.api.parties.update');
@@ -207,7 +210,10 @@ Route::middleware('tenant.resolve')->group(function () {
         Route::post('/api/parties', [PartyController::class, 'store'])->name('api.parties.store');
         Route::get('/api/parties/export', [PartyController::class, 'export'])->name('api.parties.export');
         Route::post('/api/parties/import', [PartyController::class, 'import'])->name('api.parties.import');
+        Route::post('/api/parties/rsvp-email-preview', [PartyController::class, 'previewRsvpEmail'])->name('api.parties.rsvp-email-preview');
+        Route::post('/api/parties/send-test-rsvp-email', [PartyController::class, 'sendTestRsvpEmail'])->name('api.parties.send-test-rsvp-email');
         Route::post('/api/parties/send-rsvp-emails', [PartyController::class, 'sendRsvpEmails'])->name('api.parties.send-rsvp-emails');
+        Route::post('/api/parties/send-rsvp-reminders', [PartyController::class, 'sendRsvpReminderEmails'])->name('api.parties.send-rsvp-reminders');
         Route::get('/api/parties/{party}/email-history', [PartyController::class, 'emailHistory'])->name('api.parties.email-history');
         Route::get('/api/parties/{party}', [PartyController::class, 'show'])->name('api.parties.show');
         Route::put('/api/parties/{party}', [PartyController::class, 'update'])->name('api.parties.update');

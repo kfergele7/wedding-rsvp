@@ -12,11 +12,15 @@ class RsvpEmailLog extends Model
     use BelongsToSite;
     use HasFactory;
 
+    public const TYPE_INVITE = 'invite';
+    public const TYPE_REMINDER = 'reminder';
+
     protected $fillable = [
         'site_id',
         'party_id',
         'sent_by_user_id',
         'sent_to_email',
+        'type',
         'sent_at',
     ];
 

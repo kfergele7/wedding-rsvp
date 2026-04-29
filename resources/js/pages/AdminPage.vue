@@ -51,60 +51,50 @@
         <main class="admin-main-shell pb-10 pt-4 md:py-10">
             <section v-if="section === 'dashboard'" class="space-y-6">
                 <article class="content-section-block content-section-odd">
-                    <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Recommended process</p>
-                    <h2 class="mt-2 font-heading text-3xl">Use Magic Invitation in 3 easy steps</h2>
-                    <p class="mt-3 text-wedding-muted">Follow this order for the smoothest setup and best guest experience.</p>
-
-                    <div class="mt-7 grid gap-5 lg:grid-cols-3">
-                        <article class="content-section-block content-section-even flex h-full flex-col">
-                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 1</p>
-                            <h3 class="mt-2 font-heading text-2xl">Create your website</h3>
-                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Update couple names, date, and venue details</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Add story, timeline, menu, and FAQs</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Upload imagery and preview before publishing</li>
-                            </ul>
-                            <div class="dashboard-card-footer">
-                                <div class="dashboard-card-footer-inner">
-                                    <a :href="`${adminBaseUrl}/content`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                        <span class="material-symbols-outlined btn-icon">draw</span>
-                                        Create your website
-                                    </a>
-                                </div>
+                    <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Guided setup checklist</p>
+                            <h2 class="mt-2 font-heading text-3xl">Launch your wedding website with confidence</h2>
+                            <p class="mt-3 max-w-3xl text-wedding-muted">Follow these steps in order. Magic Invitation will tick each one off as your website, guest list, emails, publishing, and RSVP testing are ready.</p>
+                        </div>
+                        <div class="min-w-[190px] border border-soft bg-white p-4 text-center">
+                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Progress</p>
+                            <p class="mt-1 font-heading text-4xl">{{ completedSetupCount }}/{{ setupChecklistItems.length }}</p>
+                            <div class="mt-3 h-2 overflow-hidden rounded-full bg-wedding-bg">
+                                <div class="h-full rounded-full bg-wedding-success transition-all" :style="{ width: `${setupCompletionPercentage}%` }"></div>
                             </div>
-                        </article>
+                        </div>
+                    </div>
 
-                        <article class="content-section-block content-section-even flex h-full flex-col">
-                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 2</p>
-                            <h3 class="mt-2 font-heading text-2xl">Build your guest list</h3>
-                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Create parties and add named guests</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Set invited seats and add notes per party</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Generate invite codes and send RSVP emails</li>
-                            </ul>
-                            <div class="dashboard-card-footer">
-                                <div class="dashboard-card-footer-inner">
-                                    <a :href="`${adminBaseUrl}/parties`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                        <span class="material-symbols-outlined btn-icon">groups</span>
-                                        Open guest list
-                                    </a>
+                    <div class="mt-7 grid gap-4 md:grid-cols-2">
+                        <article
+                            v-for="(item, index) in setupChecklistItems"
+                            :key="item.key"
+                            class="content-section-block content-section-even flex h-full flex-col border transition"
+                            :class="[
+                                item.completed ? 'border-wedding-success/40 bg-emerald-50/40' : 'border-soft bg-white',
+                                item.isNext ? 'ring-2 ring-wedding-band/20' : '',
+                            ]"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-full" :class="item.completed ? 'bg-wedding-success text-white' : 'bg-wedding-bg text-wedding-band'">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">{{ item.completed ? 'check' : item.icon }}</span>
                                 </div>
+                                <span class="text-xs uppercase tracking-[0.14em]" :class="item.completed ? 'text-wedding-successdark' : item.isNext ? 'text-wedding-band' : 'text-wedding-muted'">
+                                    {{ item.completed ? 'Complete' : item.isNext ? 'Next' : `Step ${index + 1}` }}
+                                </span>
                             </div>
-                        </article>
-
-                        <article class="content-section-block content-section-even flex h-full flex-col">
-                            <p class="text-xs uppercase tracking-[0.16em] text-wedding-muted">Step 3</p>
-                            <h3 class="mt-2 font-heading text-2xl">View and manage RSVPs</h3>
-                            <ul class="mt-4 space-y-2 text-sm text-wedding-black">
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Track attending, not attending, and no response</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Review meal choices and dietary requirements</li>
-                                <li class="inline-flex items-start gap-2"><span class="material-symbols-outlined text-wedding-success" style="font-size:16px;">check_circle</span>Update RSVPs manually and export CSV anytime</li>
-                            </ul>
+                            <p class="mt-5 text-xs uppercase tracking-[0.16em] text-wedding-muted">Step {{ index + 1 }}</p>
+                            <h3 class="mt-2 font-heading text-2xl">{{ item.title }}</h3>
+                            <p class="mt-3 text-sm text-wedding-muted">{{ item.description }}</p>
+                            <p class="mt-4 text-sm font-medium" :class="item.completed ? 'text-wedding-successdark' : 'text-wedding-black'">
+                                {{ item.statusText }}
+                            </p>
                             <div class="dashboard-card-footer">
                                 <div class="dashboard-card-footer-inner">
-                                    <a :href="`${adminBaseUrl}/rsvps`" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]">
-                                        <span class="material-symbols-outlined btn-icon">fact_check</span>
-                                        Manage RSVPs
+                                    <a :href="item.href" class="admin-btn inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" :class="item.completed ? 'admin-tool-btn' : ''">
+                                        <span class="material-symbols-outlined btn-icon">{{ item.ctaIcon }}</span>
+                                        {{ item.ctaLabel }}
                                     </a>
                                 </div>
                             </div>
@@ -1041,19 +1031,38 @@
 
                 <div class="content-section-block content-section-even">
                     <h3 class="font-heading text-2xl">RSVP Email Settings</h3>
-                    <div v-if="content" class="mt-4 grid gap-3 md:grid-cols-[1fr_320px] md:items-end">
-                        <div>
-                            <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
-                                RSVP Response Date Deadline
-                                <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(this will appear on emails sent to users)</span>
-                            </label>
-                            <input
-                                v-model="content.guest_list.responseDeadline"
-                                type="date"
-                                class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
-                            >
+                    <p class="mt-2 text-sm text-wedding-muted">Preview the email your guests receive and send yourself a test before contacting your guest list.</p>
+                    <div v-if="content" class="mt-4 space-y-4">
+                        <div class="grid gap-3 lg:grid-cols-[1fr_220px_1fr]">
+                            <div>
+                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                    RSVP Response Date Deadline
+                                    <span class="ml-1 text-[11px] normal-case italic tracking-normal text-wedding-muted">(will be sent to guests)</span>
+                                </label>
+                                <input
+                                    v-model="content.guest_list.responseDeadline"
+                                    type="date"
+                                    class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                >
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Preview guest type</label>
+                                <select v-model="rsvpEmailPreviewGuestType" class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text">
+                                    <option value="day">All Day Guest</option>
+                                    <option value="evening">Evening Guest</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Send test to</label>
+                                <input
+                                    v-model="testRsvpEmailAddress"
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                >
+                            </div>
                         </div>
-                        <div class="md:text-right">
+                        <div class="flex flex-wrap items-center gap-3">
                             <button
                                 class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
                                 type="button"
@@ -1062,11 +1071,61 @@
                                 <span class="material-symbols-outlined btn-icon">save</span>
                                 Save RSVP Email Settings
                             </button>
+                            <button
+                                class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                type="button"
+                                @click="openRsvpEmailPreview"
+                            >
+                                <span class="material-symbols-outlined btn-icon">preview</span>
+                                Preview Email
+                            </button>
+                            <button
+                                class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                type="button"
+                                @click="sendTestRsvpEmail"
+                            >
+                                <span class="material-symbols-outlined btn-icon">outgoing_mail</span>
+                                Send Test Email
+                            </button>
                         </div>
+                        <div class="border border-soft bg-white p-4 md:flex md:items-center md:justify-between md:gap-6">
+                            <div>
+                                <h4 class="font-heading text-xl">RSVP Reminders</h4>
+                                <p class="mt-1 text-sm text-wedding-muted">
+                                    Send a reminder to parties with an email address who have not responded yet.
+                                </p>
+                                <p class="mt-2 text-sm text-wedding-muted">
+                                    To send an RSVP email to one party only, use the email icon in the Actions column within
+                                    <a href="#your-guests-section" class="font-semibold text-wedding-primary underline underline-offset-4 hover:text-wedding-green" @click.prevent="scrollToYourGuests">Your Guests</a>
+                                    below.
+                                </p>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:text-right">
+                                <p class="mb-2 text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                    Eligible parties: <span class="font-semibold text-wedding-black">{{ reminderEligibleParties.length }}</span>
+                                </p>
+                                <button
+                                    class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                    type="button"
+                                    :disabled="!canSendRsvpEmails || !hasRsvpDeadline() || reminderEligibleParties.length === 0"
+                                    :title="rsvpReminderSendTitle"
+                                    @click="openSendRsvpReminderConfirmModal"
+                                >
+                                    <span class="material-symbols-outlined btn-icon">notification_important</span>
+                                    Send RSVP Reminders
+                                </button>
+                            </div>
+                        </div>
+                        <p v-if="rsvpEmailSettingsMessage" class="rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                            {{ rsvpEmailSettingsMessage }}
+                        </p>
+                        <p v-if="rsvpEmailSettingsError" class="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {{ rsvpEmailSettingsError }}
+                        </p>
                     </div>
                 </div>
 
-                <div class="content-section-block content-section-odd">
+                <div id="your-guests-section" class="content-section-block content-section-odd scroll-mt-28">
                     <h3 class="font-heading text-2xl">Create a Party</h3>
                     <div class="mt-3 grid gap-3 md:grid-cols-2">
                         <div>
@@ -1177,7 +1236,8 @@
                                     <button
                                         class="admin-btn admin-btn-success inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.12em]"
                                         type="button"
-                                        :disabled="selectedEmailableParties.length === 0"
+                                        :disabled="!canSendRsvpEmails || selectedEmailableParties.length === 0"
+                                        :title="rsvpEmailSendTitle"
                                         @click="openSendRsvpConfirmModal()"
                                     >
                                         <span class="material-symbols-outlined btn-icon">mail</span>
@@ -1336,8 +1396,8 @@
                                             <button class="admin-btn inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">edit</span>
                                             </button>
-                                            <span class="inline-flex" :class="{ 'disabled-action-tooltip': !partyItem.email }" :title="emailActionTitle(partyItem.email, 'Email RSVP')">
-                                                <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" :disabled="!partyItem.email" @click="openSendRsvpConfirmModal([partyItem.id])">
+                                            <span class="inline-flex" :class="{ 'disabled-action-tooltip': !partyItem.email || !canSendRsvpEmails }" :title="emailActionTitle(partyItem.email, 'Email RSVP')">
+                                                <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" :disabled="!partyItem.email || !canSendRsvpEmails" @click="openSendRsvpConfirmModal([partyItem.id])">
                                                     <span class="material-symbols-outlined btn-icon">mail</span>
                                                 </button>
                                             </span>
@@ -1590,6 +1650,68 @@
                 </div>
             </div>
 
+            <div v-if="sendRsvpReminderConfirmModal.open" class="fixed inset-0 z-[82] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeSendRsvpReminderConfirmModal">
+                <div class="mx-auto my-4 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft md:my-12">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-heading text-3xl">Send RSVP Reminders</h3>
+                            <p class="mt-2 text-sm text-wedding-muted">
+                                These reminders will only go to parties with an email address and no RSVP response yet.
+                            </p>
+                        </div>
+                        <button class="modal-close-x" type="button" aria-label="Close RSVP reminder confirmation" title="Close" @click="closeSendRsvpReminderConfirmModal">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="mt-4 max-h-64 overflow-y-auto border border-soft bg-wedding-bg p-3">
+                        <ul class="space-y-2 text-sm">
+                            <li v-for="party in reminderEligibleParties" :key="party.id" class="border border-soft bg-white px-3 py-2">
+                                <p class="font-medium">{{ party.display_name }}</p>
+                                <p class="text-xs text-wedding-muted normal-case tracking-normal">{{ party.email }}</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-5 flex justify-end gap-3">
+                        <button class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="closeSendRsvpReminderConfirmModal">
+                            <span class="material-symbols-outlined btn-icon">close</span>
+                            Cancel
+                        </button>
+                        <button class="admin-btn admin-btn-success inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="sendRsvpReminderEmails">
+                            <span class="material-symbols-outlined btn-icon">send</span>
+                            Send Reminders
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="rsvpEmailPreviewModal.open" class="fixed inset-0 z-[83] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closeRsvpEmailPreview">
+                <div class="mx-auto my-4 flex w-full max-w-4xl flex-col border border-soft bg-white p-6 shadow-soft md:my-12 md:max-h-[calc(100vh-6rem)]">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-heading text-3xl">RSVP Email Preview</h3>
+                            <p class="mt-2 text-sm text-wedding-muted">This preview uses sample guest details and your current RSVP email settings.</p>
+                        </div>
+                        <button class="modal-close-x" type="button" aria-label="Close RSVP email preview" title="Close" @click="closeRsvpEmailPreview">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="mt-5 min-h-[420px] overflow-hidden border border-soft bg-wedding-bg">
+                        <div v-if="rsvpEmailPreviewModal.loading" class="flex min-h-[420px] items-center justify-center p-8 text-sm text-wedding-muted">
+                            Loading email preview...
+                        </div>
+                        <div v-else-if="rsvpEmailPreviewModal.error" class="p-6 text-sm text-red-700">
+                            {{ rsvpEmailPreviewModal.error }}
+                        </div>
+                        <iframe
+                            v-else
+                            title="RSVP email preview"
+                            class="h-[70vh] min-h-[420px] w-full bg-white"
+                            :srcdoc="rsvpEmailPreviewModal.html"
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="emailHistoryModal.open" class="fixed inset-0 z-[83] overflow-y-auto bg-black/40 p-4 md:p-8" @click.self="closePartyEmailHistory">
                 <div class="mx-auto my-4 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft md:my-12">
                     <div class="flex items-start justify-between gap-3">
@@ -1603,7 +1725,7 @@
                         <p v-else-if="emailHistoryModal.error" class="text-sm text-red-700">{{ emailHistoryModal.error }}</p>
                         <ul v-else-if="emailHistoryModal.history.length" class="space-y-2">
                             <li v-for="entry in emailHistoryModal.history" :key="entry.id" class="border border-soft bg-white px-3 py-2 text-sm">
-                                <p class="font-medium normal-case tracking-normal">{{ entry.sent_to_email }}</p>
+                                <p class="font-medium normal-case tracking-normal">{{ entry.type_label || 'Invite' }} · {{ entry.sent_to_email }}</p>
                                 <p class="text-xs text-wedding-muted">{{ formatDateTime(entry.sent_at) }}</p>
                             </li>
                         </ul>
@@ -1741,11 +1863,11 @@
                                 >
                                     <span class="material-symbols-outlined btn-icon">{{ row.rsvp?.status ? 'edit' : 'add' }}</span>
                                 </button>
-                                <span class="inline-flex" :class="{ 'disabled-action-tooltip': !row.email }" :title="emailActionTitle(row.email, 'Email Guest')">
+                                <span class="inline-flex" :class="{ 'disabled-action-tooltip': !row.email || !canSendRsvpEmails }" :title="emailActionTitle(row.email, 'Email Guest')">
                                     <button
                                         class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
                                         type="button"
-                                        :disabled="!row.email"
+                                        :disabled="!row.email || !canSendRsvpEmails"
                                         @click="openSendRsvpConfirmModal([row.party_id])"
                                     >
                                         <span class="material-symbols-outlined btn-icon">mail</span>
@@ -1888,6 +2010,9 @@
                         v-else-if="editingRsvp.email"
                         type="button"
                         class="border-0 bg-transparent p-0 text-sm font-medium text-wedding-band underline decoration-wedding-band/50 underline-offset-4 transition hover:text-wedding-primarygreen hover:decoration-wedding-primarygreen"
+                        :class="{ 'cursor-not-allowed opacity-60': !canSendRsvpEmails }"
+                        :disabled="!canSendRsvpEmails"
+                        :title="rsvpEmailSendTitle"
                         @click="openSendRsvpConfirmModal([editingRsvp.party_id])"
                     >
                         Send email now
@@ -2135,6 +2260,8 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 const section = ref(props.payload?.adminSection || 'dashboard');
 const logoutUrl = props.payload?.logoutUrl || '/logout';
 const accountUrl = props.payload?.accountUrl || '';
+const billingUrl = props.payload?.billingUrl || accountUrl || '';
+const currentUserEmail = props.payload?.currentUserEmail || '';
 const adminBaseUrl = props.payload?.adminBaseUrl || '/admin';
 const apiBaseUrl = props.payload?.adminApiBaseUrl || '/admin/api';
 const previewUrl = props.payload?.previewUrl || '';
@@ -2144,6 +2271,7 @@ const fieldHelpTexts = (props.payload?.fieldHelpTexts && typeof props.payload.fi
     ? props.payload.fieldHelpTexts
     : {};
 const siteTitle = ref(props.payload?.siteTitle || '');
+const hasPaidAccess = ref(Boolean(props.payload?.hasPaidAccess ?? true));
 const sitePublished = ref(Boolean(props.payload?.sitePublished ?? false));
 const globalMessage = ref('');
 const globalError = ref('');
@@ -2218,12 +2346,25 @@ const selectedPartyIdsForEmail = ref([]);
 const sendRsvpConfirmModal = reactive({
     open: false,
 });
+const sendRsvpReminderConfirmModal = reactive({
+    open: false,
+});
 const emailHistoryModal = reactive({
     open: false,
     partyId: null,
     partyName: '',
     history: [],
     loading: false,
+    error: '',
+});
+const rsvpEmailPreviewGuestType = ref('day');
+const testRsvpEmailAddress = ref(currentUserEmail);
+const rsvpEmailSettingsMessage = ref('');
+const rsvpEmailSettingsError = ref('');
+const rsvpEmailPreviewModal = reactive({
+    open: false,
+    loading: false,
+    html: '',
     error: '',
 });
 const rsvpRows = ref([]);
@@ -2261,6 +2402,9 @@ const newGuest = reactive({
 const selectedParty = computed(() => parties.value.find((party) => party.id === selectedPartyId.value) || null);
 const selectedEmailableParties = computed(() =>
     parties.value.filter((party) => selectedPartyIdsForEmail.value.includes(party.id) && Boolean((party.email || '').trim()))
+);
+const reminderEligibleParties = computed(() =>
+    parties.value.filter((party) => Boolean((party.email || '').trim()) && !party.rsvp?.status)
 );
 const createPartyInvitedSeats = computed(() => {
     const guests = newPartyGuests.value || [];
@@ -2364,6 +2508,125 @@ const dashboardCards = computed(() => [
     { label: 'Not Attending', value: stats.value.not_attending },
     { label: 'No Response', value: stats.value.no_response },
 ]);
+const setupChecklistItems = computed(() => {
+    const websiteComplete = hasSavedWebsiteContent();
+    const guestListComplete = parties.value.length > 0 && parties.value.some((party) => (party.guests || []).length > 0);
+    const emailReady = hasRsvpDeadline() && parties.value.some((party) => Boolean((party.email || '').trim()));
+    const subscriptionReady = hasPaidAccess.value;
+    const published = sitePublished.value;
+    const rsvpChecked = rsvpRows.value.some((row) => Boolean(row.rsvp?.status));
+
+    const items = [
+        {
+            key: 'website',
+            title: 'Create your website',
+            description: 'Add the core wedding details and save your website content.',
+            statusText: websiteComplete ? 'Website content has been saved.' : 'Add your couple names, date, venue, and save.',
+            href: `${adminBaseUrl}/content`,
+            icon: 'draw',
+            ctaIcon: 'draw',
+            ctaLabel: websiteComplete ? 'Review website' : 'Create website',
+            completed: websiteComplete,
+        },
+        {
+            key: 'guest-list',
+            title: 'Build your guest list',
+            description: 'Create parties, add named guests, and confirm invited seats.',
+            statusText: guestListComplete ? `${parties.value.length} ${parties.value.length === 1 ? 'party' : 'parties'} added.` : 'Add at least one party with a named guest.',
+            href: `${adminBaseUrl}/parties`,
+            icon: 'groups',
+            ctaIcon: 'groups',
+            ctaLabel: guestListComplete ? 'Review guests' : 'Add guests',
+            completed: guestListComplete,
+        },
+        {
+            key: 'emails',
+            title: 'Prepare RSVP emails',
+            description: 'Set the RSVP deadline and add email addresses for digital invites.',
+            statusText: emailReady ? 'RSVP deadline and guest emails are ready.' : 'Set a deadline and add at least one guest email.',
+            href: `${adminBaseUrl}/parties`,
+            icon: 'forward_to_inbox',
+            ctaIcon: 'mail',
+            ctaLabel: emailReady ? 'Review emails' : 'Set email details',
+            completed: emailReady,
+        },
+        {
+            key: 'subscription',
+            title: 'Subscribe to go live',
+            description: 'An active subscription is required before publishing and sending live RSVP emails.',
+            statusText: subscriptionReady ? 'Your account can publish and send live invites.' : 'Subscribe when you are ready to share with guests.',
+            href: billingUrl || adminBaseUrl,
+            icon: 'workspace_premium',
+            ctaIcon: subscriptionReady ? 'verified' : 'credit_card',
+            ctaLabel: subscriptionReady ? 'Subscription active' : 'View subscription',
+            completed: subscriptionReady,
+        },
+        {
+            key: 'publish',
+            title: 'Publish your site',
+            description: 'Make the website live when you are ready to share it.',
+            statusText: published ? 'Your wedding website is published.' : 'Your website is still in draft mode.',
+            href: adminBaseUrl,
+            icon: 'publish',
+            ctaIcon: published ? 'visibility' : 'publish',
+            ctaLabel: published ? 'View site tools' : 'Publish when ready',
+            completed: published,
+        },
+        {
+            key: 'rsvp-check',
+            title: 'Check RSVP flow',
+            description: 'Confirm at least one RSVP response has been received or added manually.',
+            statusText: rsvpChecked ? 'At least one RSVP response is recorded.' : 'Submit a test RSVP or manually add a response.',
+            href: `${adminBaseUrl}/rsvps`,
+            icon: 'fact_check',
+            ctaIcon: 'event_note',
+            ctaLabel: rsvpChecked ? 'Review responses' : 'Check RSVPs',
+            completed: rsvpChecked,
+        },
+    ];
+
+    const nextIncompleteIndex = items.findIndex((item) => !item.completed);
+
+    return items.map((item, index) => ({
+        ...item,
+        isNext: index === nextIncompleteIndex,
+    }));
+});
+const completedSetupCount = computed(() => setupChecklistItems.value.filter((item) => item.completed).length);
+const setupCompletionPercentage = computed(() => {
+    if (setupChecklistItems.value.length === 0) {
+        return 0;
+    }
+
+    return Math.round((completedSetupCount.value / setupChecklistItems.value.length) * 100);
+});
+const canSendRsvpEmails = computed(() => hasPaidAccess.value && sitePublished.value);
+const rsvpEmailSendTitle = computed(() => {
+    if (!hasPaidAccess.value) {
+        return 'An active subscription is required before sending RSVP emails.';
+    }
+
+    if (!sitePublished.value) {
+        return 'Publish your website before sending RSVP emails.';
+    }
+
+    return 'Email RSVP';
+});
+const rsvpReminderSendTitle = computed(() => {
+    if (!canSendRsvpEmails.value) {
+        return rsvpEmailSendTitle.value;
+    }
+
+    if (!hasRsvpDeadline()) {
+        return 'Set an RSVP response deadline before sending reminders.';
+    }
+
+    if (reminderEligibleParties.value.length === 0) {
+        return 'No parties with email addresses are waiting for a response.';
+    }
+
+    return 'Send RSVP reminders';
+});
 const rsvpStatusLegend = [
     {
         icon: 'check',
@@ -2450,6 +2713,24 @@ watch(
         }
     }
 );
+
+function hasSavedWebsiteContent() {
+    if (!content.value || !lastSavedAt.value) {
+        return false;
+    }
+
+    return [
+        siteTitle.value,
+        content.value?.hero?.names,
+        content.value?.hero?.dateLine,
+        content.value?.hero?.locationLine,
+        content.value?.details?.venue?.name,
+    ].every((value) => String(value || '').trim().length > 0);
+}
+
+function hasRsvpDeadline() {
+    return String(content.value?.guest_list?.responseDeadline || '').trim().length > 0;
+}
 
 async function loadStats() {
     try {
@@ -2661,6 +2942,11 @@ function closeRsvpResponseModal() {
 
 function openSendRsvpConfirmModal(partyIds = null) {
     clearError();
+    if (!canSendRsvpEmails.value) {
+        setError(rsvpEmailSendTitle.value);
+        return;
+    }
+
     if (Array.isArray(partyIds)) {
         selectedPartyIdsForEmail.value = partyIds;
     }
@@ -2675,6 +2961,86 @@ function openSendRsvpConfirmModal(partyIds = null) {
 
 function closeSendRsvpConfirmModal() {
     sendRsvpConfirmModal.open = false;
+}
+
+function openSendRsvpReminderConfirmModal() {
+    clearError();
+    clearRsvpEmailSettingsNotice();
+
+    if (!canSendRsvpEmails.value) {
+        rsvpEmailSettingsError.value = rsvpEmailSendTitle.value;
+        return;
+    }
+
+    if (!hasRsvpDeadline()) {
+        rsvpEmailSettingsError.value = 'Set an RSVP response deadline before sending reminders.';
+        return;
+    }
+
+    if (reminderEligibleParties.value.length === 0) {
+        rsvpEmailSettingsError.value = 'No parties with email addresses are waiting for a response.';
+        return;
+    }
+
+    sendRsvpReminderConfirmModal.open = true;
+}
+
+function closeSendRsvpReminderConfirmModal() {
+    sendRsvpReminderConfirmModal.open = false;
+}
+
+function scrollToYourGuests() {
+    document.getElementById('your-guests-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+    });
+}
+
+function rsvpEmailPreviewPayload() {
+    return {
+        guest_type: rsvpEmailPreviewGuestType.value,
+        response_deadline: content.value?.guest_list?.responseDeadline || null,
+    };
+}
+
+function clearRsvpEmailSettingsNotice() {
+    rsvpEmailSettingsMessage.value = '';
+    rsvpEmailSettingsError.value = '';
+}
+
+async function openRsvpEmailPreview() {
+    clearRsvpEmailSettingsNotice();
+    rsvpEmailPreviewModal.open = true;
+    rsvpEmailPreviewModal.loading = true;
+    rsvpEmailPreviewModal.error = '';
+    rsvpEmailPreviewModal.html = '';
+
+    try {
+        const response = await window.axios.post(`${apiBaseUrl}/parties/rsvp-email-preview`, rsvpEmailPreviewPayload());
+        rsvpEmailPreviewModal.html = response.data?.html || '';
+    } catch (error) {
+        rsvpEmailPreviewModal.error = extractErrorMessage(error, 'Could not load RSVP email preview.');
+    } finally {
+        rsvpEmailPreviewModal.loading = false;
+    }
+}
+
+function closeRsvpEmailPreview() {
+    rsvpEmailPreviewModal.open = false;
+}
+
+async function sendTestRsvpEmail() {
+    clearRsvpEmailSettingsNotice();
+
+    try {
+        const response = await window.axios.post(`${apiBaseUrl}/parties/send-test-rsvp-email`, {
+            ...rsvpEmailPreviewPayload(),
+            email: testRsvpEmailAddress.value,
+        });
+        rsvpEmailSettingsMessage.value = response.data?.message || 'Test RSVP email sent.';
+    } catch (error) {
+        rsvpEmailSettingsError.value = extractErrorMessage(error, 'Could not send test RSVP email.');
+    }
 }
 
 async function copyToClipboard(text) {
@@ -3218,6 +3584,7 @@ async function saveContent(openPreviewAfterSave = false) {
 
 async function saveGuestListEmailSettings() {
     clearError();
+    clearRsvpEmailSettingsNotice();
 
     try {
         const response = await window.axios.put(`${apiBaseUrl}/content`, {
@@ -3240,9 +3607,9 @@ async function saveGuestListEmailSettings() {
 
         lastSavedAt.value = formatDateTime(response.data?.last_saved_at) || new Date().toLocaleString();
         captureSavedSnapshots();
-        setMessage('RSVP email settings saved.', 5000);
+        rsvpEmailSettingsMessage.value = 'RSVP email settings saved.';
     } catch (error) {
-        setError(extractErrorMessage(error, 'Could not save RSVP email settings.'));
+        rsvpEmailSettingsError.value = extractErrorMessage(error, 'Could not save RSVP email settings.');
     }
 }
 
@@ -4005,6 +4372,11 @@ async function importParties(event) {
 
 async function sendRsvpEmailsToSelected() {
     clearError();
+    if (!canSendRsvpEmails.value) {
+        setError(rsvpEmailSendTitle.value);
+        closeSendRsvpConfirmModal();
+        return;
+    }
 
     const partyIds = selectedEmailableParties.value.map((party) => party.id);
     if (partyIds.length === 0) {
@@ -4023,6 +4395,41 @@ async function sendRsvpEmailsToSelected() {
         setMessage(response.data?.message || 'RSVP emails sent successfully.');
     } catch (error) {
         setError(extractErrorMessage(error, 'Could not send RSVP emails.'));
+    }
+}
+
+async function sendRsvpReminderEmails() {
+    clearError();
+    clearRsvpEmailSettingsNotice();
+
+    if (!canSendRsvpEmails.value) {
+        rsvpEmailSettingsError.value = rsvpEmailSendTitle.value;
+        closeSendRsvpReminderConfirmModal();
+        return;
+    }
+
+    if (!hasRsvpDeadline()) {
+        rsvpEmailSettingsError.value = 'Set an RSVP response deadline before sending reminders.';
+        closeSendRsvpReminderConfirmModal();
+        return;
+    }
+
+    const partyIds = reminderEligibleParties.value.map((party) => party.id);
+    if (partyIds.length === 0) {
+        rsvpEmailSettingsError.value = 'No parties with email addresses are waiting for a response.';
+        closeSendRsvpReminderConfirmModal();
+        return;
+    }
+
+    try {
+        const response = await window.axios.post(`${apiBaseUrl}/parties/send-rsvp-reminders`, {
+            party_ids: partyIds,
+        });
+        await Promise.all([loadParties(), loadRsvps()]);
+        closeSendRsvpReminderConfirmModal();
+        rsvpEmailSettingsMessage.value = response.data?.message || 'RSVP reminder emails sent.';
+    } catch (error) {
+        rsvpEmailSettingsError.value = extractErrorMessage(error, 'Could not send RSVP reminder emails.');
     }
 }
 

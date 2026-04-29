@@ -7,7 +7,11 @@ use App\Models\Party;
 use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Mail\PartyRsvpInviteMail;
+use App\Mail\PartyRsvpReminderMail;
+use App\Models\RsvpEmailLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class CustomerAdminTenantScopeTest extends TestCase
@@ -137,6 +141,109 @@ class CustomerAdminTenantScopeTest extends TestCase
         $this->postJson("/w/{$siteB->public_slug}/rsvp/lookup", ['code' => 'SAME'])
             ->assertOk()
             ->assertJsonPath('party.display_name', 'Site B Household');
+    }
+
+    public function test_rsvp_email_preview_renders_sample_email(): void
+    {
+        [$user, $site] = $this->createTenant('tenant-h', 'site-h');
+
+        $response = $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->postJson('/app/admin/api/parties/rsvp-email-preview', [
+                'guest_type' => 'evening',
+                'response_deadline' => '2026-08-15',
+            ])
+            ->assertOk();
+
+        $html = (string) $response->json('html');
+        $this->assertStringContainsString('Example Guest Party', $html);
+        $this->assertStringContainsString('Evening Guest', $html);
+        $this->assertStringContainsString('15 August 2026', $html);
+    }
+
+    public function test_customer_can_send_test_rsvp_email_to_self(): void
+    {
+        Mail::fake();
+
+        [$user, $site] = $this->createTenant('tenant-i', 'site-i');
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->postJson('/app/admin/api/parties/send-test-rsvp-email', [
+                'guest_type' => 'day',
+                'response_deadline' => '2026-08-15',
+            ])
+            ->assertOk();
+
+        Mail::assertSent(PartyRsvpInviteMail::class, fn (PartyRsvpInviteMail $mail) =>
+            $mail->hasTo($user->email)
+                && $mail->guestTypeLabel === 'All Day Guest'
+                && $mail->rsvpCode === 'DEMO'
+        );
+    }
+
+    public function test_customer_can_send_rsvp_reminders_only_to_unanswered_parties_with_email(): void
+    {
+        Mail::fake();
+
+        [$user, $site] = $this->createTenant('tenant-j', 'site-j');
+
+        $waitingParty = Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Waiting Party',
+            'email' => 'waiting@example.com',
+            'code' => 'WAIT',
+            'max_guests' => 2,
+        ]);
+
+        $respondedParty = Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Responded Party',
+            'email' => 'responded@example.com',
+            'code' => 'DONE',
+            'max_guests' => 2,
+        ]);
+        $respondedParty->rsvp()->create([
+            'site_id' => $site->id,
+            'status' => 'attending',
+            'attending_count' => 2,
+        ]);
+
+        $noEmailParty = Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'No Email Party',
+            'code' => 'NONE',
+            'max_guests' => 2,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->postJson('/app/admin/api/parties/send-rsvp-reminders', [
+                'party_ids' => [$waitingParty->id, $respondedParty->id, $noEmailParty->id],
+            ])
+            ->assertOk()
+            ->assertJsonPath('sent', 1);
+
+        Mail::assertSent(PartyRsvpReminderMail::class, 1);
+        Mail::assertSent(PartyRsvpReminderMail::class, fn (PartyRsvpReminderMail $mail) =>
+            $mail->hasTo('waiting@example.com')
+                && $mail->partyName === 'Waiting Party'
+                && $mail->rsvpCode === 'WAIT'
+        );
+
+        $this->assertDatabaseHas('rsvp_email_logs', [
+            'party_id' => $waitingParty->id,
+            'type' => RsvpEmailLog::TYPE_REMINDER,
+            'sent_to_email' => 'waiting@example.com',
+        ]);
+        $this->assertDatabaseMissing('rsvp_email_logs', [
+            'party_id' => $respondedParty->id,
+            'type' => RsvpEmailLog::TYPE_REMINDER,
+        ]);
+        $this->assertDatabaseMissing('rsvp_email_logs', [
+            'party_id' => $noEmailParty->id,
+            'type' => RsvpEmailLog::TYPE_REMINDER,
+        ]);
     }
 
     private function createTenant(string $accountSlug, string $siteSlug): array
