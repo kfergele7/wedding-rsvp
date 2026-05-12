@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveSiteSettingsRequest;
 use App\Http\Requests\UploadContentImageRequest;
 use App\Models\SiteSetting;
+use App\Support\WeddingPalettes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 
@@ -21,8 +22,9 @@ class ContentController extends Controller
         $content = $this->resolvedContent();
 
         return response()->json([
-            'content' => $content,
+            'content' => WeddingPalettes::applyToContent($content),
             'rsvp_settings' => $this->resolvedRsvpSettings(),
+            'colour_palettes' => WeddingPalettes::all(),
             'image_library' => $this->imageLibrary($content),
             'last_saved_at' => $contentSetting?->updated_at?->toISOString(),
         ]);
@@ -34,8 +36,11 @@ class ContentController extends Controller
         $existingContent = $this->resolvedContent();
         $content = $this->mergeReplacingLists($existingContent, $incomingContent);
         $content = $this->normalizeHomepageContent($content, $incomingContent);
+        $content = WeddingPalettes::stripDerivedThemeData($content);
         $incomingRsvpSettings = (array) $request->input('rsvp_settings', []);
-        $rsvpSettings = $this->mergeReplacingLists($this->resolvedRsvpSettings(), $incomingRsvpSettings);
+        $rsvpSettings = $incomingRsvpSettings === []
+            ? $this->resolvedRsvpSettings()
+            : $this->mergeReplacingLists($this->resolvedRsvpSettings(), $incomingRsvpSettings);
 
         // Replace list-like RSVP fields directly so removed course/items do not get merged back.
         if (array_key_exists('menu_courses', $incomingRsvpSettings)) {
@@ -85,8 +90,9 @@ class ContentController extends Controller
 
         return response()->json([
             'message' => 'Content updated.',
-            'content' => $content,
+            'content' => WeddingPalettes::applyToContent($content),
             'rsvp_settings' => $rsvpSettings,
+            'colour_palettes' => WeddingPalettes::all(),
             'last_saved_at' => $contentSetting->updated_at?->toISOString(),
         ]);
     }
@@ -115,17 +121,20 @@ class ContentController extends Controller
         $content = $this->resolvedContent();
         data_set($content, $field, $relativePath);
         $content = $this->normalizeHomepageContent($content, $content);
+        $content = WeddingPalettes::stripDerivedThemeData($content);
 
         SiteSetting::query()->updateOrCreate(
             ['site_id' => $this->currentSiteId(), 'key' => 'homepage_content'],
             ['value' => $content]
         );
 
+        $resolvedContent = WeddingPalettes::applyToContent($content);
+
         return response()->json([
             'message' => 'Image uploaded and content updated.',
             'path' => $relativePath,
-            'content' => $content,
-            'image_library' => $this->imageLibrary($content),
+            'content' => $resolvedContent,
+            'image_library' => $this->imageLibrary($resolvedContent),
         ]);
     }
 
@@ -165,6 +174,7 @@ class ContentController extends Controller
         $layout = data_get($content, 'theme.layout', 'classic');
         $layout = $layout === 'editorial' ? 'modern' : $layout;
         data_set($content, 'theme.layout', in_array($layout, ['classic', 'modern'], true) ? $layout : 'classic');
+        data_set($content, 'theme.palette', WeddingPalettes::resolveSlug(data_get($content, 'theme.palette')));
 
         return $content;
     }

@@ -78,7 +78,7 @@
         </div>
     </section>
 
-    <section v-else class="bg-[#F2ECE3] py-20 md:py-28">
+    <section v-else class="py-20 md:py-28" style="background-color: var(--wedding-soft-background);">
         <div class="site-shell space-y-20 md:space-y-28" :class="{ 'md:space-y-32': isModern }">
             <div v-if="showVenueTravelBlock" class="grid items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr]" :class="{ 'lg:grid-cols-[0.95fr_1.05fr] lg:gap-20': isModern }">
                 <div class="space-y-8">

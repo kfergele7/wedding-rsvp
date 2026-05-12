@@ -170,84 +170,51 @@
                         <h2 class="font-heading text-3xl">Create your website</h2>
                     </div>
                     <p class="mt-2 text-wedding-muted">
-                        Update text, imagery, and colours shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.
+                        Update text, imagery, and your selected colour palette shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.
                         If you would like to see a completed demo version of the website to reference, then
                         <a href="/demo" target="_blank" rel="noopener noreferrer" class="underline decoration-wedding-band underline-offset-2">click here</a>.
                     </p>
 
                     <div v-if="content" class="mt-8 space-y-6">
-                        <div id="menu-settings-section" class="content-section-block content-section-odd">
-                            <h3 class="font-heading text-3xl">Website Title and Theme Selection</h3>
+                        <div id="website-theme-section" class="content-section-block content-section-odd">
+                            <h3 class="section-heading-with-badge">
+                                <span class="section-step-badge">1</span>
+                                <span class="font-heading text-3xl">Website Title and Theme Selection</span>
+                            </h3>
                             <label class="mt-3 block text-sm uppercase tracking-[0.12em] text-wedding-muted">
                                 Website Title
                                 <input v-model="siteTitle" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="e.g. Kyle & Nicole's Wedding">
                             </label>
 
                             <div class="mt-8">
-                                <p class="text-sm uppercase tracking-[0.12em] text-wedding-muted">Theme</p>
-                                <p class="mt-2 text-sm text-wedding-muted">Preview both themes before choosing. You can switch between them at any time without changing your content or section order.</p>
+                                <p class="text-sm uppercase tracking-[0.12em] text-wedding-muted">Theme/template</p>
+                                <p class="mt-2 text-sm text-wedding-muted">Choose the structure of your wedding website. Your colour palette is selected separately below.</p>
                                 <div class="mt-4 grid gap-4 md:grid-cols-2">
                                     <article
+                                        v-for="themeOption in themeOptions"
+                                        :key="themeOption.layout"
                                         class="flex h-full flex-col justify-between border p-5 transition"
-                                        :class="selectedThemeLayout === 'classic' ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
+                                        :class="selectedThemeLayout === themeOption.layout ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
                                     >
                                         <div>
                                             <span class="flex items-center justify-between gap-3">
-                                                <span class="font-heading text-2xl text-wedding-text">Classic</span>
-                                                <span v-if="selectedThemeLayout === 'classic'" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
+                                                <span class="font-heading text-2xl text-wedding-text">{{ themeOption.name }}</span>
+                                                <span v-if="selectedThemeLayout === themeOption.layout" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
                                             </span>
-                                            <span class="mt-3 block text-sm leading-relaxed text-wedding-muted">Large image hero, centred headings, and the current polished wedding layout.</span>
+                                            <span class="mt-3 block text-sm leading-relaxed text-wedding-muted">{{ themeOption.description }}</span>
                                         </div>
                                         <div class="mt-5 flex flex-wrap gap-2">
                                             <button
                                                 type="button"
                                                 class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
-                                                :class="selectedThemeLayout === 'classic' ? 'admin-btn-success' : ''"
-                                                @click="selectThemeLayout('classic')"
+                                                :class="selectedThemeLayout === themeOption.layout ? 'admin-btn-success' : ''"
+                                                @click="selectThemeLayout(themeOption.layout)"
                                             >
                                                 <span class="material-symbols-outlined btn-icon">check</span>
-                                                Select Classic
+                                                {{ selectedThemeLayout === themeOption.layout ? `${themeOption.name} selected` : `Select ${themeOption.name}` }}
                                             </button>
                                             <a
-                                                :href="themePreviewUrl('classic')"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="admin-btn border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em]"
-                                            >
-                                                Preview
-                                            </a>
-                                        </div>
-                                    </article>
-
-                                    <article
-                                        class="flex h-full flex-col justify-between border p-5 transition"
-                                        :class="selectedThemeLayout === 'modern' ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
-                                    >
-                                        <div>
-                                            <span class="flex items-center justify-between gap-3">
-                                                <span class="font-heading text-2xl text-wedding-text">Modern</span>
-                                                <span v-if="selectedThemeLayout === 'modern'" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
-                                            </span>
-                                            <span class="mt-3 block text-sm leading-relaxed text-wedding-muted">A refined, modern layout with soft mauve tones, rounded imagery, clean image bands, and calmer spacing.</span>
-                                            <span class="mt-4 flex gap-2" aria-hidden="true">
-                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#B9A1A7]"></span>
-                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#EFE6E1]"></span>
-                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#FAF7F3]"></span>
-                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#31282A]"></span>
-                                            </span>
-                                        </div>
-                                        <div class="mt-5 flex flex-wrap gap-2">
-                                            <button
-                                                type="button"
-                                                class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
-                                                :class="selectedThemeLayout === 'modern' ? 'admin-btn-success' : ''"
-                                                @click="selectThemeLayout('modern')"
-                                            >
-                                                <span class="material-symbols-outlined btn-icon">check</span>
-                                                Select Modern
-                                            </button>
-                                            <a
-                                                :href="themePreviewUrl('modern')"
+                                                :href="themePreviewUrl(themeOption.layout)"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 class="admin-btn border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em]"
@@ -257,47 +224,53 @@
                                         </div>
                                     </article>
                                 </div>
+
+                                <div class="mt-8 border-t border-soft pt-8">
+                                    <p class="text-sm uppercase tracking-[0.12em] text-wedding-muted">Colour palette</p>
+                                    <p class="mt-2 text-sm text-wedding-muted">Choose a professionally designed palette. It controls section backgrounds, buttons, hover colours, accents, borders and contrast-safe text.</p>
+                                    <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                        <article
+                                            v-for="palette in colourPaletteOptions"
+                                            :key="palette.slug"
+                                            class="flex h-full flex-col justify-between border p-4 transition"
+                                            :class="selectedColourPaletteSlug === palette.slug ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
+                                        >
+                                            <div>
+                                                <span class="flex items-start justify-between gap-3">
+                                                    <span>
+                                                        <span class="block font-heading text-xl text-wedding-text">{{ palette.name }}</span>
+                                                        <span class="mt-2 block text-sm leading-relaxed text-wedding-muted">{{ palette.mood }}</span>
+                                                    </span>
+                                                    <span v-if="selectedColourPaletteSlug === palette.slug" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
+                                                </span>
+                                                <div class="mt-4 flex flex-nowrap items-center gap-1.5" :aria-label="`${palette.name} colour swatches`">
+                                                    <span
+                                                        v-for="colour in paletteSwatches(palette)"
+                                                        :key="`${palette.slug}-${colour}`"
+                                                        class="theme-swatch-button pointer-events-none"
+                                                        :style="{ backgroundColor: colour }"
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="admin-btn mt-5 inline-flex items-center justify-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                                :class="selectedColourPaletteSlug === palette.slug ? 'admin-btn-success' : ''"
+                                                @click="selectColourPalette(palette.slug)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">palette</span>
+                                                {{ selectedColourPaletteSlug === palette.slug ? 'Selected' : 'Select Palette' }}
+                                            </button>
+                                        </article>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-
                         <div class="content-section-block content-section-even">
-                            <h3 class="section-heading-with-badge">
-                                <span class="section-step-badge">1</span>
-                                <span class="font-heading text-3xl">Theme Colours</span>
-                            </h3>
-                            <p class="mt-2 text-sm text-wedding-muted">Primary section colour applies to The Big Day and Ready to Celebrate sections. Button colour applies to all dark buttons (hero button excluded).</p>
-                            <div class="mt-4 grid gap-4 md:grid-cols-2">
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Primary Section Colour
-                                    <div class="mt-2 flex items-center gap-3">
-                                        <input v-model="content.theme.primary_color" type="color" class="h-12 w-16 border border-soft bg-white p-1">
-                                        <input v-model="content.theme.primary_color" class="h-12 w-full border border-soft px-4 py-3 uppercase" placeholder="#22363A">
-                                    </div>
-                                </label>
-                                <label class="block text-sm uppercase tracking-[0.12em] text-wedding-muted">Button Colour
-                                    <div class="mt-2 flex items-center gap-3">
-                                        <input v-model="content.theme.button_color" type="color" class="h-12 w-16 border border-soft bg-white p-1">
-                                        <input v-model="content.theme.button_color" class="h-12 w-full border border-soft px-4 py-3 uppercase" placeholder="#22363A">
-                                    </div>
-                                </label>
-                            </div>
-                            <p class="mt-3 text-sm italic text-wedding-muted">Tip: keep colour contrast in mind so your text stays easy to read.</p>
-                            <button
-                                type="button"
-                                class="mt-4 text-sm font-medium text-red-700 underline decoration-wedding-danger underline-offset-4 transition hover:text-[#B93F3F]"
-                                @click="resetThemeColours"
-                            >
-                                Reset to default colours
-                            </button>
-                        </div>
-
-                        <div class="w-full py-8">
-                            <hr class="w-full border-t-2 border-wedding-band">
-                        </div>
-                        <div class="content-section-block content-section-odd">
                         <h3 class="section-heading-with-badge">
                             <span class="section-step-badge">2</span>
                             <span class="font-heading text-3xl">Hero</span>
@@ -351,7 +324,7 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <div class="content-section-block content-section-even">
+                        <div class="content-section-block content-section-odd">
                         <div class="mb-3">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">3</span>
@@ -405,7 +378,7 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <div class="content-section-block content-section-odd mt-2">
+                        <div class="content-section-block content-section-even mt-2">
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">4</span>
@@ -495,7 +468,7 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <div class="content-section-block content-section-even">
+                        <div class="content-section-block content-section-odd">
                         <div class="mb-3">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">5</span>
@@ -550,7 +523,7 @@
                         <div class="w-full py-8">
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
-                        <div class="content-section-block content-section-odd">
+                        <div class="content-section-block content-section-even">
                         <div class="mb-3">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">6</span>
@@ -605,7 +578,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-even">
+                        <div class="content-section-block content-section-odd">
                             <div class="mb-3">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">7</span>
@@ -629,7 +602,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-odd">
+                        <div id="menu-settings-section" class="content-section-block content-section-even">
                             <div class="mb-3">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">8</span>
@@ -831,7 +804,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-even">
+                        <div class="content-section-block content-section-odd">
                             <div class="mb-3 flex items-center justify-between">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">9</span>
@@ -914,7 +887,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div id="countdown-section" class="content-section-block content-section-odd">
+                        <div id="countdown-section" class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">10</span>
                                 <span class="font-heading text-3xl">Countdown Timer</span>
@@ -950,7 +923,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div id="gallery-section" class="content-section-block content-section-even">
+                        <div id="gallery-section" class="content-section-block content-section-odd">
                             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                                 <h3 class="section-heading-with-badge">
                                     <span class="section-step-badge">11</span>
@@ -1073,7 +1046,7 @@
                             <hr class="w-full border-t-2 border-wedding-band">
                         </div>
 
-                        <div class="content-section-block content-section-odd">
+                        <div class="content-section-block content-section-even">
                             <h3 class="section-heading-with-badge">
                                 <span class="section-step-badge">12</span>
                                 <span class="font-heading text-3xl">Final RSVP Request</span>
@@ -2402,6 +2375,33 @@ const mobileNavOpen = ref(false);
 const imageLibrary = ref([]);
 const imageLibraryModalOpen = ref(false);
 const selectedGalleryLibraryIndex = ref(null);
+const themeOptions = [
+    {
+        layout: 'classic',
+        name: 'Classic',
+        description: 'Large image hero, centred headings, and the current polished wedding layout.',
+    },
+    {
+        layout: 'modern',
+        name: 'Modern',
+        description: 'A refined, modern layout with soft mauve tones, rounded imagery, clean image bands, and calmer spacing.',
+    },
+];
+const fallbackColourPalettes = [
+    {
+        slug: 'magic_classic',
+        name: 'Magic Classic',
+        mood: 'Elegant, premium, timeless',
+        colours: {
+            primary: '#22363A',
+            secondary: '#466369',
+            dark: '#0F1B1D',
+            soft_background: '#F7F5F2',
+            light: '#FFFFFF',
+        },
+    },
+];
+const colourPalettes = ref(fallbackColourPalettes);
 
 const stats = ref({
     total_households: 0,
@@ -2536,6 +2536,8 @@ const hasUnsavedChanges = computed(() => {
         || siteTitle.value !== lastSavedSiteTitle.value;
 });
 const selectedThemeLayout = computed(() => normalizeThemeLayout(content.value?.theme?.layout));
+const colourPaletteOptions = computed(() => colourPalettes.value.length ? colourPalettes.value : fallbackColourPalettes);
+const selectedColourPaletteSlug = computed(() => normalizeColourPalette(content.value?.theme?.palette));
 const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
 const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
 const galleryImageCount = computed(() => {
@@ -2846,6 +2848,7 @@ async function loadStats() {
 async function loadContent() {
     try {
         const response = await window.axios.get(`${apiBaseUrl}/content`);
+        colourPalettes.value = normalizeColourPalettes(response.data.colour_palettes);
         content.value = response.data.content;
         ensureImageFocusDefaults();
         ensureSectionVisibilityDefaults();
@@ -3651,27 +3654,56 @@ function selectThemeLayout(layout) {
     content.value.theme.layout = normalizeThemeLayout(layout);
 }
 
-async function resetThemeColours() {
-    const confirmed = await openConfirmModal(
-        'Reset Theme Colours',
-        'Are you sure you want to reset your theme colours? This will overwrite your selected primary section colour and button colour once you click Save.',
-        {
-            confirmClass: 'admin-btn-success',
-            confirmIcon: 'check',
-            confirmLabel: 'Yes, Reset Colours',
-        }
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
+function selectColourPalette(slug) {
     if (!content.value.theme || typeof content.value.theme !== 'object') {
         content.value.theme = {};
     }
 
-    content.value.theme.primary_color = '#22363A';
-    content.value.theme.button_color = '#22363A';
+    content.value.theme.palette = normalizeColourPalette(slug);
+    delete content.value.theme.palette_colours;
+}
+
+function normalizeColourPalette(slug) {
+    const normalized = String(slug || 'magic_classic').trim().toLowerCase().replace(/[\s-]+/g, '_');
+    return colourPaletteOptions.value.some((palette) => palette.slug === normalized) ? normalized : 'magic_classic';
+}
+
+function normalizeColourPalettes(palettes) {
+    if (!Array.isArray(palettes) || palettes.length === 0) {
+        return fallbackColourPalettes;
+    }
+
+    const normalizedPalettes = palettes
+        .map((palette) => ({
+            slug: String(palette?.slug || '').trim(),
+            name: String(palette?.name || '').trim(),
+            mood: String(palette?.mood || '').trim(),
+            colours: {
+                primary: normalizeHexColour(palette?.colours?.primary, '#22363A'),
+                secondary: normalizeHexColour(palette?.colours?.secondary, '#466369'),
+                dark: normalizeHexColour(palette?.colours?.dark, '#0F1B1D'),
+                soft_background: normalizeHexColour(palette?.colours?.soft_background, '#F7F5F2'),
+                light: normalizeHexColour(palette?.colours?.light, '#FFFFFF'),
+            },
+        }))
+        .filter((palette) => palette.slug && palette.name);
+
+    return normalizedPalettes.length ? normalizedPalettes : fallbackColourPalettes;
+}
+
+function normalizeHexColour(colour, fallback) {
+    const normalized = String(colour || '').trim().toUpperCase();
+    return /^#[0-9A-F]{6}$/.test(normalized) ? normalized : fallback;
+}
+
+function paletteSwatches(palette) {
+    return [
+        palette?.colours?.primary,
+        palette?.colours?.secondary,
+        palette?.colours?.dark,
+        palette?.colours?.soft_background,
+        palette?.colours?.light,
+    ].filter(Boolean);
 }
 
 async function saveContent(openPreviewAfterSave = false) {
@@ -3732,6 +3764,9 @@ async function saveContent(openPreviewAfterSave = false) {
             ensureImageFocusDefaults();
             ensureSectionVisibilityDefaults();
         }
+        if (response.data?.colour_palettes) {
+            colourPalettes.value = normalizeColourPalettes(response.data.colour_palettes);
+        }
         if (response.data?.rsvp_settings) {
             rsvpSettings.value = {
                 ...response.data.rsvp_settings,
@@ -3763,6 +3798,9 @@ async function saveGuestListEmailSettings() {
             content.value = response.data.content;
             ensureImageFocusDefaults();
             ensureSectionVisibilityDefaults();
+        }
+        if (response.data?.colour_palettes) {
+            colourPalettes.value = normalizeColourPalettes(response.data.colour_palettes);
         }
 
         if (response.data?.rsvp_settings) {
@@ -3900,6 +3938,8 @@ function ensureImageFocusDefaults() {
     if (typeof content.value.theme !== 'object' || content.value.theme === null) {
         content.value.theme = {};
     }
+
+    content.value.theme.palette = normalizeColourPalette(content.value.theme.palette);
 
     if (!content.value.theme.primary_color) {
         content.value.theme.primary_color = '#22363A';
@@ -4132,7 +4172,9 @@ async function uploadContentImage(event, field) {
             },
         });
 
-        if (response.data?.path) {
+        if (response.data?.content) {
+            content.value = response.data.content;
+        } else if (response.data?.path) {
             setNestedContentValue(field, response.data.path);
         }
         ensureImageFocusDefaults();
@@ -4858,8 +4900,7 @@ function ensureHelpTooltip(iconElement, helpText) {
 function buildFieldHelp(labelText) {
     const lower = labelText.toLowerCase();
 
-    if (lower.includes('primary section colour')) return resolveFieldHelpText('theme.primary_section_colour', 'Example: #22363A. Choose a dark section colour for strong white text contrast.');
-    if (lower.includes('button colour')) return resolveFieldHelpText('theme.button_colour', 'Example: #22363A. This controls dark action buttons across the page.');
+    if (lower.includes('colour palette')) return resolveFieldHelpText('theme.colour_palette', 'Choose a professionally designed colour palette. The website automatically handles button, section and text contrast.');
     if (lower.includes('couple names')) return resolveFieldHelpText('hero.couple_names', 'Example: Kyle & Nicole. This displays as the hero headline.');
     if (lower.includes('hero kicker')) return resolveFieldHelpText('hero.kicker', 'Example: We are getting married. Keep this short and warm.');
     if (lower.includes('wedding date')) return resolveFieldHelpText('hero.wedding_date', 'Example: 12 September 2026.');
@@ -5513,6 +5554,32 @@ function serialize(value) {
 
 .guest-option-control > .guest-option-checkbox {
     margin-top: 0 !important;
+}
+
+.theme-swatch-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.85rem;
+    height: 1.85rem;
+    border: 1px solid rgba(15, 27, 29, 0.18);
+    border-radius: 9999px;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.theme-swatch-button:hover,
+.theme-swatch-button:focus-visible {
+    border-color: #22363a;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.58), 0 8px 18px rgba(15, 27, 29, 0.12);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.theme-swatch-button.is-selected {
+    border-color: #22363a;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #22363a;
 }
 
 .timeline-grid {

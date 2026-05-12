@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\WeddingPalettes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,6 +26,7 @@ class SaveSiteSettingsRequest extends FormRequest
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
             ],
+            'content.theme.palette' => ['nullable', Rule::in(WeddingPalettes::slugs())],
             'content.theme.layout' => ['nullable', Rule::in(['classic', 'modern', 'editorial'])],
             'content.guest_list' => ['nullable', 'array'],
             'content.guest_list.responseDeadline' => ['nullable', 'date'],

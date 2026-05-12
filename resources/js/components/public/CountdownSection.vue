@@ -1,10 +1,10 @@
 <template>
-    <section v-if="countdownReady" class="py-20 md:py-24" :class="isModern ? 'bg-[var(--modern-mauve)] py-24 md:py-32' : 'bg-[#22363A]'">
+    <section v-if="countdownReady" class="py-20 md:py-24" :class="isModern ? 'py-24 md:py-32' : ''" :style="sectionStyle">
         <div class="site-shell">
-            <div class="border px-8 py-10 text-center shadow-soft md:px-10 md:py-12" :class="isModern ? 'rounded-[2rem] border-white/25 bg-[rgba(250,247,243,0.2)] text-white' : 'border-white/20 bg-[#466369] text-white'">
-                <p class="text-xs uppercase tracking-[0.22em] text-white/75">Countdown</p>
+            <div class="border px-8 py-10 text-center shadow-soft md:px-10 md:py-12" :class="isModern ? 'rounded-[2rem]' : ''" :style="panelStyle">
+                <p class="text-xs uppercase tracking-[0.22em]" :style="{ color: mutedTextColor }">Countdown</p>
                 <h2 class="mt-3 font-heading text-4xl md:text-5xl" :class="{ '!font-sans font-semibold uppercase tracking-[0.14em]': isModern }">Until The Wedding Begins</h2>
-                <p class="mt-4 text-white/85">
+                <p class="mt-4" :style="{ color: softTextColor }">
                     {{ countdownIntro }}
                 </p>
 
@@ -13,10 +13,11 @@
                         v-for="item in countdownItems"
                         :key="item.label"
                         class="border px-6 py-8 shadow-soft"
-                        :class="isModern ? 'rounded-[1.5rem] border-white/30 bg-[rgba(250,247,243,0.18)]' : 'rounded border-white/20 bg-[#22363A]'"
+                        :class="isModern ? 'rounded-[1.5rem]' : 'rounded'"
+                        :style="countdownCardStyle"
                     >
                         <p class="font-heading text-5xl md:text-6xl" :class="{ '!font-sans font-semibold': isModern }">{{ item.value }}</p>
-                        <p class="mt-3 text-xs uppercase tracking-[0.22em] text-white/70">{{ item.label }}</p>
+                        <p class="mt-3 text-xs uppercase tracking-[0.22em]" :style="{ color: mutedTextColor }">{{ item.label }}</p>
                     </article>
                 </div>
             </div>
@@ -32,6 +33,10 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    primaryColor: {
+        type: String,
+        default: '#22363A',
+    },
     layout: {
         type: String,
         default: 'classic',
@@ -42,6 +47,26 @@ const now = ref(Date.now());
 let timer = null;
 
 const isModern = computed(() => props.layout === 'modern');
+const hasLightBackground = computed(() => isLightColour(props.primaryColor));
+const textColor = computed(() => (hasLightBackground.value ? '#0F1B1D' : '#FFFFFF'));
+const mutedTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.62)' : 'rgba(255, 255, 255, 0.75)'));
+const softTextColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.78)' : 'rgba(255, 255, 255, 0.85)'));
+const panelSurface = computed(() => (hasLightBackground.value ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.12)'));
+const cardSurface = computed(() => (hasLightBackground.value ? 'rgba(255, 255, 255, 0.64)' : 'rgba(15, 27, 29, 0.16)'));
+const borderColor = computed(() => (hasLightBackground.value ? 'rgba(15, 27, 29, 0.14)' : 'rgba(255, 255, 255, 0.25)'));
+const sectionStyle = computed(() => ({
+    backgroundColor: props.primaryColor,
+    color: textColor.value,
+}));
+const panelStyle = computed(() => ({
+    borderColor: borderColor.value,
+    backgroundColor: panelSurface.value,
+    color: textColor.value,
+}));
+const countdownCardStyle = computed(() => ({
+    borderColor: borderColor.value,
+    backgroundColor: cardSurface.value,
+}));
 const targetDate = computed(() => parseTargetDate(props.targetDateTime));
 const countdownReady = computed(() => targetDate.value instanceof Date && !Number.isNaN(targetDate.value.getTime()));
 
@@ -114,5 +139,19 @@ function parseTargetDate(targetDateTime) {
 
 function padNumber(value) {
     return String(Math.max(0, value)).padStart(2, '0');
+}
+
+function isLightColour(hex) {
+    const normalized = (hex || '').replace('#', '').trim();
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return false;
+    }
+
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+    const luminance = (0.299 * r) + (0.587 * g) + (0.114 * b);
+
+    return luminance > 160;
 }
 </script>

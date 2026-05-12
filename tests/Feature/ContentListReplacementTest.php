@@ -84,6 +84,51 @@ class ContentListReplacementTest extends TestCase
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.2.items');
     }
 
+    public function test_colour_palette_selection_is_stored_as_slug_and_rendered_from_palette(): void
+    {
+        [$user, $site] = $this->createTenant();
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->getJson('/app/admin/api/content')
+            ->assertOk()
+            ->assertJsonPath('content.theme.palette', 'magic_classic')
+            ->assertJsonPath('content.theme.palette_colours.primary', '#22363A')
+            ->assertJsonFragment(['name' => 'Rose Veil']);
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->putJson('/app/admin/api/content', [
+                'content' => [
+                    'theme' => [
+                        'layout' => 'modern',
+                        'palette' => 'rose_veil',
+                        'palette_colours' => [
+                            'primary' => '#000000',
+                        ],
+                    ],
+                ],
+                'rsvp_settings' => [],
+            ])
+            ->assertOk()
+            ->assertJsonPath('content.theme.layout', 'modern')
+            ->assertJsonPath('content.theme.palette', 'rose_veil')
+            ->assertJsonPath('content.theme.palette_colours.primary', '#B9A3AA');
+
+        $savedContent = SiteSetting::query()
+            ->where('site_id', $site->id)
+            ->where('key', 'homepage_content')
+            ->firstOrFail()
+            ->value;
+
+        $this->assertSame('rose_veil', $savedContent['theme']['palette']);
+        $this->assertArrayNotHasKey('palette_colours', $savedContent['theme']);
+
+        $this->get('/'.$site->public_slug)
+            ->assertOk()
+            ->assertSee('#B9A3AA');
+    }
+
     private function createTenant(): array
     {
         $account = Account::query()->create([

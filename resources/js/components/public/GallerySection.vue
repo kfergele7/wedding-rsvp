@@ -1,5 +1,5 @@
 <template>
-    <section v-if="visibleImages.length >= 2" class="pt-20 pb-20 md:pt-28 md:pb-28" :class="isModern ? 'bg-[var(--modern-cream)]' : 'bg-[#F2ECE3]'">
+    <section v-if="visibleImages.length >= 2" class="pt-20 pb-20 md:pt-28 md:pb-28" style="background-color: var(--wedding-soft-background);">
         <div class="site-shell">
             <div class="card-frame bg-white" :class="{ 'border-[rgba(143,115,123,0.18)] bg-white/70 md:p-12': isModern }">
                 <p v-if="isModern" class="text-center text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Memories</p>

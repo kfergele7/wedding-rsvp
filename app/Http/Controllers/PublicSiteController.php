@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PlatformSetting;
 use App\Models\Site;
 use App\Models\SiteSetting;
+use App\Support\WeddingPalettes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -217,10 +218,10 @@ class PublicSiteController extends Controller
             ->first();
 
         if (! $saved || ! is_array($saved->value)) {
-            return $fallback;
+            return WeddingPalettes::applyToContent($fallback);
         }
 
-        return $this->mergeReplacingLists($fallback, $saved->value);
+        return WeddingPalettes::applyToContent($this->mergeReplacingLists($fallback, $saved->value));
     }
 
     private function rsvpSettings(): array
@@ -264,7 +265,7 @@ class PublicSiteController extends Controller
         }
 
         if (! $demoSite) {
-            return [$fallbackContent, $fallbackRsvp, null, 'Magic Invitation Demo'];
+            return [WeddingPalettes::applyToContent($fallbackContent), $fallbackRsvp, null, 'Magic Invitation Demo'];
         }
 
         $savedContent = SiteSetting::query()
@@ -279,6 +280,7 @@ class PublicSiteController extends Controller
         $content = (is_array($savedContent?->value))
             ? $this->mergeReplacingLists($fallbackContent, $savedContent->value)
             : $fallbackContent;
+        $content = WeddingPalettes::applyToContent($content);
         $rsvpSettings = (is_array($savedRsvp?->value))
             ? $this->mergeReplacingLists($fallbackRsvp, $savedRsvp->value)
             : $fallbackRsvp;

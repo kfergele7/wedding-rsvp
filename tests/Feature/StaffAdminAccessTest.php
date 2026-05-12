@@ -8,6 +8,7 @@ use App\Models\PlatformSetting;
 use App\Models\Site;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Support\WeddingPalettes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -285,6 +286,62 @@ class StaffAdminAccessTest extends TestCase
             'staff_user_id' => $staff->id,
             'account_id' => null,
             'action' => 'staff.platform.demo_source.updated',
+        ]);
+    }
+
+    public function test_staff_user_can_add_custom_colour_palette_for_customer_editor(): void
+    {
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.templates.colour-palettes.update'), [
+                'new_palette' => [
+                    'name' => 'Winter Pearl',
+                    'mood' => 'Cool, refined, crisp',
+                    'slug' => 'winter_pearl',
+                    'primary' => '#55606E',
+                    'secondary' => '#A8B4C0',
+                    'dark' => '#1E2630',
+                    'soft_background' => '#EDF0F2',
+                    'light' => '#FFFFFF',
+                ],
+            ])
+            ->assertRedirect();
+
+        $setting = PlatformSetting::query()
+            ->where('key', WeddingPalettes::CUSTOM_SETTING_KEY)
+            ->first();
+
+        $this->assertNotNull($setting);
+        $this->assertSame('Winter Pearl', $setting->value['winter_pearl']['name'] ?? null);
+
+        [$customer, $site] = $this->makeTenant('palette-account', 'palette-site');
+
+        $this->actingAs($customer)
+            ->withSession(['current_site_id' => $site->id])
+            ->getJson('/app/admin/api/content')
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Winter Pearl']);
+
+        $this->actingAs($customer)
+            ->withSession(['current_site_id' => $site->id])
+            ->putJson('/app/admin/api/content', [
+                'content' => [
+                    'theme' => [
+                        'layout' => 'classic',
+                        'palette' => 'winter_pearl',
+                    ],
+                ],
+                'rsvp_settings' => [],
+            ])
+            ->assertOk()
+            ->assertJsonPath('content.theme.palette', 'winter_pearl')
+            ->assertJsonPath('content.theme.palette_colours.primary', '#55606E');
+
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'staff_user_id' => $staff->id,
+            'account_id' => null,
+            'action' => 'staff.platform.colour_palettes.updated',
         ]);
     }
 

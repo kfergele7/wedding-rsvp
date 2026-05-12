@@ -182,8 +182,12 @@ const saveEndpoint = ref('');
 const codeInput = ref((props.payload?.code || '').toUpperCase());
 const party = ref(null);
 const theme = computed(() => props.payload?.content?.theme || {});
+const paletteColours = computed(() => normalizePaletteColours(theme.value.palette_colours));
 const themeVars = computed(() => ({
-    '--wedding-button-color': theme.value.button_color || '#22363A',
+    '--wedding-button-color': paletteColours.value.primary,
+    '--wedding-button-hover-color': paletteColours.value.secondary,
+    '--wedding-button-text-color': isLightColour(paletteColours.value.primary) ? '#0F1B1D' : '#FFFFFF',
+    '--wedding-button-hover-text-color': isLightColour(paletteColours.value.secondary) ? '#0F1B1D' : '#FFFFFF',
 }));
 
 const loadingLookup = ref(false);
@@ -200,6 +204,33 @@ const form = reactive({
     dietary_restrictions: '',
     message: '',
 });
+
+function normalizePaletteColours(colours) {
+    return {
+        primary: normalizeHexColour(colours?.primary, '#22363A'),
+        secondary: normalizeHexColour(colours?.secondary, '#466369'),
+    };
+}
+
+function normalizeHexColour(colour, fallback) {
+    const normalized = String(colour || '').trim().toUpperCase();
+    return /^#[0-9A-F]{6}$/.test(normalized) ? normalized : fallback;
+}
+
+function isLightColour(hex) {
+    const normalized = (hex || '').replace('#', '').trim();
+
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return false;
+    }
+
+    const red = parseInt(normalized.slice(0, 2), 16);
+    const green = parseInt(normalized.slice(2, 4), 16);
+    const blue = parseInt(normalized.slice(4, 6), 16);
+    const luminance = (0.299 * red) + (0.587 * green) + (0.114 * blue);
+
+    return luminance > 160;
+}
 
 const availableCourseSections = computed(() => mealCourses.value.filter((course) => Array.isArray(course.items) && course.items.length > 0));
 const hasKidsMenu = computed(() => rsvpSettings.value.kids_menu_enabled && kidsMenuItems.value.length > 0);

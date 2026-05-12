@@ -28,27 +28,28 @@
 
         <HeroSection :content="content.hero" :layout="selectedLayout" @open-rsvp="openRsvpModal" />
 
-        <main class="bg-[#F7F5F2]">
+        <main :style="{ backgroundColor: activePalette.soft_background }">
             <WelcomeSection v-if="effectiveSectionVisibility.welcome" :content="content.welcome" :layout="selectedLayout" />
-            <TimelineSection v-if="effectiveSectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" :layout="selectedLayout" />
+            <TimelineSection v-if="effectiveSectionVisibility.timeline" :content="content.timeline" :primary-color="effectivePrimaryColor" :layout="selectedLayout" />
             <StorySection v-if="effectiveSectionVisibility.story" :content="content.story" :layout="selectedLayout" />
             <DetailsSection
                 :content="content.details"
                 :rsvp-settings="rsvpSettings"
-                :primary-color="content.theme.primary_color"
+                :primary-color="effectivePrimaryColor"
                 :section-visibility="effectiveSectionVisibility"
                 :layout="selectedLayout"
             />
             <CountdownSection
                 v-if="effectiveSectionVisibility.countdown"
                 :target-date-time="content.countdown.targetDateTime"
+                :primary-color="effectivePrimaryColor"
                 :layout="selectedLayout"
             />
             <GallerySection v-if="effectiveSectionVisibility.gallery" :content="content.gallery" :layout="selectedLayout" />
-            <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" :layout="selectedLayout" @open-rsvp="openRsvpModal" />
+            <RsvpCtaSection :content="content.cta" :primary-color="effectivePrimaryColor" :layout="selectedLayout" @open-rsvp="openRsvpModal" />
         </main>
 
-        <div :class="selectedLayout === 'modern' ? 'bg-[var(--modern-ink)]' : 'bg-[#0F1B1D]'">
+        <div :style="{ backgroundColor: activePalette.dark }">
             <footer class="w-full py-[5px] text-white/85">
                 <div class="site-shell flex items-center justify-center text-center text-[10px] uppercase tracking-[0.12em]">
                     <span>&copy; Copyright Magic Invitation {{ currentYear }}</span>
@@ -85,6 +86,14 @@ const props = defineProps({
         default: () => ({}),
     },
 });
+
+const fallbackPaletteColours = {
+    primary: '#22363A',
+    secondary: '#466369',
+    dark: '#0F1B1D',
+    soft_background: '#F7F5F2',
+    light: '#FFFFFF',
+};
 
 const fallbackContent = {
     hero: {
@@ -163,6 +172,8 @@ const fallbackContent = {
         buttonLabel: 'Go to RSVP',
     },
     theme: {
+        palette: 'magic_classic',
+        palette_colours: fallbackPaletteColours,
         primary_color: '#22363A',
         button_color: '#22363A',
         layout: 'classic',
@@ -253,18 +264,31 @@ const selectedLayout = computed(() => {
     return ['classic', 'modern'].includes(layout) ? layout : 'classic';
 });
 
+const activePalette = computed(() => normalizePaletteColours(content.value.theme.palette_colours));
+const effectivePrimaryColor = computed(() => activePalette.value.primary);
+const effectiveButtonColor = computed(() => activePalette.value.primary);
+
 const themeVars = computed(() => {
-    const savedButtonColor = content.value.theme.button_color || fallbackContent.theme.button_color;
-    const defaultButtonColor = fallbackContent.theme.button_color.toLowerCase();
-    const buttonColor = selectedLayout.value === 'modern' && savedButtonColor.toLowerCase() === defaultButtonColor
-        ? '#8F737B'
-        : savedButtonColor;
+    const buttonColor = effectiveButtonColor.value;
+    const hoverColor = activePalette.value.secondary;
 
     return {
+        '--wedding-palette-primary': activePalette.value.primary,
+        '--wedding-palette-secondary': activePalette.value.secondary,
+        '--wedding-palette-dark': activePalette.value.dark,
+        '--wedding-soft-background': activePalette.value.soft_background,
+        '--wedding-palette-light': activePalette.value.light,
+        '--modern-mauve': activePalette.value.primary,
+        '--modern-mauve-dark': activePalette.value.secondary,
+        '--modern-cream': activePalette.value.soft_background,
+        '--modern-blush': washedOutColour(activePalette.value.soft_background, 0.18),
+        '--modern-blush-deep': washedOutColour(activePalette.value.secondary, 0.42),
+        '--modern-taupe': activePalette.value.secondary,
+        '--modern-ink': activePalette.value.dark,
         '--wedding-button-color': buttonColor,
-        '--wedding-button-hover-color': selectedLayout.value === 'modern' && buttonColor === '#8F737B'
-            ? '#31282A'
-            : washedOutColour(buttonColor),
+        '--wedding-button-hover-color': hoverColor,
+        '--wedding-button-text-color': isLightColour(buttonColor) ? '#0F1B1D' : '#FFFFFF',
+        '--wedding-button-hover-text-color': isLightColour(hoverColor) ? '#0F1B1D' : '#FFFFFF',
     };
 });
 const isRsvpModalOpen = ref(Boolean(props.payload?.openRsvpModal));
@@ -436,7 +460,23 @@ function normalizeMenuCourses(courses) {
     return fallbackRsvpSettings.menu_courses;
 }
 
-function washedOutColour(hex) {
+function normalizePaletteColours(colours) {
+    return {
+        primary: normalizeHexColour(colours?.primary, fallbackPaletteColours.primary),
+        secondary: normalizeHexColour(colours?.secondary, fallbackPaletteColours.secondary),
+        dark: normalizeHexColour(colours?.dark, fallbackPaletteColours.dark),
+        soft_background: normalizeHexColour(colours?.soft_background, fallbackPaletteColours.soft_background),
+        light: normalizeHexColour(colours?.light, fallbackPaletteColours.light),
+    };
+}
+
+function normalizeHexColour(colour, fallback) {
+    const normalized = String(colour || '').trim().toUpperCase();
+
+    return /^#[0-9A-F]{6}$/.test(normalized) ? normalized : fallback;
+}
+
+function washedOutColour(hex, mixWithWhite = 0.24) {
     const normalized = (hex || '').replace('#', '').trim();
 
     if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
@@ -446,7 +486,6 @@ function washedOutColour(hex) {
     const red = parseInt(normalized.slice(0, 2), 16);
     const green = parseInt(normalized.slice(2, 4), 16);
     const blue = parseInt(normalized.slice(4, 6), 16);
-    const mixWithWhite = 0.24;
 
     const washedRed = Math.round(red + ((255 - red) * mixWithWhite));
     const washedGreen = Math.round(green + ((255 - green) * mixWithWhite));
@@ -455,5 +494,20 @@ function washedOutColour(hex) {
     return `#${[washedRed, washedGreen, washedBlue]
         .map((channel) => channel.toString(16).padStart(2, '0'))
         .join('')}`;
+}
+
+function isLightColour(hex) {
+    const normalized = (hex || '').replace('#', '').trim();
+
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return false;
+    }
+
+    const red = parseInt(normalized.slice(0, 2), 16);
+    const green = parseInt(normalized.slice(2, 4), 16);
+    const blue = parseInt(normalized.slice(4, 6), 16);
+    const luminance = (0.299 * red) + (0.587 * green) + (0.114 * blue);
+
+    return luminance > 160;
 }
 </script>

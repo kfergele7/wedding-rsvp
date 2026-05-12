@@ -1,6 +1,96 @@
 <?php
 
 return [
+    'colour_palettes' => [
+        'magic_classic' => [
+            'name' => 'Magic Classic',
+            'mood' => 'Elegant, premium, timeless',
+            'colours' => [
+                'primary' => '#22363A',
+                'secondary' => '#466369',
+                'dark' => '#0F1B1D',
+                'soft_background' => '#F7F5F2',
+                'light' => '#FFFFFF',
+            ],
+        ],
+        'rose_veil' => [
+            'name' => 'Rose Veil',
+            'mood' => 'Soft, romantic, feminine',
+            'colours' => [
+                'primary' => '#B9A3AA',
+                'secondary' => '#967984',
+                'dark' => '#4A363C',
+                'soft_background' => '#EFE7E1',
+                'light' => '#FAF8F5',
+            ],
+        ],
+        'champagne_silk' => [
+            'name' => 'Champagne Silk',
+            'mood' => 'Warm, elegant, softly luxurious',
+            'colours' => [
+                'primary' => '#6F6252',
+                'secondary' => '#C8B58A',
+                'dark' => '#2A241D',
+                'soft_background' => '#F1E8D8',
+                'light' => '#FFFFFF',
+            ],
+        ],
+        'sage_garden' => [
+            'name' => 'Sage Garden',
+            'mood' => 'Natural, calm, countryside',
+            'colours' => [
+                'primary' => '#617465',
+                'secondary' => '#9AAA8E',
+                'dark' => '#2F3A32',
+                'soft_background' => '#E8E4D8',
+                'light' => '#FFFFFF',
+            ],
+        ],
+        'lavender_haze' => [
+            'name' => 'Lavender Haze',
+            'mood' => 'Soft, elegant, modern romantic',
+            'colours' => [
+                'primary' => '#8E7A9B',
+                'secondary' => '#B7A6C4',
+                'dark' => '#3D3345',
+                'soft_background' => '#EFEAF2',
+                'light' => '#FFFFFF',
+            ],
+        ],
+        'dusky_blue' => [
+            'name' => 'Dusky Blue',
+            'mood' => 'Cool, calm, sophisticated',
+            'colours' => [
+                'primary' => '#3D5361',
+                'secondary' => '#7892A0',
+                'dark' => '#1F2B33',
+                'soft_background' => '#DDE6E8',
+                'light' => '#F4F7F7',
+            ],
+        ],
+        'terracotta_bloom' => [
+            'name' => 'Terracotta Bloom',
+            'mood' => 'Warm, rustic, Mediterranean',
+            'colours' => [
+                'primary' => '#A9634D',
+                'secondary' => '#D19A7C',
+                'dark' => '#4A2C24',
+                'soft_background' => '#EFE0D4',
+                'light' => '#FAF4EF',
+            ],
+        ],
+        'black_tie' => [
+            'name' => 'Black Tie',
+            'mood' => 'Formal, dramatic, evening',
+            'colours' => [
+                'primary' => '#111111',
+                'secondary' => '#3A3A3A',
+                'dark' => '#000000',
+                'soft_background' => '#F7F4ED',
+                'light' => '#FFFFFF',
+            ],
+        ],
+    ],
     'rsvp_settings' => [
         'meal_mode' => 'set_menu',
         'menu_heading' => 'Wedding Menu',
@@ -113,6 +203,7 @@ return [
             'buttonLabel' => 'Go to RSVP',
         ],
         'theme' => [
+            'palette' => 'magic_classic',
             'primary_color' => '#22363A',
             'button_color' => '#22363A',
             'layout' => 'classic',
@@ -130,13 +221,9 @@ return [
         ],
     ],
     'admin_field_help_texts' => [
-        'theme.primary_section_colour' => [
-            'label' => 'Theme Colours - Primary Section Colour',
-            'default' => 'Example: #22363A. Choose a dark section colour for strong white text contrast.',
-        ],
-        'theme.button_colour' => [
-            'label' => 'Theme Colours - Button Colour',
-            'default' => 'Example: #22363A. This controls dark action buttons across the page.',
+        'theme.colour_palette' => [
+            'label' => 'Website Title and Theme Selection - Colour Palette',
+            'default' => 'Choose a professionally designed colour palette. The website automatically handles button, section and text contrast.',
         ],
         'hero.couple_names' => [
             'label' => 'Hero - Couple Names',

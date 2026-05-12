@@ -313,36 +313,40 @@
         border-color: var(--wedding-button-color, var(--modern-mauve-dark));
         border-radius: 999px;
         background-color: var(--wedding-button-color, var(--modern-mauve-dark));
+        color: var(--wedding-button-text-color, var(--wedding-white));
     }
 
     .public-layout-modern .button-dark:hover {
         border-color: var(--wedding-button-hover-color, var(--modern-ink));
         background-color: var(--wedding-button-hover-color, var(--modern-ink));
+        color: var(--wedding-button-hover-text-color, var(--wedding-white));
     }
 
     .button-primary {
         @apply inline-flex items-center justify-center border px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] transition;
-        border-color: var(--wedding-white);
-        background-color: var(--wedding-white);
-        color: var(--wedding-black);
+        border-color: var(--wedding-palette-light, var(--wedding-white));
+        background-color: var(--wedding-palette-light, var(--wedding-white));
+        color: var(--wedding-palette-dark, var(--wedding-black));
         box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
     }
 
     .button-primary:hover {
-        border-color: var(--wedding-secondary-light);
-        background-color: var(--wedding-secondary-light);
-        color: var(--wedding-black);
+        border-color: var(--wedding-button-hover-color, var(--wedding-secondary-light));
+        background-color: var(--wedding-button-hover-color, var(--wedding-secondary-light));
+        color: var(--wedding-button-hover-text-color, var(--wedding-black));
     }
 
     .button-dark {
         @apply inline-flex items-center justify-center border border-soft px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] text-white transition;
         background-color: var(--wedding-button-color, #22363a);
+        color: var(--wedding-button-text-color, #ffffff);
         box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
     }
 
     .button-dark:hover {
         border-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
         background-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
+        color: var(--wedding-button-hover-text-color, #ffffff);
     }
 
     .button-success {
@@ -397,12 +401,14 @@
     .cms-button-link {
         @apply inline-flex items-center justify-center border border-soft px-5 py-2 text-xs font-medium uppercase tracking-[0.14em] text-white no-underline transition;
         background-color: var(--wedding-button-color, #22363a);
+        color: var(--wedding-button-text-color, #ffffff);
         box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
     }
 
     .cms-button-link:hover {
         border-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
         background-color: var(--wedding-button-hover-color, var(--wedding-primary-green));
+        color: var(--wedding-button-hover-text-color, #ffffff);
     }
 
     .btn-icon {

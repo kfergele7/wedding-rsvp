@@ -174,6 +174,7 @@ Route::middleware('tenant.resolve')->group(function () {
             Route::get('/template-management', [StaffTemplateManagementController::class, 'index'])->name('templates.index');
             Route::put('/template-management/field-help', [StaffTemplateManagementController::class, 'updateFieldHelp'])->name('templates.field-help.update');
             Route::put('/template-management/demo-source', [StaffTemplateManagementController::class, 'updateDemoSource'])->name('templates.demo-source.update');
+            Route::put('/template-management/colour-palettes', [StaffTemplateManagementController::class, 'updateColourPalettes'])->name('templates.colour-palettes.update');
             Route::get('/accounts', [StaffAccountController::class, 'index'])->name('accounts.index');
             Route::get('/accounts/{account}', [StaffAccountController::class, 'show'])->name('accounts.show');
             Route::put('/accounts/{account}', [StaffAccountController::class, 'update'])->name('accounts.update');
