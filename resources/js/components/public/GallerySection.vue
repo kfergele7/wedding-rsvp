@@ -1,8 +1,9 @@
 <template>
-    <section v-if="visibleImages.length >= 2" class="bg-[#F2ECE3] pt-20 pb-20 md:pt-28 md:pb-28">
+    <section v-if="visibleImages.length >= 2" class="pt-20 pb-20 md:pt-28 md:pb-28" :class="isModern ? 'bg-[var(--modern-cream)]' : 'bg-[#F2ECE3]'">
         <div class="site-shell">
-            <div class="card-frame bg-white">
-                <h2 class="section-heading text-center">{{ content.heading || "Photo's of us across the years" }}</h2>
+            <div class="card-frame bg-white" :class="{ 'border-[rgba(143,115,123,0.18)] bg-white/70 md:p-12': isModern }">
+                <p v-if="isModern" class="text-center text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Memories</p>
+                <h2 class="section-heading text-center" :class="{ 'mt-4': isModern }">{{ content.heading || "Photo's of us across the years" }}</h2>
                 <div class="mt-10 space-y-4 md:space-y-5">
                     <div
                         v-for="(row, rowIndex) in imageRows"
@@ -14,6 +15,7 @@
                             v-for="(item, itemIndex) in row"
                             :key="`${rowIndex}-${itemIndex}-${item.image}`"
                             class="aspect-square overflow-hidden border border-soft bg-[#F7F7F7] shadow-soft"
+                            :class="{ 'border-[rgba(143,115,123,0.16)] shadow-none': isModern }"
                         >
                             <img
                                 :src="item.image"
@@ -41,8 +43,13 @@ const props = defineProps({
             items: [],
         }),
     },
+    layout: {
+        type: String,
+        default: 'classic',
+    },
 });
 
+const isModern = computed(() => props.layout === 'modern');
 const visibleImages = computed(() =>
     (Array.isArray(props.content.items) ? props.content.items : [])
         .filter((item) => item?.image)

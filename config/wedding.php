@@ -115,6 +115,7 @@ return [
         'theme' => [
             'primary_color' => '#22363A',
             'button_color' => '#22363A',
+            'layout' => 'classic',
         ],
         'section_visibility' => [
             'welcome' => true,

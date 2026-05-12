@@ -1,5 +1,5 @@
 <template>
-    <div :style="themeVars">
+    <div :class="['public-site', `public-layout-${selectedLayout}`]" :style="themeVars">
         <div v-if="previewBanner" ref="previewBannerRef" class="fixed inset-x-0 top-0 z-50 border-b border-[#466369] bg-[#F2ECE3]">
             <div class="site-shell flex flex-wrap items-center justify-between gap-3 py-3">
                 <div>
@@ -26,27 +26,29 @@
         </div>
         <div v-if="previewBanner" :style="{ height: `${previewBannerHeight}px` }"></div>
 
-        <HeroSection :content="content.hero" @open-rsvp="openRsvpModal" />
+        <HeroSection :content="content.hero" :layout="selectedLayout" @open-rsvp="openRsvpModal" />
 
         <main class="bg-[#F7F5F2]">
-            <WelcomeSection v-if="effectiveSectionVisibility.welcome" :content="content.welcome" />
-            <TimelineSection v-if="effectiveSectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" />
-            <StorySection v-if="effectiveSectionVisibility.story" :content="content.story" />
+            <WelcomeSection v-if="effectiveSectionVisibility.welcome" :content="content.welcome" :layout="selectedLayout" />
+            <TimelineSection v-if="effectiveSectionVisibility.timeline" :content="content.timeline" :primary-color="content.theme.primary_color" :layout="selectedLayout" />
+            <StorySection v-if="effectiveSectionVisibility.story" :content="content.story" :layout="selectedLayout" />
             <DetailsSection
                 :content="content.details"
                 :rsvp-settings="rsvpSettings"
                 :primary-color="content.theme.primary_color"
                 :section-visibility="effectiveSectionVisibility"
+                :layout="selectedLayout"
             />
             <CountdownSection
                 v-if="effectiveSectionVisibility.countdown"
                 :target-date-time="content.countdown.targetDateTime"
+                :layout="selectedLayout"
             />
-            <GallerySection v-if="effectiveSectionVisibility.gallery" :content="content.gallery" />
-            <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" @open-rsvp="openRsvpModal" />
+            <GallerySection v-if="effectiveSectionVisibility.gallery" :content="content.gallery" :layout="selectedLayout" />
+            <RsvpCtaSection :content="content.cta" :primary-color="content.theme.primary_color" :layout="selectedLayout" @open-rsvp="openRsvpModal" />
         </main>
 
-        <div class="bg-[#0F1B1D]">
+        <div :class="selectedLayout === 'modern' ? 'bg-[var(--modern-ink)]' : 'bg-[#0F1B1D]'">
             <footer class="w-full py-[5px] text-white/85">
                 <div class="site-shell flex items-center justify-center text-center text-[10px] uppercase tracking-[0.12em]">
                     <span>&copy; Copyright Magic Invitation {{ currentYear }}</span>
@@ -163,6 +165,7 @@ const fallbackContent = {
     theme: {
         primary_color: '#22363A',
         button_color: '#22363A',
+        layout: 'classic',
     },
     section_visibility: {
         welcome: true,
@@ -231,13 +234,37 @@ const effectiveSectionVisibility = computed(() => {
 const previewBanner = computed(() => props.payload?.previewBanner || null);
 const previewBannerRef = ref(null);
 const previewBannerHeight = ref(0);
+const previewLayout = computed(() => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const layout = normalizeLayout(new URLSearchParams(window.location.search).get('layout'));
+
+    return ['classic', 'modern'].includes(layout) ? layout : null;
+});
+const selectedLayout = computed(() => {
+    if (previewLayout.value) {
+        return previewLayout.value;
+    }
+
+    const layout = normalizeLayout(content.value.theme.layout || fallbackContent.theme.layout || 'classic');
+
+    return ['classic', 'modern'].includes(layout) ? layout : 'classic';
+});
 
 const themeVars = computed(() => {
-    const buttonColor = content.value.theme.button_color || fallbackContent.theme.button_color;
+    const savedButtonColor = content.value.theme.button_color || fallbackContent.theme.button_color;
+    const defaultButtonColor = fallbackContent.theme.button_color.toLowerCase();
+    const buttonColor = selectedLayout.value === 'modern' && savedButtonColor.toLowerCase() === defaultButtonColor
+        ? '#8F737B'
+        : savedButtonColor;
 
     return {
         '--wedding-button-color': buttonColor,
-        '--wedding-button-hover-color': washedOutColour(buttonColor),
+        '--wedding-button-hover-color': selectedLayout.value === 'modern' && buttonColor === '#8F737B'
+            ? '#31282A'
+            : washedOutColour(buttonColor),
     };
 });
 const isRsvpModalOpen = ref(Boolean(props.payload?.openRsvpModal));
@@ -272,6 +299,16 @@ function updateDocumentTitle() {
     const title = (props.payload?.siteTitle || content.value.hero?.names || 'Magic Invitation').toString().trim();
 
     document.title = title || 'Magic Invitation';
+}
+
+function normalizeLayout(layout) {
+    const normalized = (layout || 'classic').toString().trim().toLowerCase();
+
+    if (normalized === 'editorial') {
+        return 'modern';
+    }
+
+    return normalized;
 }
 
 const fallbackRsvpSettings = {

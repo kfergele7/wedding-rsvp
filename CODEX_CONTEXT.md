@@ -78,3 +78,11 @@
 - Content save/read merge behaviour now replaces list arrays (timeline, FAQs, menu courses/items) to prevent deleted items reappearing after save/reload.
 - Public story section layout is image-left/text-right on desktop.
 - Content save notification copy and duration were tuned to make preview-refresh guidance clearer for users.
+- Modern public theme palette is stored in `resources/css/app.css` as CSS variables:
+  - `--modern-mauve: #B9A1A7`
+  - `--modern-mauve-dark: #8F737B`
+  - `--modern-cream: #FAF7F3`
+  - `--modern-blush: #EFE6E1`
+  - `--modern-blush-deep: #E2D1CC`
+  - `--modern-taupe: #A99791`
+  - `--modern-ink: #31282A`

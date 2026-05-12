@@ -177,11 +177,87 @@
 
                     <div v-if="content" class="mt-8 space-y-6">
                         <div id="menu-settings-section" class="content-section-block content-section-odd">
-                            <h3 class="font-heading text-3xl">Website Title</h3>
+                            <h3 class="font-heading text-3xl">Website Title and Theme Selection</h3>
                             <label class="mt-3 block text-sm uppercase tracking-[0.12em] text-wedding-muted">
                                 Website Title
                                 <input v-model="siteTitle" class="mt-2 w-full border border-soft bg-white px-4 py-3" placeholder="e.g. Kyle & Nicole's Wedding">
                             </label>
+
+                            <div class="mt-8">
+                                <p class="text-sm uppercase tracking-[0.12em] text-wedding-muted">Theme</p>
+                                <p class="mt-2 text-sm text-wedding-muted">Preview both themes before choosing. You can switch between them at any time without changing your content or section order.</p>
+                                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                    <article
+                                        class="flex h-full flex-col justify-between border p-5 transition"
+                                        :class="selectedThemeLayout === 'classic' ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
+                                    >
+                                        <div>
+                                            <span class="flex items-center justify-between gap-3">
+                                                <span class="font-heading text-2xl text-wedding-text">Classic</span>
+                                                <span v-if="selectedThemeLayout === 'classic'" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
+                                            </span>
+                                            <span class="mt-3 block text-sm leading-relaxed text-wedding-muted">Large image hero, centred headings, and the current polished wedding layout.</span>
+                                        </div>
+                                        <div class="mt-5 flex flex-wrap gap-2">
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                                :class="selectedThemeLayout === 'classic' ? 'admin-btn-success' : ''"
+                                                @click="selectThemeLayout('classic')"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">check</span>
+                                                Select Classic
+                                            </button>
+                                            <a
+                                                :href="themePreviewUrl('classic')"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="admin-btn border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                            >
+                                                Preview
+                                            </a>
+                                        </div>
+                                    </article>
+
+                                    <article
+                                        class="flex h-full flex-col justify-between border p-5 transition"
+                                        :class="selectedThemeLayout === 'modern' ? 'border-wedding-band bg-white shadow-soft' : 'border-soft bg-[#F7F7F7] hover:border-wedding-band'"
+                                    >
+                                        <div>
+                                            <span class="flex items-center justify-between gap-3">
+                                                <span class="font-heading text-2xl text-wedding-text">Modern</span>
+                                                <span v-if="selectedThemeLayout === 'modern'" class="material-symbols-outlined text-[20px] text-wedding-success">check_circle</span>
+                                            </span>
+                                            <span class="mt-3 block text-sm leading-relaxed text-wedding-muted">A refined, modern layout with soft mauve tones, rounded imagery, clean image bands, and calmer spacing.</span>
+                                            <span class="mt-4 flex gap-2" aria-hidden="true">
+                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#B9A1A7]"></span>
+                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#EFE6E1]"></span>
+                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#FAF7F3]"></span>
+                                                <span class="h-6 w-6 rounded-full border border-soft bg-[#31282A]"></span>
+                                            </span>
+                                        </div>
+                                        <div class="mt-5 flex flex-wrap gap-2">
+                                            <button
+                                                type="button"
+                                                class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                                :class="selectedThemeLayout === 'modern' ? 'admin-btn-success' : ''"
+                                                @click="selectThemeLayout('modern')"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">check</span>
+                                                Select Modern
+                                            </button>
+                                            <a
+                                                :href="themePreviewUrl('modern')"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="admin-btn border border-soft bg-white px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                                            >
+                                                Preview
+                                            </a>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="w-full py-8">
@@ -359,7 +435,7 @@
                             </div>
 
                             <p v-if="isTimelineAtMax || isTimelineAtMin" class="mt-3 text-sm text-wedding-danger">
-                                {{ isTimelineAtMax ? 'Maximum of 5 timeline items reached.' : 'Minimum of 2 timeline items is required.' }}
+                                {{ isTimelineAtMax ? 'Maximum of 8 timeline items reached.' : 'Minimum of 3 timeline items is required.' }}
                             </p>
 
                             <div class="mt-4 space-y-3">
@@ -2301,8 +2377,8 @@ const lastSavedAt = ref('');
 const lastSavedContentSnapshot = ref('');
 const lastSavedRsvpSnapshot = ref('');
 const lastSavedSiteTitle = ref(siteTitle.value);
-const timelineMinItems = 2;
-const timelineMaxItems = 5;
+const timelineMinItems = 3;
+const timelineMaxItems = 8;
 const confirmResolve = ref(null);
 const confirmModal = reactive({
     open: false,
@@ -2459,6 +2535,7 @@ const hasUnsavedChanges = computed(() => {
         || serialize(rsvpSettings.value) !== lastSavedRsvpSnapshot.value
         || siteTitle.value !== lastSavedSiteTitle.value;
 });
+const selectedThemeLayout = computed(() => normalizeThemeLayout(content.value?.theme?.layout));
 const isTimelineAtMax = computed(() => (content.value?.timeline?.items?.length || 0) >= timelineMaxItems);
 const isTimelineAtMin = computed(() => (content.value?.timeline?.items?.length || 0) <= timelineMinItems);
 const galleryImageCount = computed(() => {
@@ -3442,7 +3519,7 @@ function addTimelineItem() {
         return;
     }
     if (isTimelineAtMax.value) {
-        openNoticeModal('Timeline limit reached', 'You can only have a maximum of 5 timeline items in this section.');
+        openNoticeModal('Timeline limit reached', 'You can only have a maximum of 8 timeline items in this section.');
         return;
     }
 
@@ -3539,6 +3616,39 @@ function selectGalleryImageFromLibrary(imagePath) {
 
     closeImageLibrary();
     scrollToElementById(`gallery-item-${index}`);
+}
+
+function themePreviewUrl(layout) {
+    if (!previewUrl) {
+        return '#';
+    }
+
+    try {
+        const url = new URL(previewUrl, window.location.origin);
+        url.searchParams.set('layout', layout);
+        return url.toString();
+    } catch {
+        const separator = previewUrl.includes('?') ? '&' : '?';
+        return `${previewUrl}${separator}layout=${encodeURIComponent(layout)}`;
+    }
+}
+
+function normalizeThemeLayout(layout) {
+    const normalized = (layout || 'classic').toString().trim().toLowerCase();
+
+    if (normalized === 'editorial') {
+        return 'modern';
+    }
+
+    return ['classic', 'modern'].includes(normalized) ? normalized : 'classic';
+}
+
+function selectThemeLayout(layout) {
+    if (!content.value.theme || typeof content.value.theme !== 'object') {
+        content.value.theme = {};
+    }
+
+    content.value.theme.layout = normalizeThemeLayout(layout);
 }
 
 async function resetThemeColours() {
@@ -3798,6 +3908,8 @@ function ensureImageFocusDefaults() {
     if (!content.value.theme.button_color) {
         content.value.theme.button_color = '#22363A';
     }
+
+    content.value.theme.layout = normalizeThemeLayout(content.value.theme.layout);
 
     if (typeof content.value.gallery !== 'object' || content.value.gallery === null) {
         content.value.gallery = {

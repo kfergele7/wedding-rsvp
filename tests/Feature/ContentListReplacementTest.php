@@ -29,6 +29,9 @@ class ContentListReplacementTest extends TestCase
                         ['question' => 'Is parking available?', 'answer' => 'Yes'],
                     ],
                 ],
+                'theme' => [
+                    'layout' => 'modern',
+                ],
             ],
             'rsvp_settings' => [
                 'meal_mode' => 'options',
@@ -64,6 +67,7 @@ class ContentListReplacementTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'content.timeline.items')
             ->assertJsonCount(1, 'content.details.faqs')
+            ->assertJsonPath('content.theme.layout', 'modern')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.0.items')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.1.items')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.2.items');
@@ -74,6 +78,7 @@ class ContentListReplacementTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'content.timeline.items')
             ->assertJsonCount(1, 'content.details.faqs')
+            ->assertJsonPath('content.theme.layout', 'modern')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.0.items')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.1.items')
             ->assertJsonCount(1, 'rsvp_settings.menu_courses.2.items');

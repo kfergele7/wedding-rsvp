@@ -1,10 +1,10 @@
 <template>
-    <section v-if="countdownReady" class="bg-[#22363A] py-20 md:py-24">
+    <section v-if="countdownReady" class="py-20 md:py-24" :class="isModern ? 'bg-[var(--modern-mauve)] py-24 md:py-32' : 'bg-[#22363A]'">
         <div class="site-shell">
-            <div class="border border-white/20 bg-[#466369] px-8 py-10 text-center text-white shadow-soft md:px-10 md:py-12">
-                <p class="text-xs uppercase tracking-[0.22em] text-white/70">Countdown</p>
-                <h2 class="mt-3 font-heading text-4xl md:text-5xl">Until The Wedding Begins</h2>
-                <p class="mt-4 text-white/80">
+            <div class="border px-8 py-10 text-center shadow-soft md:px-10 md:py-12" :class="isModern ? 'rounded-[2rem] border-white/25 bg-[rgba(250,247,243,0.2)] text-white' : 'border-white/20 bg-[#466369] text-white'">
+                <p class="text-xs uppercase tracking-[0.22em] text-white/75">Countdown</p>
+                <h2 class="mt-3 font-heading text-4xl md:text-5xl" :class="{ '!font-sans font-semibold uppercase tracking-[0.14em]': isModern }">Until The Wedding Begins</h2>
+                <p class="mt-4 text-white/85">
                     {{ countdownIntro }}
                 </p>
 
@@ -12,9 +12,10 @@
                     <article
                         v-for="item in countdownItems"
                         :key="item.label"
-                        class="rounded border border-white/20 bg-[#22363A] px-6 py-8 shadow-soft"
+                        class="border px-6 py-8 shadow-soft"
+                        :class="isModern ? 'rounded-[1.5rem] border-white/30 bg-[rgba(250,247,243,0.18)]' : 'rounded border-white/20 bg-[#22363A]'"
                     >
-                        <p class="font-heading text-5xl md:text-6xl">{{ item.value }}</p>
+                        <p class="font-heading text-5xl md:text-6xl" :class="{ '!font-sans font-semibold': isModern }">{{ item.value }}</p>
                         <p class="mt-3 text-xs uppercase tracking-[0.22em] text-white/70">{{ item.label }}</p>
                     </article>
                 </div>
@@ -31,11 +32,16 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    layout: {
+        type: String,
+        default: 'classic',
+    },
 });
 
 const now = ref(Date.now());
 let timer = null;
 
+const isModern = computed(() => props.layout === 'modern');
 const targetDate = computed(() => parseTargetDate(props.targetDateTime));
 const countdownReady = computed(() => targetDate.value instanceof Date && !Number.isNaN(targetDate.value.getTime()));
 

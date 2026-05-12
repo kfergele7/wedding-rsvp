@@ -162,6 +162,9 @@ class ContentController extends Controller
             'guest_list.responseDeadline',
             trim((string) data_get($content, 'guest_list.responseDeadline', '2026-08-15'))
         );
+        $layout = data_get($content, 'theme.layout', 'classic');
+        $layout = $layout === 'editorial' ? 'modern' : $layout;
+        data_set($content, 'theme.layout', in_array($layout, ['classic', 'modern'], true) ? $layout : 'classic');
 
         return $content;
     }
