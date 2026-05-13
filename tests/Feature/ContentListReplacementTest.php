@@ -126,7 +126,26 @@ class ContentListReplacementTest extends TestCase
 
         $this->get('/'.$site->public_slug)
             ->assertOk()
+            ->assertSee('"layout":"modern"', false)
             ->assertSee('#B9A3AA');
+    }
+
+    public function test_demo_route_stays_available_while_marketing_is_coming_soon_and_includes_gallery(): void
+    {
+        $this->createTenant();
+
+        config(['app.marketing_coming_soon' => true]);
+
+        $this->get('/demo?preview_layout=modern')
+            ->assertOk()
+            ->assertSee('window.__APP_PAYLOAD', false)
+            ->assertDontSee('Magic Invitation is coming soon')
+            ->assertSee('"gallery"', false)
+            ->assertSee('Us across the years', false)
+            ->assertSee('demo-gallery-1.svg', false)
+            ->assertSee('Whipped Goats Cheese', false)
+            ->assertSee('Summer Berry Pavlova', false)
+            ->assertSee('What time should guests arrive?', false);
     }
 
     private function createTenant(): array

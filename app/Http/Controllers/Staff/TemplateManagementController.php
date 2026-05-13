@@ -79,13 +79,22 @@ class TemplateManagementController extends Controller
             return back()->with('status', 'Platform settings table not found yet. Run migrations first.');
         }
 
-        $validated = $request->validate([
-            'demo_site_id' => ['required', 'integer', 'exists:sites,id'],
-        ]);
-
         $beforeSetting = PlatformSetting::query()->where('key', 'demo_template_source')->first();
         $before = is_array($beforeSetting?->value) ? $beforeSetting->value : [];
-        $after = ['site_id' => (int) $validated['demo_site_id']];
+        $source = (string) $request->input('demo_site_id');
+
+        if ($source === 'default') {
+            $after = ['source' => 'default'];
+        } else {
+            $validated = $request->validate([
+                'demo_site_id' => ['required', 'integer', 'exists:sites,id'],
+            ]);
+
+            $after = [
+                'source' => 'site',
+                'site_id' => (int) $validated['demo_site_id'],
+            ];
+        }
 
         PlatformSetting::query()->updateOrCreate(
             ['key' => 'demo_template_source'],

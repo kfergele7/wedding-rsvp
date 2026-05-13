@@ -250,7 +250,13 @@ const previewLayout = computed(() => {
         return null;
     }
 
-    const layout = normalizeLayout(new URLSearchParams(window.location.search).get('layout'));
+    const requestedLayout = new URLSearchParams(window.location.search).get('preview_layout');
+
+    if (!requestedLayout) {
+        return null;
+    }
+
+    const layout = normalizeLayout(requestedLayout);
 
     return ['classic', 'modern'].includes(layout) ? layout : null;
 });
@@ -265,12 +271,15 @@ const selectedLayout = computed(() => {
 });
 
 const activePalette = computed(() => normalizePaletteColours(content.value.theme.palette_colours));
+const activePaletteSlug = computed(() => normalizePaletteSlug(content.value.theme.palette));
+const usesGoldenButtons = computed(() => activePaletteSlug.value === 'champagne_silk');
 const effectivePrimaryColor = computed(() => activePalette.value.primary);
-const effectiveButtonColor = computed(() => activePalette.value.primary);
+const effectiveButtonColor = computed(() => usesGoldenButtons.value ? activePalette.value.secondary : activePalette.value.primary);
+const effectiveButtonHoverColor = computed(() => usesGoldenButtons.value ? activePalette.value.primary : activePalette.value.secondary);
 
 const themeVars = computed(() => {
     const buttonColor = effectiveButtonColor.value;
-    const hoverColor = activePalette.value.secondary;
+    const hoverColor = effectiveButtonHoverColor.value;
 
     return {
         '--wedding-palette-primary': activePalette.value.primary,
@@ -278,6 +287,8 @@ const themeVars = computed(() => {
         '--wedding-palette-dark': activePalette.value.dark,
         '--wedding-soft-background': activePalette.value.soft_background,
         '--wedding-palette-light': activePalette.value.light,
+        '--wedding-card-background': activePalette.value.light,
+        '--wedding-card-border-color': withAlpha(activePalette.value.secondary, 0.34),
         '--modern-mauve': activePalette.value.primary,
         '--modern-mauve-dark': activePalette.value.secondary,
         '--modern-cream': activePalette.value.soft_background,
@@ -285,6 +296,9 @@ const themeVars = computed(() => {
         '--modern-blush-deep': washedOutColour(activePalette.value.secondary, 0.42),
         '--modern-taupe': activePalette.value.secondary,
         '--modern-ink': activePalette.value.dark,
+        '--modern-shape-primary': withAlpha(activePalette.value.secondary, 0.2),
+        '--modern-shape-secondary': withAlpha(activePalette.value.primary, 0.14),
+        '--modern-shape-tertiary': withAlpha(activePalette.value.dark, 0.08),
         '--wedding-button-color': buttonColor,
         '--wedding-button-hover-color': hoverColor,
         '--wedding-button-text-color': isLightColour(buttonColor) ? '#0F1B1D' : '#FFFFFF',
@@ -333,6 +347,10 @@ function normalizeLayout(layout) {
     }
 
     return normalized;
+}
+
+function normalizePaletteSlug(palette) {
+    return (palette || 'magic_classic').toString().trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
 
 const fallbackRsvpSettings = {
@@ -494,6 +512,20 @@ function washedOutColour(hex, mixWithWhite = 0.24) {
     return `#${[washedRed, washedGreen, washedBlue]
         .map((channel) => channel.toString(16).padStart(2, '0'))
         .join('')}`;
+}
+
+function withAlpha(hex, alpha = 0.18) {
+    const normalized = (hex || '').replace('#', '').trim();
+
+    if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+        return `rgba(70, 99, 105, ${alpha})`;
+    }
+
+    const red = parseInt(normalized.slice(0, 2), 16);
+    const green = parseInt(normalized.slice(2, 4), 16);
+    const blue = parseInt(normalized.slice(4, 6), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
 function isLightColour(hex) {

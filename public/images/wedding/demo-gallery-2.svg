@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900" role="img" aria-labelledby="title desc">
+  <title id="title">Demo gallery placeholder 2</title>
+  <desc id="desc">Abstract placeholder image for the Magic Invitation demo gallery.</desc>
+  <rect width="900" height="900" fill="#EFE0D4"/>
+  <circle cx="720" cy="180" r="118" fill="#D19A7C" opacity="0.62"/>
+  <circle cx="190" cy="715" r="150" fill="#A9634D" opacity="0.16"/>
+  <path d="M170 250 C275 125 430 135 520 245 C610 355 758 328 805 220" fill="none" stroke="#A9634D" stroke-width="22" stroke-linecap="round" opacity="0.23"/>
+  <path d="M455 590 C370 515 315 465 315 398 C315 342 359 300 414 300 C446 300 477 315 498 340 C519 315 550 300 582 300 C637 300 681 342 681 398 C681 465 626 515 541 590 L498 630 Z" fill="#A9634D" opacity="0.22"/>
+  <rect x="250" y="655" width="400" height="2" fill="#A9634D" opacity="0.32"/>
+  <text x="450" y="708" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" letter-spacing="7" fill="#D19A7C" opacity="0.85">MEMORY 2</text>
+</svg>

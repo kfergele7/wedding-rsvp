@@ -4,16 +4,19 @@
 <section class="mb-6 card-frame bg-white">
     <h2 class="font-heading text-2xl">Demo Website Source</h2>
     <p class="mt-2 text-sm text-wedding-muted">
-        Select which customer site powers the global demo link at <span class="font-medium text-wedding-black">/demo</span>.
-        Staff can update that site via Accounts and changes will appear in the demo.
+        Select what powers the global demo link at <span class="font-medium text-wedding-black">/demo</span>.
+        Use the Magic Invitation default demo, or select a customer site if you want the demo to use that account's content.
     </p>
     <form method="POST" action="{{ route('staff.templates.demo-source.update') }}" class="mt-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
         @csrf
         @method('PUT')
         <label class="block text-xs uppercase tracking-[0.12em] text-wedding-muted">
-            Demo Source Site
+            Demo Source
             <select name="demo_site_id" class="mt-1 w-full border border-soft bg-white px-3 py-2 normal-case tracking-normal text-wedding-black" required>
-                <option value="" disabled @selected(! $selectedDemoSiteId)>Select a site</option>
+                <option value="default" @selected(! $selectedDemoSiteId)>Magic Invitation default demo</option>
+                @if ($sites->count())
+                    <option value="" disabled>Customer demo sites</option>
+                @endif
                 @foreach ($sites as $site)
                     <option value="{{ $site->id }}" @selected((int) $selectedDemoSiteId === (int) $site->id)>
                         {{ $site->title }} ({{ $site->public_slug }})

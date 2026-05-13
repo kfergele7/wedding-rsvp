@@ -94,15 +94,6 @@ class PublicSiteController extends Controller
 
     public function demo(Request $request)
     {
-        if (config('app.marketing_coming_soon')) {
-            return view('marketing.coming-soon', [
-                'meta' => [
-                    'title' => 'Magic Invitation is coming soon',
-                    'description' => 'Magic Invitation is preparing to launch. Existing customers can still log in and published wedding websites remain available.',
-                ],
-            ]);
-        }
-
         [$content, $rsvpSettings, $publicSlug, $siteTitle] = $this->demoTemplatePayload();
 
         return response()
@@ -251,9 +242,10 @@ class PublicSiteController extends Controller
                 ->first();
         }
 
-        $demoSiteId = is_array($demoSourceSetting?->value)
-            ? ($demoSourceSetting->value['site_id'] ?? null)
-            : null;
+        $demoSource = is_array($demoSourceSetting?->value) ? $demoSourceSetting->value : [];
+        $demoSiteId = ($demoSource['source'] ?? null) === 'default'
+            ? null
+            : ($demoSource['site_id'] ?? null);
 
         $demoSite = null;
         if (is_numeric($demoSiteId)) {
@@ -261,11 +253,12 @@ class PublicSiteController extends Controller
         }
 
         if (! $demoSite) {
-            $demoSite = Site::query()->orderBy('id')->first();
-        }
-
-        if (! $demoSite) {
-            return [WeddingPalettes::applyToContent($fallbackContent), $fallbackRsvp, null, 'Magic Invitation Demo'];
+            return [
+                WeddingPalettes::applyToContent($this->ensureDemoContent($fallbackContent)),
+                $this->ensureDemoRsvpSettings($fallbackRsvp),
+                null,
+                'Magic Invitation Demo',
+            ];
         }
 
         $savedContent = SiteSetting::query()
@@ -280,12 +273,124 @@ class PublicSiteController extends Controller
         $content = (is_array($savedContent?->value))
             ? $this->mergeReplacingLists($fallbackContent, $savedContent->value)
             : $fallbackContent;
+        $content = $this->ensureDemoContent($content);
         $content = WeddingPalettes::applyToContent($content);
         $rsvpSettings = (is_array($savedRsvp?->value))
             ? $this->mergeReplacingLists($fallbackRsvp, $savedRsvp->value)
             : $fallbackRsvp;
+        $rsvpSettings = $this->ensureDemoRsvpSettings($rsvpSettings);
 
         return [$content, $rsvpSettings, $demoSite->public_slug, $demoSite->title];
+    }
+
+    private function ensureDemoContent(array $content): array
+    {
+        $demoGalleryItems = [
+            ['image' => '/images/wedding/demo-gallery-1.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-2.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-3.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-4.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-5.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-6.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-7.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+            ['image' => '/images/wedding/demo-gallery-8.svg', 'imageFocusX' => 50, 'imageFocusY' => 50],
+        ];
+
+        $content['gallery']['heading'] = 'Us across the years';
+        $content['gallery']['items'] = $demoGalleryItems;
+        $content['details']['faqs'] = $this->ensureDemoFaqs($content['details']['faqs'] ?? []);
+        $content['section_visibility']['gallery'] = true;
+        $content['section_visibility']['faqs'] = true;
+
+        return $content;
+    }
+
+    private function ensureDemoFaqs(mixed $faqs): array
+    {
+        $normalisedFaqs = collect(is_array($faqs) ? $faqs : [])
+            ->filter(fn (mixed $faq) => is_array($faq) && filled($faq['question'] ?? null))
+            ->values()
+            ->all();
+
+        $additionalFaq = [
+            'question' => 'What time should guests arrive?',
+            'answer' => 'Please arrive around 20 minutes before the ceremony so everyone can be seated comfortably.',
+        ];
+
+        $alreadyExists = collect($normalisedFaqs)
+            ->contains(fn (array $faq) => ($faq['question'] ?? '') === $additionalFaq['question']);
+
+        if (! $alreadyExists) {
+            $normalisedFaqs[] = $additionalFaq;
+        }
+
+        return $normalisedFaqs;
+    }
+
+    private function ensureDemoRsvpSettings(array $rsvpSettings): array
+    {
+        $courseOptions = [
+            'starter' => [
+                ['title' => 'Whipped Goats Cheese', 'description' => 'Honeyed goats cheese with pickled pear, toasted walnuts, and garden leaves.'],
+                ['title' => 'Smoked Salmon Roulade', 'description' => 'Smoked salmon with lemon creme fraiche, cucumber ribbons, and dill.'],
+            ],
+            'dessert' => [
+                ['title' => 'Dark Chocolate Delice', 'description' => 'Rich chocolate delice with salted caramel and vanilla cream.'],
+                ['title' => 'Summer Berry Pavlova', 'description' => 'Crisp meringue, softly whipped cream, and seasonal berries.'],
+            ],
+        ];
+
+        $courses = is_array($rsvpSettings['menu_courses'] ?? null)
+            ? array_values($rsvpSettings['menu_courses'])
+            : [];
+
+        foreach ($courseOptions as $courseKey => $options) {
+            $courseIndex = $this->findDemoMenuCourseIndex($courses, $courseKey);
+
+            if ($courseIndex === null) {
+                $courses[] = [
+                    'id' => $courseKey,
+                    'name' => ucfirst($courseKey),
+                    'items' => $options,
+                ];
+                continue;
+            }
+
+            $items = is_array($courses[$courseIndex]['items'] ?? null)
+                ? array_values($courses[$courseIndex]['items'])
+                : [];
+
+            foreach ($options as $option) {
+                $exists = collect($items)->contains(fn (mixed $item) => is_array($item) && ($item['title'] ?? '') === $option['title']);
+
+                if (! $exists) {
+                    $items[] = $option;
+                }
+            }
+
+            $courses[$courseIndex]['items'] = $items;
+        }
+
+        $rsvpSettings['menu_courses'] = $courses;
+
+        return $rsvpSettings;
+    }
+
+    private function findDemoMenuCourseIndex(array $courses, string $courseKey): ?int
+    {
+        foreach ($courses as $index => $course) {
+            if (! is_array($course)) {
+                continue;
+            }
+
+            $label = strtolower(trim(($course['id'] ?? '').' '.($course['name'] ?? '')));
+
+            if (str_contains($label, $courseKey)) {
+                return $index;
+            }
+        }
+
+        return null;
     }
 
     /**

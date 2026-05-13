@@ -280,7 +280,33 @@ class StaffAdminAccessTest extends TestCase
             ->first();
 
         $this->assertNotNull($setting);
+        $this->assertSame('site', $setting->value['source'] ?? null);
         $this->assertSame($site->id, (int) ($setting->value['site_id'] ?? 0));
+
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'staff_user_id' => $staff->id,
+            'account_id' => null,
+            'action' => 'staff.platform.demo_source.updated',
+        ]);
+    }
+
+    public function test_staff_user_can_select_default_demo_template_source(): void
+    {
+        $staff = User::factory()->create(['is_staff' => true, 'email_verified_at' => now()]);
+
+        $this->actingAs($staff)
+            ->put(route('staff.templates.demo-source.update'), [
+                'demo_site_id' => 'default',
+            ])
+            ->assertRedirect();
+
+        $setting = PlatformSetting::query()
+            ->where('key', 'demo_template_source')
+            ->first();
+
+        $this->assertNotNull($setting);
+        $this->assertSame('default', $setting->value['source'] ?? null);
+        $this->assertArrayNotHasKey('site_id', $setting->value);
 
         $this->assertDatabaseHas('staff_audit_logs', [
             'staff_user_id' => $staff->id,

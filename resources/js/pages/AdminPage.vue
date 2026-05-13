@@ -172,7 +172,7 @@
                     <p class="mt-2 text-wedding-muted">
                         Update text, imagery, and your selected colour palette shown on your single-page wedding website. Use the info icons beside each section title for guidance and examples.
                         If you would like to see a completed demo version of the website to reference, then
-                        <a href="/demo" target="_blank" rel="noopener noreferrer" class="underline decoration-wedding-band underline-offset-2">click here</a>.
+                        <button type="button" class="inline underline decoration-wedding-band underline-offset-2" @click="openDemoChoiceModal">click here</button>.
                     </p>
 
                     <div v-if="content" class="mt-8 space-y-6">
@@ -2224,6 +2224,42 @@
             </div>
         </div>
 
+        <div v-if="demoChoiceModalOpen" class="fixed inset-0 z-[86] overflow-y-auto bg-black/40 p-4" @click.self="closeDemoChoiceModal">
+            <div class="mx-auto my-4 w-full max-w-2xl border border-soft bg-white p-6 shadow-soft md:my-24 md:p-8">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Demo preview</p>
+                        <h3 class="mt-2 font-heading text-3xl">Choose a demo layout</h3>
+                        <p class="mt-3 text-wedding-muted">Preview the same completed demo content in either available website style.</p>
+                    </div>
+                    <button type="button" class="modal-close-x" aria-label="Close demo layout chooser" title="Close" @click="closeDemoChoiceModal">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="mt-6 grid gap-4 md:grid-cols-2">
+                    <button
+                        type="button"
+                        class="border border-soft bg-[#F7F7F7] p-5 text-left transition hover:border-wedding-band hover:bg-white"
+                        @click="openDemoPreview('classic')"
+                    >
+                        <span class="material-symbols-outlined text-wedding-band">auto_stories</span>
+                        <span class="mt-3 block font-heading text-2xl">Classic demo</span>
+                        <span class="mt-2 block text-sm leading-relaxed text-wedding-muted">Elegant, timeless, image-led wedding website layout.</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="border border-soft bg-[#F7F7F7] p-5 text-left transition hover:border-wedding-band hover:bg-white"
+                        @click="openDemoPreview('modern')"
+                    >
+                        <span class="material-symbols-outlined text-wedding-band">interests</span>
+                        <span class="mt-3 block font-heading text-2xl">Modern demo</span>
+                        <span class="mt-2 block text-sm leading-relaxed text-wedding-muted">Rounded imagery, softer shapes, and a more contemporary editorial feel.</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div v-if="section === 'content'" class="fixed bottom-0 left-0 right-0 z-50">
             <div class="w-full border-t border-soft bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:px-8">
                 <div class="flex flex-col items-center justify-center gap-3 text-center md:flex-row md:justify-between md:text-left">
@@ -2368,6 +2404,7 @@ const noticeModal = reactive({
     note: '',
     scrollTarget: '',
 });
+const demoChoiceModalOpen = ref(false);
 const qrModalOpen = ref(false);
 const copyLinkCopied = ref(false);
 let copyLinkResetTimer = null;
@@ -3628,11 +3665,11 @@ function themePreviewUrl(layout) {
 
     try {
         const url = new URL(previewUrl, window.location.origin);
-        url.searchParams.set('layout', layout);
+        url.searchParams.set('preview_layout', layout);
         return url.toString();
     } catch {
         const separator = previewUrl.includes('?') ? '&' : '?';
-        return `${previewUrl}${separator}layout=${encodeURIComponent(layout)}`;
+        return `${previewUrl}${separator}preview_layout=${encodeURIComponent(layout)}`;
     }
 }
 
@@ -4682,6 +4719,22 @@ function closeNoticeModal() {
     if (scrollTarget) {
         scrollToElementById(scrollTarget);
     }
+}
+
+function openDemoChoiceModal() {
+    demoChoiceModalOpen.value = true;
+}
+
+function closeDemoChoiceModal() {
+    demoChoiceModalOpen.value = false;
+}
+
+function openDemoPreview(layout) {
+    const normalizedLayout = normalizeThemeLayout(layout);
+    const url = new URL('/demo', window.location.origin);
+    url.searchParams.set('preview_layout', normalizedLayout);
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    closeDemoChoiceModal();
 }
 
 function scrollToElementById(elementId) {

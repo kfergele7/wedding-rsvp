@@ -288,6 +288,22 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->assertDontSee('Demo A Couple');
     }
 
+    public function test_demo_route_uses_default_demo_when_staff_selects_default_source(): void
+    {
+        $this->makeSite('demo-account-a', 'demo-site-a', true, 'Demo A Couple');
+
+        PlatformSetting::query()->create([
+            'key' => 'demo_template_source',
+            'value' => ['source' => 'default'],
+        ]);
+
+        $this->get('/demo')
+            ->assertOk()
+            ->assertSee('Sabrina \\u0026 Kevin', false)
+            ->assertSee('demo-gallery-1.svg', false)
+            ->assertDontSee('Demo A Couple');
+    }
+
     private function makeSite(string $accountSlug, string $siteSlug, bool $published, string $names): Site
     {
         $account = Account::query()->create([

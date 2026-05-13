@@ -7,7 +7,7 @@
                 <p class="mt-3 text-xs uppercase tracking-[0.22em] text-[var(--modern-taupe)]">{{ content.dateLine }}</p>
             </div>
 
-            <figure class="modern-image-frame modern-image-frame--hero mx-auto mt-12 max-w-5xl overflow-hidden border border-[rgba(143,115,123,0.22)] bg-white p-3 shadow-soft md:mt-14 md:p-4">
+            <figure class="modern-image-frame modern-image-frame--hero mx-auto mt-12 max-w-5xl overflow-hidden border border-[color:var(--wedding-card-border-color)] bg-[var(--wedding-card-background)] p-3 shadow-soft md:mt-14 md:p-4">
                 <img :src="content.image" alt="Couple in garden" class="aspect-[16/10] h-full w-full object-cover" :style="{ objectPosition: imagePosition }" />
             </figure>
 

@@ -3,7 +3,7 @@
         <div class="site-shell space-y-24 md:space-y-32">
             <div v-if="showVenueTravelBlock" class="grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-20">
                 <div class="space-y-10">
-                    <article v-if="sectionVisibility.venue" class="rounded-[1.75rem] border border-[rgba(143,115,123,0.16)] bg-[rgba(250,247,243,0.62)] p-8 md:p-10">
+                    <article v-if="sectionVisibility.venue" class="rounded-[1.75rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--wedding-card-background)] p-8 md:p-10">
                         <p class="text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Venue</p>
                         <h2 class="mt-4 text-3xl font-semibold uppercase tracking-[0.14em] text-[var(--modern-ink)]">Venue & Details</h2>
                         <p class="mt-6 text-2xl font-semibold text-[var(--modern-mauve-dark)]">{{ content.venue.name }}</p>
@@ -11,7 +11,7 @@
                         <div class="cms-rich mt-6 leading-relaxed text-[var(--modern-mauve-dark)]" v-html="content.venue.blurb"></div>
                     </article>
 
-                    <article v-if="sectionVisibility.travel" class="rounded-[1.75rem] border border-[rgba(143,115,123,0.16)] bg-white/55 p-8 md:p-10">
+                    <article v-if="sectionVisibility.travel" class="rounded-[1.75rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--wedding-card-background)] p-8 md:p-10">
                         <p class="text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Guest guide</p>
                         <h3 class="mt-4 text-2xl font-semibold uppercase tracking-[0.14em] text-[var(--modern-ink)]">Travel & Accommodation</h3>
                         <div class="cms-rich mt-5 leading-relaxed text-[var(--modern-mauve-dark)]" v-html="content.travel"></div>
@@ -23,7 +23,7 @@
                 </figure>
             </div>
 
-            <section v-if="sectionVisibility.menu" class="rounded-[2rem] border border-[rgba(143,115,123,0.18)] bg-[var(--modern-cream)] p-8 md:p-12">
+            <section v-if="sectionVisibility.menu" class="rounded-[2rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--wedding-card-background)] p-8 md:p-12">
                 <div class="max-w-3xl text-left">
                     <p class="text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Dining</p>
                     <h3 class="section-heading mt-4">{{ rsvpSettings.menu_heading }}</h3>
@@ -56,20 +56,20 @@
                     </div>
                 </div>
 
-                <article class="mt-10 rounded-[1.5rem] border border-[rgba(143,115,123,0.18)] bg-white/65 p-6 md:p-8">
+                <article class="mt-10 rounded-[1.5rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--modern-blush)] p-6 md:p-8">
                     <p class="text-xs uppercase tracking-[0.24em] text-[var(--modern-taupe)]">Additional Information</p>
                     <h4 class="mt-3 text-xl font-semibold text-[var(--modern-ink)]">{{ rsvpSettings.menu_note_title || 'Dining Notes' }}</h4>
                     <div class="cms-rich mt-3 text-sm leading-relaxed text-[var(--modern-mauve-dark)]" v-html="rsvpSettings.menu_note_text"></div>
                 </article>
             </section>
 
-            <section v-if="sectionVisibility.faqs" class="rounded-[2rem] border border-[rgba(143,115,123,0.26)] bg-white/85 p-8 shadow-[0_18px_46px_rgba(49,40,42,0.06)] md:p-12">
+            <section v-if="sectionVisibility.faqs" class="rounded-[2rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--wedding-card-background)] p-8 shadow-[0_18px_46px_rgba(49,40,42,0.06)] md:p-12">
                 <div class="mx-auto max-w-2xl text-center">
                     <p class="text-xs uppercase tracking-[0.24em] text-[var(--modern-mauve-dark)]">Good to know</p>
                     <h3 class="section-heading mt-4">FAQ</h3>
                 </div>
                 <div class="mt-10 grid gap-5 md:grid-cols-2">
-                    <article v-for="faq in content.faqs" :key="faq.question" class="rounded-[1.5rem] border border-[rgba(143,115,123,0.16)] bg-white/80 p-6">
+                    <article v-for="faq in content.faqs" :key="faq.question" class="rounded-[1.5rem] border border-[color:var(--wedding-card-border-color)] bg-[var(--modern-blush)] p-6">
                         <h4 class="text-lg font-semibold text-[var(--modern-ink)]">{{ faq.question }}</h4>
                         <div class="cms-rich mt-3 leading-relaxed text-[var(--modern-mauve-dark)]" v-html="faq.answer"></div>
                     </article>

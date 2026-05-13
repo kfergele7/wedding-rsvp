@@ -183,11 +183,14 @@ const codeInput = ref((props.payload?.code || '').toUpperCase());
 const party = ref(null);
 const theme = computed(() => props.payload?.content?.theme || {});
 const paletteColours = computed(() => normalizePaletteColours(theme.value.palette_colours));
+const paletteSlug = computed(() => normalizePaletteSlug(theme.value.palette));
+const buttonColor = computed(() => paletteSlug.value === 'champagne_silk' ? paletteColours.value.secondary : paletteColours.value.primary);
+const buttonHoverColor = computed(() => paletteSlug.value === 'champagne_silk' ? paletteColours.value.primary : paletteColours.value.secondary);
 const themeVars = computed(() => ({
-    '--wedding-button-color': paletteColours.value.primary,
-    '--wedding-button-hover-color': paletteColours.value.secondary,
-    '--wedding-button-text-color': isLightColour(paletteColours.value.primary) ? '#0F1B1D' : '#FFFFFF',
-    '--wedding-button-hover-text-color': isLightColour(paletteColours.value.secondary) ? '#0F1B1D' : '#FFFFFF',
+    '--wedding-button-color': buttonColor.value,
+    '--wedding-button-hover-color': buttonHoverColor.value,
+    '--wedding-button-text-color': isLightColour(buttonColor.value) ? '#0F1B1D' : '#FFFFFF',
+    '--wedding-button-hover-text-color': isLightColour(buttonHoverColor.value) ? '#0F1B1D' : '#FFFFFF',
 }));
 
 const loadingLookup = ref(false);
@@ -210,6 +213,10 @@ function normalizePaletteColours(colours) {
         primary: normalizeHexColour(colours?.primary, '#22363A'),
         secondary: normalizeHexColour(colours?.secondary, '#466369'),
     };
+}
+
+function normalizePaletteSlug(palette) {
+    return (palette || 'magic_classic').toString().trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
 
 function normalizeHexColour(colour, fallback) {

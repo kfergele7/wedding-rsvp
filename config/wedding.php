@@ -24,15 +24,15 @@ return [
                 'light' => '#FAF8F5',
             ],
         ],
-        'champagne_silk' => [
-            'name' => 'Champagne Silk',
-            'mood' => 'Warm, elegant, softly luxurious',
+        'terracotta_bloom' => [
+            'name' => 'Terracotta Bloom',
+            'mood' => 'Warm, rustic, Mediterranean',
             'colours' => [
-                'primary' => '#6F6252',
-                'secondary' => '#C8B58A',
-                'dark' => '#2A241D',
-                'soft_background' => '#F1E8D8',
-                'light' => '#FFFFFF',
+                'primary' => '#A9634D',
+                'secondary' => '#D19A7C',
+                'dark' => '#4A2C24',
+                'soft_background' => '#EFE0D4',
+                'light' => '#FAF4EF',
             ],
         ],
         'sage_garden' => [
@@ -68,15 +68,15 @@ return [
                 'light' => '#F4F7F7',
             ],
         ],
-        'terracotta_bloom' => [
-            'name' => 'Terracotta Bloom',
-            'mood' => 'Warm, rustic, Mediterranean',
+        'champagne_silk' => [
+            'name' => 'Champagne Silk',
+            'mood' => 'Warm, elegant, softly luxurious',
             'colours' => [
-                'primary' => '#A9634D',
-                'secondary' => '#D19A7C',
-                'dark' => '#4A2C24',
-                'soft_background' => '#EFE0D4',
-                'light' => '#FAF4EF',
+                'primary' => '#6F6252',
+                'secondary' => '#C8B58A',
+                'dark' => '#2A241D',
+                'soft_background' => '#F1E8D8',
+                'light' => '#FFFFFF',
             ],
         ],
         'black_tie' => [
@@ -86,8 +86,8 @@ return [
                 'primary' => '#111111',
                 'secondary' => '#3A3A3A',
                 'dark' => '#000000',
-                'soft_background' => '#F7F4ED',
-                'light' => '#FFFFFF',
+                'soft_background' => '#FFFFFF',
+                'light' => '#F7F4ED',
             ],
         ],
     ],

@@ -138,6 +138,9 @@
 
     .public-layout-modern .site-shell {
         max-width: 1080px;
+        position: relative;
+        z-index: 0;
+        isolation: isolate;
     }
 
     .public-layout-modern .font-heading,
@@ -155,17 +158,20 @@
     }
 
     .public-layout-modern .card-frame {
-        background-color: rgba(255, 255, 255, 0.86);
+        background-color: var(--wedding-card-background, rgba(255, 255, 255, 0.86));
         box-shadow: 0 18px 40px rgba(15, 27, 29, 0.05);
-        border-color: rgba(143, 115, 123, 0.2);
+        border-color: var(--wedding-card-border-color, rgba(143, 115, 123, 0.2));
         border-radius: 1.75rem;
+    }
+
+    .public-site .card-frame {
+        background-color: var(--wedding-card-background, #ffffff);
+        border-color: var(--wedding-card-border-color, rgba(15, 27, 29, 0.12));
     }
 
     .public-layout-modern .modern-image-frame,
     .public-layout-modern .gallery-row figure {
         position: relative;
-        z-index: 0;
-        isolation: isolate;
         border-radius: 1.75rem;
     }
 
@@ -183,116 +189,93 @@
 
     .public-layout-modern .modern-image-frame::before,
     .public-layout-modern .modern-image-frame::after {
+        content: '';
         position: absolute;
         z-index: -1;
-        display: grid;
-        place-items: center;
         border: 0;
-        background: transparent;
-        color: rgba(143, 115, 123, 0.18);
-        line-height: 1;
         box-shadow: none;
         pointer-events: none;
     }
 
     .public-layout-modern .modern-image-frame::before {
-        content: '♡';
-        top: -3.75rem;
-        right: -2.25rem;
-        font-family: "Playfair Display", serif;
-        font-size: clamp(6rem, 12vw, 10rem);
-        transform: rotate(14deg);
+        width: clamp(7rem, 16vw, 12rem);
+        height: clamp(7rem, 16vw, 12rem);
+        border-radius: 999px;
+        background: var(--modern-shape-primary, rgba(143, 115, 123, 0.18));
     }
 
     .public-layout-modern .modern-image-frame::after {
-        content: '~~~';
-        bottom: -3.25rem;
-        left: -2.75rem;
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        font-size: clamp(4rem, 9vw, 8rem);
-        font-weight: 300;
-        letter-spacing: -0.28em;
-        transform: rotate(-13deg) scaleX(1.15);
+        display: none;
+        width: clamp(4.5rem, 9vw, 7rem);
+        height: clamp(4.5rem, 9vw, 7rem);
+        background: var(--modern-shape-secondary, rgba(143, 115, 123, 0.14));
     }
 
     .public-layout-modern .modern-image-frame--hero::before {
-        top: -4.2rem;
-        right: -2.6rem;
-        font-size: clamp(7rem, 13vw, 11rem);
-        color: rgba(143, 115, 123, 0.16);
-        transform: rotate(12deg);
-    }
-
-    .public-layout-modern .modern-image-frame--hero::after {
-        bottom: -3rem;
-        left: -3.6rem;
-        font-size: clamp(4.8rem, 10vw, 8.5rem);
-        color: rgba(169, 151, 145, 0.2);
-        transform: rotate(-16deg) scaleX(1.25);
+        top: -4.75rem;
+        right: -3.4rem;
+        width: clamp(8rem, 18vw, 14rem);
+        height: clamp(8rem, 18vw, 14rem);
+        transform: rotate(8deg);
     }
 
     .public-layout-modern .modern-image-frame--welcome::before {
-        content: '◜';
-        top: -4.5rem;
-        left: -2.25rem;
+        top: -3.25rem;
+        left: -3rem;
         right: auto;
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        font-size: clamp(8rem, 14vw, 12rem);
-        font-weight: 300;
-        color: rgba(143, 115, 123, 0.13);
-        transform: rotate(-8deg);
+        width: clamp(6.5rem, 12vw, 10rem);
+        height: clamp(6.5rem, 12vw, 10rem);
+        border-radius: 32% 68% 56% 44% / 42% 36% 64% 58%;
+        background: var(--modern-shape-secondary, rgba(143, 115, 123, 0.14));
+        transform: rotate(-14deg);
     }
 
     .public-layout-modern .modern-image-frame--welcome::after {
-        content: '♡';
-        right: -1.9rem;
-        bottom: -2.1rem;
+        display: block;
+        right: -2.1rem;
+        bottom: -1.9rem;
         left: auto;
-        font-family: "Playfair Display", serif;
-        font-size: clamp(4.8rem, 8vw, 7rem);
-        color: rgba(143, 115, 123, 0.18);
-        letter-spacing: 0;
-        transform: rotate(-18deg);
+        width: clamp(4.6rem, 8vw, 6.8rem);
+        height: clamp(4.6rem, 8vw, 6.8rem);
+        background: var(--modern-shape-primary, rgba(143, 115, 123, 0.18));
+        clip-path: none;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+        transform: rotate(-12deg);
     }
 
     .public-layout-modern .modern-image-frame--story::before {
-        content: '✦';
-        top: -2.4rem;
-        right: -1.6rem;
-        font-family: "Playfair Display", serif;
-        font-size: clamp(5rem, 10vw, 8rem);
-        color: rgba(169, 151, 145, 0.2);
+        top: -2.25rem;
+        right: -2rem;
+        width: clamp(4.4rem, 9vw, 7rem);
+        height: clamp(4.4rem, 9vw, 7rem);
+        border-radius: 999px;
+        background: var(--modern-shape-tertiary, rgba(49, 40, 42, 0.08));
         transform: rotate(10deg);
     }
 
-    .public-layout-modern .modern-image-frame--story::after {
-        bottom: -3.8rem;
-        left: -2.2rem;
-        font-size: clamp(4.2rem, 8vw, 7rem);
-        color: rgba(143, 115, 123, 0.15);
-        transform: rotate(9deg) scaleX(1.05);
-    }
-
     .public-layout-modern .modern-image-frame--details::before {
-        content: '♡';
-        top: -2.8rem;
-        left: -2.5rem;
+        top: -3.1rem;
+        left: -2.7rem;
         right: auto;
-        font-size: clamp(5.5rem, 9vw, 8rem);
-        color: rgba(143, 115, 123, 0.15);
-        transform: rotate(-16deg);
+        width: clamp(5.5rem, 10vw, 8rem);
+        height: clamp(5.5rem, 10vw, 8rem);
+        background: var(--modern-shape-secondary, rgba(143, 115, 123, 0.14));
+        clip-path: none;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M12%2021.35l-1.45-1.32C5.4%2015.36%202%2012.28%202%208.5%202%205.42%204.42%203%207.5%203c1.74%200%203.41.81%204.5%202.09C13.09%203.81%2014.76%203%2016.5%203%2019.58%203%2022%205.42%2022%208.5c0%203.78-3.4%206.86-8.55%2011.54L12%2021.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+        transform: rotate(10deg);
     }
 
     .public-layout-modern .modern-image-frame--details::after {
-        content: '◝';
-        right: -3.25rem;
-        bottom: -4rem;
+        display: block;
+        right: -2.8rem;
+        bottom: -3.2rem;
         left: auto;
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        font-size: clamp(8rem, 13vw, 11rem);
-        font-weight: 300;
-        color: rgba(169, 151, 145, 0.16);
-        letter-spacing: 0;
+        width: clamp(6.2rem, 12vw, 9.5rem);
+        height: clamp(6.2rem, 12vw, 9.5rem);
+        border-radius: 999px;
+        background: var(--modern-shape-primary, rgba(143, 115, 123, 0.18));
         transform: rotate(18deg);
     }
 
@@ -324,9 +307,9 @@
 
     .button-primary {
         @apply inline-flex items-center justify-center border px-8 py-4 text-xs font-medium uppercase tracking-[0.2em] transition;
-        border-color: var(--wedding-palette-light, var(--wedding-white));
-        background-color: var(--wedding-palette-light, var(--wedding-white));
-        color: var(--wedding-palette-dark, var(--wedding-black));
+        border-color: var(--wedding-button-color, var(--wedding-palette-light, var(--wedding-white)));
+        background-color: var(--wedding-button-color, var(--wedding-palette-light, var(--wedding-white)));
+        color: var(--wedding-button-text-color, var(--wedding-palette-dark, var(--wedding-black)));
         box-shadow: 0 6px 14px rgba(15, 27, 29, 0.18);
     }
 
