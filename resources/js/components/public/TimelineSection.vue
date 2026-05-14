@@ -8,13 +8,15 @@
             </div>
 
             <div class="relative space-y-8 md:space-y-10">
-                <span class="absolute left-[1.15rem] top-2 h-[calc(100%-1rem)] w-px" :style="{ backgroundColor: timelineLineColor }"></span>
+                <span class="absolute left-[1.125rem] top-0 z-10 h-4 w-3 -translate-x-1/2" :style="{ backgroundColor: props.primaryColor }"></span>
+                <span class="absolute bottom-1 left-[1.125rem] top-10 z-0 w-px" :style="{ backgroundColor: timelineLineColor }"></span>
+                <span class="absolute bottom-0 z-20 h-2 w-2 rounded-full" :style="timelineCapStyle"></span>
                 <article
                     v-for="(item, index) in content.items"
                     :key="`${item.time || ''}-${item.title || ''}-${index}`"
                     class="relative grid gap-5 pl-14 md:grid-cols-[9rem_1fr] md:gap-8"
                 >
-                    <span class="absolute left-0 top-1 flex h-9 w-9 items-center justify-center rounded-full border text-[13px] font-semibold" :style="timelineMarkerStyle">
+                    <span class="absolute left-0 top-1 z-20 flex h-9 w-9 items-center justify-center rounded-full border text-[13px] font-semibold" :style="timelineMarkerStyle">
                         {{ index + 1 }}
                     </span>
                     <p class="text-sm uppercase tracking-[0.2em]" :style="{ color: mutedTextColor }">{{ item.time }}</p>
@@ -36,13 +38,15 @@
             </div>
 
             <div class="relative space-y-8 md:space-y-10">
-                <span class="absolute left-[1.15rem] top-2 h-[calc(100%-1rem)] w-px" :style="{ backgroundColor: timelineLineColor }"></span>
+                <span class="absolute left-[1.125rem] top-0 z-10 h-4 w-3 -translate-x-1/2" :style="{ backgroundColor: props.primaryColor }"></span>
+                <span class="absolute bottom-1 left-[1.125rem] top-10 z-0 w-px" :style="{ backgroundColor: timelineLineColor }"></span>
+                <span class="absolute bottom-0 z-20 h-2 w-2 rounded-full" :style="timelineCapStyle"></span>
                 <article
                     v-for="(item, index) in content.items"
                     :key="`${item.time || ''}-${item.title || ''}-${index}`"
                     class="relative grid gap-5 pl-14 md:grid-cols-[9rem_1fr] md:gap-8"
                 >
-                    <span class="absolute left-0 top-1 flex h-9 w-9 items-center justify-center rounded-full border text-[13px] font-semibold" :style="timelineMarkerStyle">
+                    <span class="absolute left-0 top-1 z-20 flex h-9 w-9 items-center justify-center rounded-full border text-[13px] font-semibold" :style="timelineMarkerStyle">
                         {{ index + 1 }}
                     </span>
                     <p class="font-heading text-xl" :style="{ color: mutedTextColor }">{{ item.time }}</p>
@@ -92,8 +96,12 @@ const timelinePanelStyle = computed(() => ({
 }));
 const timelineMarkerStyle = computed(() => ({
     borderColor: panelBorderColor.value,
-    backgroundColor: hasLightBackground.value ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: hasLightBackground.value ? '#FFFFFF' : props.primaryColor,
     color: hasLightBackground.value ? '#0F1B1D' : '#FFFFFF',
+}));
+const timelineCapStyle = computed(() => ({
+    backgroundColor: hasLightBackground.value ? '#0F1B1D' : '#FFFFFF',
+    left: 'calc(1.125rem - 0.25rem)',
 }));
 
 function isLightColour(hex) {
