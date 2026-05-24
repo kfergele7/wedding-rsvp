@@ -118,6 +118,10 @@
         @apply py-20 md:py-28;
     }
 
+    .story-section {
+        padding-bottom: 0;
+    }
+
     .section-heading {
         @apply font-heading text-4xl tracking-wide md:text-5xl;
     }
@@ -128,6 +132,10 @@
 
     .public-layout-modern .section-gap {
         @apply md:py-32;
+    }
+
+    .public-layout-modern .story-section {
+        padding-bottom: 0;
     }
 
     .public-layout-modern {

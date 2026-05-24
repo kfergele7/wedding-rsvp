@@ -1,5 +1,5 @@
 <template>
-    <section class="section-gap" :class="{ 'bg-[var(--modern-blush)]': isModern }">
+    <section class="section-gap story-section" :class="{ 'bg-[var(--modern-blush)]': isModern }">
         <div class="site-shell grid gap-8 lg:grid-cols-2 lg:items-center" :class="{ 'lg:grid-cols-[1fr_0.9fr] lg:gap-20': isModern }">
             <div class="h-[430px] overflow-hidden border border-soft bg-white p-4 shadow-soft md:h-[520px]" :class="{ 'modern-image-frame modern-image-frame--story !border-0 !bg-transparent !p-0 !shadow-none md:h-[540px]': isModern }">
                 <img :src="content.image" alt="Couple closeup" class="h-full w-full object-cover" :style="{ objectPosition: imagePosition }" />
