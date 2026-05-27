@@ -1379,12 +1379,37 @@
                             <thead class="sticky top-0 bg-white">
                                 <tr class="border-b border-soft text-xs uppercase tracking-[0.12em] text-wedding-muted">
                                     <th class="w-[6%] px-2 py-2"><span class="sr-only">Select</span></th>
-                                    <th class="w-[39%] px-2 py-2">Party</th>
+                                    <th class="w-[37%] px-2 py-2">Party</th>
                                     <th class="w-[14%] px-2 py-2">Email</th>
                                     <th class="w-[12%] whitespace-nowrap px-2 py-2 text-center">Email Sent</th>
                                     <th class="w-[7%] px-2 py-2 text-center">Code</th>
                                     <th class="w-[4%] px-1 py-2 text-center">Seats</th>
-                                    <th class="w-[18%] px-2 py-2 text-center">Actions</th>
+                                    <th class="w-[20%] px-2 py-2 text-center">
+                                        <span class="actions-help-wrap">
+                                            Actions
+                                            <button
+                                                type="button"
+                                                class="actions-help-trigger"
+                                                aria-label="Explain guest list actions"
+                                                title="Explain guest list actions"
+                                                @click.stop="actionsHelpOpen = !actionsHelpOpen"
+                                            >
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+                                                    <path d="M12 10.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                                    <circle cx="12" cy="7.7" r="1.2" fill="currentColor" />
+                                                </svg>
+                                            </button>
+                                            <span class="actions-help-tooltip" :class="{ 'is-open': actionsHelpOpen }">
+                                                <span><strong>View:</strong> preview party details.</span>
+                                                <span><strong>Edit:</strong> update party and guest details.</span>
+                                                <span><strong>Delete:</strong> remove the party.</span>
+                                                <span><strong>WhatsApp:</strong> open a pre-filled invite message.</span>
+                                                <span><strong>Copy:</strong> copy invite details to paste anywhere.</span>
+                                                <span><strong>Email:</strong> send the RSVP request by email.</span>
+                                            </span>
+                                        </span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1458,20 +1483,42 @@
                                     <td class="px-2 py-2 text-center uppercase">{{ partyItem.code }}</td>
                                     <td class="px-1 py-2 text-center">{{ partyItem.max_guests }}</td>
                                     <td class="px-2 py-2">
-                                        <div class="mx-auto grid w-fit grid-cols-2 gap-1.5">
+                                        <div class="mx-auto grid w-fit grid-cols-3 gap-1.5">
                                             <button class="admin-btn admin-btn-view inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="View" @click="openViewPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">visibility</span>
                                             </button>
                                             <button class="admin-btn inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Edit" @click="openEditPartyModal(partyItem.id)">
                                                 <span class="material-symbols-outlined btn-icon">edit</span>
                                             </button>
+                                            <button class="admin-btn admin-btn-danger inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
+                                                <span class="material-symbols-outlined btn-icon">delete</span>
+                                            </button>
+                                            <button
+                                                class="admin-btn admin-btn-copy inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                                :class="{ 'admin-btn-copy-copied': copiedInvitationPartyId === partyItem.id }"
+                                                type="button"
+                                                :disabled="!sitePublished"
+                                                :title="copiedInvitationPartyId === partyItem.id ? 'Invitation details copied' : (sitePublished ? 'Copy invitation details' : 'Publish your website before copying invitation details')"
+                                                @click="copyInvitationDetails(partyItem)"
+                                            >
+                                                <span class="material-symbols-outlined btn-icon">{{ copiedInvitationPartyId === partyItem.id ? 'check' : 'content_copy' }}</span>
+                                            </button>
                                             <span class="inline-flex" :class="{ 'disabled-action-tooltip': !partyItem.email || !canSendRsvpEmails }" :title="emailActionTitle(partyItem.email, 'Email RSVP')">
-                                                <button class="admin-btn admin-btn-success inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" :disabled="!partyItem.email || !canSendRsvpEmails" @click="openSendRsvpConfirmModal([partyItem.id])">
+                                                <button class="admin-btn admin-btn-email inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" :disabled="!partyItem.email || !canSendRsvpEmails" @click="openSendRsvpConfirmModal([partyItem.id])">
                                                     <span class="material-symbols-outlined btn-icon">mail</span>
                                                 </button>
                                             </span>
-                                            <button class="admin-btn admin-btn-danger inline-flex h-10 w-10 items-center justify-center p-0 text-xs" type="button" title="Delete" @click="deletePartyById(partyItem.id, partyItem.display_name)">
-                                                <span class="material-symbols-outlined btn-icon">delete</span>
+                                            <button
+                                                class="admin-btn admin-btn-whatsapp inline-flex h-10 w-10 items-center justify-center p-0 text-xs"
+                                                type="button"
+                                                :disabled="!sitePublished"
+                                                :title="sitePublished ? 'Share RSVP via WhatsApp' : 'Publish your website before sharing RSVP links by WhatsApp'"
+                                                @click="openWhatsappInvite(partyItem)"
+                                            >
+                                                <svg class="action-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M20 11.7a7.8 7.8 0 0 1-11.6 6.8L4 20l1.5-4.2A7.8 7.8 0 1 1 20 11.7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M8.9 8.2c.2-.4.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.3 0 .5-.1.7l-.4.5c.6 1.1 1.5 2 2.7 2.6l.5-.4c.2-.2.4-.2.7-.1l1.5.7c.3.1.4.3.4.6v.5c0 .4-.2.6-.5.8-.5.3-1.1.4-1.8.2-3-.7-5.4-3.1-6.1-6.1-.2-.6-.1-1.2.2-1.5Z" fill="currentColor" />
+                                                </svg>
                                             </button>
                                         </div>
                                     </td>
@@ -1551,7 +1598,20 @@
                         <p class="mt-2 text-sm text-wedding-text">{{ selectedParty.notes }}</p>
                     </div>
 
-                    <div class="mt-6 flex justify-end">
+                    <div class="mt-6 flex flex-wrap justify-end gap-3">
+                        <button
+                            class="admin-btn admin-btn-whatsapp inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]"
+                            type="button"
+                            :disabled="!sitePublished"
+                            :title="sitePublished ? 'Share RSVP via WhatsApp' : 'Publish your website before sharing RSVP links by WhatsApp'"
+                            @click="openWhatsappInvite(selectedParty)"
+                        >
+                            <svg class="action-svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20 11.7a7.8 7.8 0 0 1-11.6 6.8L4 20l1.5-4.2A7.8 7.8 0 1 1 20 11.7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M8.9 8.2c.2-.4.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.3 0 .5-.1.7l-.4.5c.6 1.1 1.5 2 2.7 2.6l.5-.4c.2-.2.4-.2.7-.1l1.5.7c.3.1.4.3.4.6v.5c0 .4-.2.6-.5.8-.5.3-1.1.4-1.8.2-3-.7-5.4-3.1-6.1-6.1-.2-.6-.1-1.2.2-1.5Z" fill="currentColor" />
+                            </svg>
+                            WhatsApp RSVP
+                        </button>
                         <button class="admin-btn inline-flex items-center gap-2 px-4 py-3 text-xs uppercase tracking-[0.12em]" type="button" @click="openEditFromViewModal">
                             <span class="material-symbols-outlined btn-icon">edit</span>
                             Edit this Party
@@ -2407,7 +2467,10 @@ const noticeModal = reactive({
 const demoChoiceModalOpen = ref(false);
 const qrModalOpen = ref(false);
 const copyLinkCopied = ref(false);
+const copiedInvitationPartyId = ref(null);
+const actionsHelpOpen = ref(false);
 let copyLinkResetTimer = null;
+let copiedInvitationResetTimer = null;
 const mobileNavOpen = ref(false);
 const imageLibrary = ref([]);
 const imageLibraryModalOpen = ref(false);
@@ -2831,6 +2894,9 @@ onBeforeUnmount(() => {
     if (copyLinkResetTimer) {
         clearTimeout(copyLinkResetTimer);
     }
+    if (copiedInvitationResetTimer) {
+        clearTimeout(copiedInvitationResetTimer);
+    }
 });
 
 watch(section, async () => {
@@ -3217,13 +3283,13 @@ async function sendTestRsvpEmail() {
     }
 }
 
-async function copyToClipboard(text) {
+async function copyToClipboard(text, successMessage = 'Link copied to clipboard.', fallbackLabel = 'Copy this link:') {
     try {
         await navigator.clipboard.writeText(text);
-        setMessage('Link copied to clipboard.');
+        setMessage(successMessage);
         return true;
     } catch (error) {
-        window.prompt('Copy this link:', text);
+        window.prompt(fallbackLabel, text);
         return false;
     }
 }
@@ -3525,6 +3591,110 @@ function guestTypeMeta(partyItem) {
 
 function emailActionTitle(email, fallbackTitle = 'Email Guest') {
     return email ? fallbackTitle : "this guest doesn't have an email address";
+}
+
+function partyRsvpUrl(partyItem) {
+    if (!previewUrl || !partyItem?.code) {
+        return '';
+    }
+
+    try {
+        const url = new URL(previewUrl, window.location.origin);
+        url.searchParams.set('code', partyItem.code);
+        return url.toString();
+    } catch (error) {
+        const separator = previewUrl.includes('?') ? '&' : '?';
+        return `${previewUrl}${separator}code=${encodeURIComponent(partyItem.code)}`;
+    }
+}
+
+function responseDeadlineLabel() {
+    const deadline = content.value?.guest_list?.responseDeadline;
+    return deadline ? formatDate(deadline) : '';
+}
+
+function whatsappInviteMessage(partyItem) {
+    const partyName = String(partyItem?.display_name || 'there').trim();
+    const guestType = guestTypeMeta(partyItem).label;
+    const deadline = responseDeadlineLabel();
+    const rsvpUrl = partyRsvpUrl(partyItem);
+    const weddingName = String(siteTitle.value || 'our wedding').trim();
+    const lines = [
+        `Hi ${partyName},`,
+        '',
+        `We would love you to join us for ${weddingName}.`,
+        '',
+        'Please visit our wedding website to RSVP:',
+        rsvpUrl,
+        '',
+        `Your RSVP code is: ${partyItem?.code || ''}`,
+        `You are invited as an ${guestType}.`,
+    ];
+
+    if (deadline) {
+        lines.push(`Please RSVP by ${deadline}.`);
+    }
+
+    return lines.join('\n');
+}
+
+function openWhatsappInvite(partyItem) {
+    clearError();
+
+    if (!sitePublished.value) {
+        setError('Publish your website before sharing RSVP links by WhatsApp.');
+        return;
+    }
+
+    if (!partyItem?.code || !partyRsvpUrl(partyItem)) {
+        setError('This party needs an RSVP code before you can share it on WhatsApp.');
+        return;
+    }
+
+    const inviteMessage = whatsappInviteMessage(partyItem);
+    const copyPromise = copyToClipboard(
+        inviteMessage,
+        `Full WhatsApp invite copied for ${partyItem.display_name}. If WhatsApp only inserts the link, paste the copied message.`,
+        'Copy this WhatsApp invitation:'
+    );
+    const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteMessage)}`;
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+
+    copyPromise.then((copied) => {
+        if (!copied) {
+            setMessage(`WhatsApp opened for ${partyItem.display_name}.`);
+        }
+    });
+}
+
+async function copyInvitationDetails(partyItem) {
+    clearError();
+
+    if (!sitePublished.value) {
+        setError('Publish your website before copying invitation details.');
+        return;
+    }
+
+    if (!partyItem?.code || !partyRsvpUrl(partyItem)) {
+        setError('This party needs an RSVP code before you can copy invitation details.');
+        return;
+    }
+
+    const copied = await copyToClipboard(
+        whatsappInviteMessage(partyItem),
+        `Invitation details copied for ${partyItem.display_name}.`,
+        'Copy these invitation details:'
+    );
+
+    if (copied) {
+        copiedInvitationPartyId.value = partyItem.id;
+        if (copiedInvitationResetTimer) {
+            clearTimeout(copiedInvitationResetTimer);
+        }
+        copiedInvitationResetTimer = setTimeout(() => {
+            copiedInvitationPartyId.value = null;
+        }, 2200);
+    }
 }
 
 function viewResponseActionTitle(row) {
@@ -5221,13 +5391,13 @@ function serialize(value) {
 }
 
 .admin-btn-view:hover {
-    border-color: #22363a !important;
-    background-color: #22363a !important;
-    color: #ffffff !important;
+    border-color: #f7f5f2 !important;
+    background-color: #f7f5f2 !important;
+    color: #0f1b1d !important;
 }
 
 .admin-btn-view:hover .btn-icon {
-    color: #ffffff !important;
+    color: #0f1b1d !important;
 }
 
 .admin-btn-danger {
@@ -5240,6 +5410,133 @@ function serialize(value) {
     border-color: #b93f3f !important;
     background-color: #b93f3f !important;
     color: #ffffff !important;
+}
+
+.admin-btn-whatsapp {
+    border-color: #21c177 !important;
+    background-color: #ffffff !important;
+    color: #21c177 !important;
+}
+
+.admin-btn-whatsapp:hover {
+    border-color: #21c177 !important;
+    background-color: #f7f7f7 !important;
+    color: #21c177 !important;
+}
+
+.admin-btn-copy {
+    border-color: #21c177 !important;
+    background-color: #21c177 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-copy:hover {
+    border-color: #1aa267 !important;
+    background-color: #1aa267 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-copy-copied,
+.admin-btn-copy-copied:hover {
+    border-color: #21c177 !important;
+    background-color: #21c177 !important;
+    color: #ffffff !important;
+    animation: copy-confirm-pulse 0.55s ease;
+}
+
+.admin-btn-email {
+    border-color: #466369 !important;
+    background-color: #466369 !important;
+    color: #ffffff !important;
+}
+
+.admin-btn-email:hover {
+    border-color: #22363a !important;
+    background-color: #22363a !important;
+    color: #ffffff !important;
+}
+
+.action-svg-icon {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: currentColor;
+}
+
+.actions-help-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.actions-help-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    color: #848484;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: help;
+}
+
+.actions-help-trigger svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.actions-help-tooltip {
+    position: absolute;
+    z-index: 90;
+    top: calc(100% + 0.7rem);
+    right: 0;
+    display: grid;
+    width: min(18rem, 72vw);
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0.5rem;
+    background: #0f1b1d;
+    color: #ffffff;
+    padding: 0.75rem;
+    text-align: left;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    font-weight: 400;
+    box-shadow: 0 12px 28px rgba(15, 27, 29, 0.22);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-0.25rem);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.actions-help-tooltip strong {
+    color: #f2ece3;
+    font-weight: 700;
+}
+
+.actions-help-wrap:hover .actions-help-tooltip,
+.actions-help-tooltip.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+@keyframes copy-confirm-pulse {
+    0% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 .admin-btn-danger-solid {
@@ -5332,6 +5629,9 @@ function serialize(value) {
 .admin-btn-danger:disabled,
 .admin-btn-danger-solid:disabled,
 .admin-btn-success:disabled,
+.admin-btn-whatsapp:disabled,
+.admin-btn-copy:disabled,
+.admin-btn-email:disabled,
 .admin-btn-outline:disabled {
     border-color: #848484 !important;
     background-color: #848484 !important;
@@ -5344,14 +5644,19 @@ function serialize(value) {
 .admin-btn:disabled .btn-icon,
 .admin-btn-view:disabled .btn-icon,
 .admin-btn-success:disabled .btn-icon,
-.admin-btn-danger:disabled .btn-icon {
+.admin-btn-danger:disabled .btn-icon,
+.admin-btn-copy:disabled .btn-icon,
+.admin-btn-email:disabled .btn-icon {
     color: #ffffff !important;
 }
 
 .admin-btn:disabled:hover,
 .admin-btn-view:disabled:hover,
 .admin-btn-success:disabled:hover,
-.admin-btn-danger:disabled:hover {
+.admin-btn-danger:disabled:hover,
+.admin-btn-whatsapp:disabled:hover,
+.admin-btn-copy:disabled:hover,
+.admin-btn-email:disabled:hover {
     border-color: #848484 !important;
     background-color: #848484 !important;
     color: #ffffff !important;

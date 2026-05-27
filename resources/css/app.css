@@ -445,6 +445,45 @@
         border-color: var(--wedding-success-dark) !important;
         color: var(--wedding-white) !important;
     }
+
+    .admin-btn-whatsapp {
+        background-color: var(--wedding-white) !important;
+        border-color: var(--wedding-success) !important;
+        color: var(--wedding-success) !important;
+        box-shadow: none;
+    }
+
+    .admin-btn-whatsapp:hover {
+        background-color: var(--wedding-off-white) !important;
+        border-color: var(--wedding-success) !important;
+        color: var(--wedding-success) !important;
+    }
+
+    .admin-btn-copy {
+        background-color: var(--wedding-success) !important;
+        border-color: var(--wedding-success) !important;
+        color: var(--wedding-white) !important;
+        box-shadow: 0 6px 14px rgba(33, 193, 119, 0.22);
+    }
+
+    .admin-btn-copy:hover {
+        background-color: var(--wedding-success-dark) !important;
+        border-color: var(--wedding-success-dark) !important;
+        color: var(--wedding-white) !important;
+    }
+
+    .admin-btn-email {
+        background-color: var(--wedding-primary-green) !important;
+        border-color: var(--wedding-primary-green) !important;
+        color: var(--wedding-white) !important;
+        box-shadow: 0 6px 14px rgba(70, 99, 105, 0.2);
+    }
+
+    .admin-btn-email:hover {
+        background-color: var(--wedding-primary-dark) !important;
+        border-color: var(--wedding-primary-dark) !important;
+        color: var(--wedding-white) !important;
+    }
 }
 
 /* Palette normalization for existing status utility classes used across views/components. */
