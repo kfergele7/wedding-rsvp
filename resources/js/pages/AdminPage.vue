@@ -3607,19 +3607,39 @@ function emailActionTitle(email, fallbackTitle = 'Email Guest') {
     return email ? fallbackTitle : "this guest doesn't have an email address";
 }
 
-function partyRsvpUrl(partyItem) {
-    if (!previewUrl || !partyItem?.code) {
+function partyWebsiteUrl() {
+    if (!previewUrl) {
         return '';
     }
 
     try {
         const url = new URL(previewUrl, window.location.origin);
-        url.searchParams.set('code', partyItem.code);
+        url.search = '';
+        url.hash = '';
         return url.toString();
     } catch (error) {
-        const separator = previewUrl.includes('?') ? '&' : '?';
-        return `${previewUrl}${separator}code=${encodeURIComponent(partyItem.code)}`;
+        return String(previewUrl).split('?')[0].split('#')[0];
     }
+}
+
+function invitationDateLine() {
+    return String(
+        content.value?.hero?.dateLine
+        || content.value?.timeline?.dateAccent
+        || ''
+    ).trim();
+}
+
+function invitationVenueLine() {
+    const venueName = String(content.value?.details?.venue?.name || '').trim();
+    const venueAddress = String(content.value?.details?.venue?.address || '').trim();
+    const locationLine = String(content.value?.hero?.locationLine || '').trim();
+
+    if (venueName && venueAddress) {
+        return `${venueName}, ${venueAddress}`;
+    }
+
+    return venueName || venueAddress || locationLine;
 }
 
 function responseDeadlineLabel() {
@@ -3656,19 +3676,39 @@ function whatsappInviteMessage(partyItem) {
     const guestType = guestTypeMeta(partyItem).label;
     const deadline = responseDeadlineLabel();
     const eveningArrival = eveningArrivalLine(partyItem);
-    const rsvpUrl = partyRsvpUrl(partyItem);
+    const websiteUrl = partyWebsiteUrl();
+    const weddingDate = invitationDateLine();
+    const weddingVenue = invitationVenueLine();
     const weddingName = String(siteTitle.value || 'our wedding').trim();
+    const inviteIntro = (partyItem?.guest_type || 'day') === 'evening'
+        ? `We would love you to join us for the evening of ${weddingName}.`
+        : `We would love you to join us for ${weddingName}.`;
     const lines = [
         `Hi ${partyName},`,
         '',
-        `We would love you to join us for ${weddingName}.`,
+        inviteIntro,
         '',
+    ];
+
+    if (weddingDate) {
+        lines.push(`Date: ${weddingDate}`);
+    }
+
+    if (weddingVenue) {
+        lines.push(`Venue: ${weddingVenue}`);
+    }
+
+    if (weddingDate || weddingVenue) {
+        lines.push('');
+    }
+
+    lines.push(
         'Please visit our wedding website to RSVP:',
-        rsvpUrl,
+        websiteUrl,
         '',
         `Your RSVP code is: ${partyItem?.code || ''}`,
         `You are invited as an ${guestType}.`,
-    ];
+    );
 
     if (eveningArrival) {
         lines.push(eveningArrival);
@@ -3689,7 +3729,7 @@ function openWhatsappInvite(partyItem) {
         return;
     }
 
-    if (!partyItem?.code || !partyRsvpUrl(partyItem)) {
+    if (!partyItem?.code || !partyWebsiteUrl()) {
         setError('This party needs an RSVP code before you can share it on WhatsApp.');
         return;
     }
@@ -3718,7 +3758,7 @@ async function copyInvitationDetails(partyItem) {
         return;
     }
 
-    if (!partyItem?.code || !partyRsvpUrl(partyItem)) {
+    if (!partyItem?.code || !partyWebsiteUrl()) {
         setError('This party needs an RSVP code before you can copy invitation details.');
         return;
     }
