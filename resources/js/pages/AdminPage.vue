@@ -3673,7 +3673,6 @@ function eveningArrivalLine(partyItem) {
 
 function whatsappInviteMessage(partyItem) {
     const partyName = String(partyItem?.display_name || 'there').trim();
-    const guestType = guestTypeMeta(partyItem).label;
     const deadline = responseDeadlineLabel();
     const eveningArrival = eveningArrivalLine(partyItem);
     const websiteUrl = partyWebsiteUrl();
@@ -3707,7 +3706,6 @@ function whatsappInviteMessage(partyItem) {
         websiteUrl,
         '',
         `Your RSVP code is: ${partyItem?.code || ''}`,
-        `You are invited as an ${guestType}.`,
     );
 
     if (eveningArrival) {

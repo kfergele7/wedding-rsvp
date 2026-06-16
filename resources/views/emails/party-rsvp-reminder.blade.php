@@ -33,7 +33,7 @@
                                 <td style="padding:0 32px 8px;">
                                     <p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#0F1B1D;">Hello {{ $partyName }},</p>
                                     <p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#0F1B1D;">
-                                        We have not received your RSVP yet. Your invitation is marked as <strong>{{ $guestTypeLabel }}</strong>, and you can respond on the wedding website using your RSVP code.
+                                        We have not received your RSVP yet. You can respond on the wedding website using your RSVP code.
                                     </p>
                                 </td>
                             </tr>

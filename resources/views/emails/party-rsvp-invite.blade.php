@@ -35,7 +35,7 @@
                                         RSVP Invitation
                                     </p>
                                     <h1 style="margin:0; font-family: Georgia, 'Times New Roman', serif; font-size:34px; line-height:1.15; color:#0F1B1D;">
-                                        Your invitation is for: {{ $guestTypeLabel }}
+                                        You're invited
                                     </h1>
                                 </td>
                             </tr>
@@ -45,8 +45,11 @@
                                         Hello {{ $partyName }},
                                     </p>
                                     <p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#0F1B1D;">
-                                        We would love for you to join us. Your invitation is marked as
-                                        <strong>{{ $guestTypeLabel }}</strong>, and you can submit your RSVP using the details below.
+                                        @if ($eveningArrivalTime)
+                                            We would love for you to join us for the evening celebration. You can explore the wedding website and submit your RSVP using the details below.
+                                        @else
+                                            We would love for you to join us. You can explore the wedding website and submit your RSVP using the details below.
+                                        @endif
                                     </p>
                                 </td>
                             </tr>
