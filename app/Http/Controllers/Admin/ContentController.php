@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveSiteSettingsRequest;
 use App\Http\Requests\UploadContentImageRequest;
 use App\Models\SiteSetting;
+use App\Support\InvitationTiming;
 use App\Support\WeddingPalettes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -171,6 +172,10 @@ class ContentController extends Controller
             'guest_list.responseDeadline',
             trim((string) data_get($content, 'guest_list.responseDeadline', '2026-08-15'))
         );
+        $eveningArrivalTime = InvitationTiming::normalizeEveningArrivalTimeForStorage(
+            data_get($content, 'guest_list.evening_arrival_time')
+        );
+        data_set($content, 'guest_list.evening_arrival_time', $eveningArrivalTime);
         $layout = data_get($content, 'theme.layout', 'classic');
         $layout = $layout === 'editorial' ? 'modern' : $layout;
         data_set($content, 'theme.layout', in_array($layout, ['classic', 'modern'], true) ? $layout : 'classic');

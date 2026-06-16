@@ -37,6 +37,21 @@
                                     </p>
                                 </td>
                             </tr>
+                            @if ($eveningArrivalTime)
+                                <tr>
+                                    <td style="padding:8px 32px 0;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid rgba(70,99,105,0.22); background-color:#F7F5F2;">
+                                            <tr>
+                                                <td style="padding:22px 24px;">
+                                                    <p style="margin:0 0 8px; font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:#466369;">Evening arrival</p>
+                                                    <p style="margin:0 0 10px; font-family: Georgia, 'Times New Roman', serif; font-size:28px; line-height:1.2; color:#22363A;">{{ $eveningArrivalTime }}</p>
+                                                    <p style="margin:0; font-size:15px; line-height:1.7; color:#0F1B1D;">Please arrive from {{ $eveningArrivalTime }} for the evening celebration.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            @endif
                             @if ($responseDeadline)
                                 <tr>
                                     <td style="padding:12px 32px 0;">

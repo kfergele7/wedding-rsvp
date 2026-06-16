@@ -141,6 +141,12 @@ class PublicWeddingSlugRouteTest extends TestCase
     public function test_evening_guest_lookup_returns_evening_type_and_disables_meal_choices(): void
     {
         $site = $this->makeSite('evening-account', 'evening-site', true, 'Evening Couple');
+        $content = config('wedding.homepage_content');
+        $content['guest_list']['evening_arrival_time'] = '19:30';
+        SiteSetting::query()
+            ->where('site_id', $site->id)
+            ->where('key', 'homepage_content')
+            ->update(['value' => $content]);
 
         Party::query()->create([
             'site_id' => $site->id,
@@ -154,7 +160,35 @@ class PublicWeddingSlugRouteTest extends TestCase
             ->assertOk()
             ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_EVENING)
             ->assertJsonPath('party.guest_type_label', 'Evening Guest')
+            ->assertJsonPath('party.evening_arrival_time_label', '7:30 pm')
+            ->assertJsonPath('party.evening_arrival_sentence', 'Please arrive from 7:30 pm for the evening celebration.')
             ->assertJsonPath('mealChoicesEnabled', false);
+    }
+
+    public function test_day_guest_lookup_does_not_return_evening_arrival_time(): void
+    {
+        $site = $this->makeSite('day-arrival-account', 'day-arrival-site', true, 'Day Couple');
+        $content = config('wedding.homepage_content');
+        $content['guest_list']['evening_arrival_time'] = '19:30';
+        SiteSetting::query()
+            ->where('site_id', $site->id)
+            ->where('key', 'homepage_content')
+            ->update(['value' => $content]);
+
+        Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Day Guests',
+            'guest_type' => Party::GUEST_TYPE_DAY,
+            'code' => 'SUNNY',
+            'max_guests' => 2,
+        ]);
+
+        $this->postJson('/w/'.$site->public_slug.'/rsvp/lookup', ['code' => 'SUNNY'])
+            ->assertOk()
+            ->assertJsonPath('party.guest_type', Party::GUEST_TYPE_DAY)
+            ->assertJsonPath('party.guest_type_label', 'All Day Guest')
+            ->assertJsonPath('party.evening_arrival_time_label', null)
+            ->assertJsonPath('party.evening_arrival_sentence', null);
     }
 
     public function test_evening_guest_can_save_rsvp_without_meal_choices(): void

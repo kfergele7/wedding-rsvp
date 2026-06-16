@@ -1,10 +1,47 @@
 ## Current objective
-- Finalise and ship content editor persistence fixes so deleted list items (timeline/FAQ/menu) never reappear after save.
+- Completed: configurable evening guest arrival time for invitation messaging.
+
+## Evening guest arrival-time update (2026-06-16)
+- What changed:
+  - Couples can now set an optional `Evening guest arrival time` in Guest List > RSVP Email Settings.
+  - The value is stored on the existing site setting JSON at `homepage_content.guest_list.evening_arrival_time`.
+  - No database migration is required.
+  - Existing weddings without this key continue to work because the config default is `null`.
+- Backend areas touched:
+  - Added `App\Support\InvitationTiming` for storage normalisation and display formatting (`19:30` -> `7:30 pm`).
+  - Added validation in `SaveSiteSettingsRequest`.
+  - Normalised the value in `Admin\ContentController`.
+  - Passed evening-only arrival data through `Admin\PartyController` email sends, reminders, test sends, and previews.
+  - Added evening arrival data to public RSVP lookup/save payloads in `RsvpController`.
+- Vue/UI areas touched:
+  - `AdminPage.vue` now shows the time field in RSVP Email Settings and includes it in email preview/test payloads.
+  - `AdminPage.vue` includes the evening arrival sentence in copy-to-clipboard and WhatsApp/share invitation text for evening parties only.
+  - `RsvpModal.vue` shows a structured `Evening arrival` block for evening guests only.
+- Email areas touched:
+  - `PartyRsvpInviteMail` and `PartyRsvpReminderMail` accept optional evening arrival text.
+  - RSVP invite/reminder Blade templates display `Please arrive from 7:30 pm for the evening celebration.` only when present.
+- Tests updated:
+  - Save/load coverage for the new guest-list setting.
+  - RSVP email preview coverage for evening vs all-day guests.
+  - Sent RSVP email payload coverage for evening vs all-day parties.
+  - Public RSVP lookup coverage for evening and all-day payloads.
+  - Updated one stale customer dashboard tenant-context assertion to match the current dashboard output.
+- Checks run:
+  - `php artisan test --filter='evening|rsvp_email_preview|evening_guest_invite|evening_arrival'` passed.
+  - `npm run build` passed.
+  - `php artisan test` passed: 59 tests, 240 assertions.
+- Manual testing steps:
+  - Open `/app/admin/parties`.
+  - Set `Evening guest arrival time` to a time such as `19:30`, then save RSVP Email Settings.
+  - Preview/send a test RSVP email as `Evening Guest` and confirm the arrival section says `7:30 pm`.
+  - Preview/send as `All Day Guest` and confirm no evening arrival wording appears.
+  - Use Guest List copy/WhatsApp actions for an evening party and confirm the plain-text message includes the arrival sentence.
+  - Lookup an evening RSVP code on the public site and confirm the RSVP modal shows `Evening arrival`; repeat with an all-day code and confirm it is hidden.
+- Known issues / follow-up:
+  - No frontend unit test harness exists for copy/WhatsApp helper text; coverage is via Vue build plus manual copy/WhatsApp testing.
 
 ## Next steps
-- [ ] Manual smoke test in Admin > Content: delete timeline/FAQ/menu items, save, reload, confirm deletions persist.
-- [ ] Verify menu heading labels show `Course` vs `Course Options` based on per-course item count.
-- [ ] Push latest bugfix/docs commit to remote.
+- [ ] Manual browser smoke test of the RSVP Email Settings field and invitation copy actions.
 
 ## Cross-machine handoff (2026-03-09 16:35 GMT)
 - Objective completed:

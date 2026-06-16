@@ -192,6 +192,7 @@ return [
         ],
         'guest_list' => [
             'responseDeadline' => '2026-08-15',
+            'evening_arrival_time' => null,
         ],
         'gallery' => [
             'heading' => "Photo's of us across the years",

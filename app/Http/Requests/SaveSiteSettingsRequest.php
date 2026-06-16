@@ -30,6 +30,7 @@ class SaveSiteSettingsRequest extends FormRequest
             'content.theme.layout' => ['nullable', Rule::in(['classic', 'modern', 'editorial'])],
             'content.guest_list' => ['nullable', 'array'],
             'content.guest_list.responseDeadline' => ['nullable', 'date'],
+            'content.guest_list.evening_arrival_time' => ['nullable', 'date_format:H:i'],
             'rsvp_settings' => ['nullable', 'array'],
             'rsvp_settings.meal_mode' => ['nullable', Rule::in(['options', 'set_menu'])],
             'rsvp_settings.menu_heading' => ['nullable', 'string', 'max:120'],

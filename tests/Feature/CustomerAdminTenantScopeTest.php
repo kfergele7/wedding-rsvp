@@ -152,6 +152,7 @@ class CustomerAdminTenantScopeTest extends TestCase
             ->postJson('/app/admin/api/parties/rsvp-email-preview', [
                 'guest_type' => 'evening',
                 'response_deadline' => '2026-08-15',
+                'evening_arrival_time' => '19:30',
             ])
             ->assertOk();
 
@@ -159,6 +160,18 @@ class CustomerAdminTenantScopeTest extends TestCase
         $this->assertStringContainsString('Example Guest Party', $html);
         $this->assertStringContainsString('Evening Guest', $html);
         $this->assertStringContainsString('15 August 2026', $html);
+        $this->assertStringContainsString('Please arrive from 7:30 pm for the evening celebration.', $html);
+
+        $dayResponse = $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->postJson('/app/admin/api/parties/rsvp-email-preview', [
+                'guest_type' => 'day',
+                'response_deadline' => '2026-08-15',
+                'evening_arrival_time' => '19:30',
+            ])
+            ->assertOk();
+
+        $this->assertStringNotContainsString('Please arrive from 7:30 pm for the evening celebration.', (string) $dayResponse->json('html'));
     }
 
     public function test_customer_can_send_test_rsvp_email_to_self(): void
@@ -179,6 +192,58 @@ class CustomerAdminTenantScopeTest extends TestCase
             $mail->hasTo($user->email)
                 && $mail->guestTypeLabel === 'All Day Guest'
                 && $mail->rsvpCode === 'DEMO'
+                && $mail->eveningArrivalTime === null
+        );
+    }
+
+    public function test_evening_guest_invite_email_uses_arrival_time_only_for_evening_parties(): void
+    {
+        Mail::fake();
+
+        [$user, $site] = $this->createTenant('tenant-evening-email', 'site-evening-email');
+        $content = config('wedding.homepage_content');
+        $content['guest_list']['evening_arrival_time'] = '19:30';
+        SiteSetting::query()
+            ->where('site_id', $site->id)
+            ->where('key', 'homepage_content')
+            ->update(['value' => $content]);
+
+        $eveningParty = Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Evening Party',
+            'guest_type' => Party::GUEST_TYPE_EVENING,
+            'email' => 'evening@example.com',
+            'code' => 'EVE',
+            'max_guests' => 2,
+        ]);
+
+        $dayParty = Party::query()->create([
+            'site_id' => $site->id,
+            'display_name' => 'Day Party',
+            'guest_type' => Party::GUEST_TYPE_DAY,
+            'email' => 'day@example.com',
+            'code' => 'DAY',
+            'max_guests' => 2,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->postJson('/app/admin/api/parties/send-rsvp-emails', [
+                'party_ids' => [$eveningParty->id, $dayParty->id],
+            ])
+            ->assertOk()
+            ->assertJsonPath('sent', 2);
+
+        Mail::assertSent(PartyRsvpInviteMail::class, 2);
+        Mail::assertSent(PartyRsvpInviteMail::class, fn (PartyRsvpInviteMail $mail) =>
+            $mail->hasTo('evening@example.com')
+                && $mail->guestTypeLabel === 'Evening Guest'
+                && $mail->eveningArrivalTime === '7:30 pm'
+        );
+        Mail::assertSent(PartyRsvpInviteMail::class, fn (PartyRsvpInviteMail $mail) =>
+            $mail->hasTo('day@example.com')
+                && $mail->guestTypeLabel === 'All Day Guest'
+                && $mail->eveningArrivalTime === null
         );
     }
 

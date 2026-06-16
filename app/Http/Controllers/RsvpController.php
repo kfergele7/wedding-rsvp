@@ -8,6 +8,7 @@ use App\Mail\HostRsvpNotificationMail;
 use App\Models\Party;
 use App\Models\Rsvp;
 use App\Models\SiteSetting;
+use App\Support\InvitationTiming;
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class RsvpController extends Controller
 
         $party = $this->findParty($request->validated('code'));
         $rsvpSettings = $this->rsvpSettings();
+        $content = $this->homepageContent();
 
         if (! $party) {
             return response()->json([
@@ -30,7 +32,7 @@ class RsvpController extends Controller
         }
 
         return response()->json([
-            'party' => $this->partyPayload($party),
+            'party' => $this->partyPayload($party, $content),
             'mealOptions' => $this->mealOptionsFromSettings($rsvpSettings),
             'mealCourses' => $this->mealCoursesFromSettings($rsvpSettings),
             'kidsMenuItems' => $this->kidsMenuItemsFromSettings($rsvpSettings),
@@ -106,7 +108,7 @@ class RsvpController extends Controller
 
         return response()->json([
             'message' => 'Your RSVP has been saved.',
-            'party' => $this->partyPayload($party),
+            'party' => $this->partyPayload($party, $this->homepageContent()),
         ]);
     }
 
@@ -125,6 +127,17 @@ class RsvpController extends Controller
         return array_replace_recursive($fallback, $saved->value);
     }
 
+    private function homepageContent(): array
+    {
+        $fallback = config('wedding.homepage_content', []);
+        $saved = SiteSetting::query()
+            ->forSite($this->currentSiteId())
+            ->where('key', 'homepage_content')
+            ->first();
+
+        return is_array($saved?->value) ? array_replace_recursive($fallback, $saved->value) : $fallback;
+    }
+
     private function findParty(string $code): ?Party
     {
         $normalizedCode = strtoupper(trim($code));
@@ -136,16 +149,23 @@ class RsvpController extends Controller
             ->first();
     }
 
-    private function partyPayload(Party $party): array
+    private function partyPayload(Party $party, array $content): array
     {
         $attendingGuests = $this->attendingGuestsForParty($party);
+        $guestType = $party->guest_type ?: Party::GUEST_TYPE_DAY;
+        $eveningArrivalTime = InvitationTiming::eveningArrivalTimeForGuestType(
+            $guestType,
+            data_get($content, 'guest_list.evening_arrival_time')
+        );
 
         return [
             'id' => $party->id,
             'code' => $party->code,
             'display_name' => $party->display_name,
-            'guest_type' => $party->guest_type ?: Party::GUEST_TYPE_DAY,
+            'guest_type' => $guestType,
             'guest_type_label' => $party->guestTypeLabel(),
+            'evening_arrival_time_label' => $eveningArrivalTime,
+            'evening_arrival_sentence' => InvitationTiming::eveningArrivalSentence($eveningArrivalTime),
             'max_guests' => $party->max_guests,
             'notes' => $party->notes,
             'guests' => $party->guests->map(fn ($guest) => [

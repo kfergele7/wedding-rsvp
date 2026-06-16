@@ -14,6 +14,7 @@ use App\Models\Guest;
 use App\Models\Party;
 use App\Models\RsvpEmailLog;
 use App\Models\SiteSetting;
+use App\Support\InvitationTiming;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -311,6 +312,7 @@ class PartyController extends Controller
         $formattedResponseDeadline = $this->formatResponseDeadline(
             (string) data_get($content, 'guest_list.responseDeadline', '')
         );
+        $eveningArrivalTime = data_get($content, 'guest_list.evening_arrival_time');
 
         $parties = Party::query()
             ->forSite($this->currentSiteId())
@@ -334,6 +336,7 @@ class PartyController extends Controller
                 websiteUrl: $siteUrl,
                 rsvpUrl: $rsvpUrl,
                 responseDeadline: $formattedResponseDeadline,
+                eveningArrivalTime: InvitationTiming::eveningArrivalTimeForGuestType($party->guest_type, $eveningArrivalTime),
             ));
 
             RsvpEmailLog::query()->create([
@@ -369,6 +372,7 @@ class PartyController extends Controller
         $formattedResponseDeadline = $this->formatResponseDeadline(
             (string) data_get($content, 'guest_list.responseDeadline', '')
         );
+        $eveningArrivalTime = data_get($content, 'guest_list.evening_arrival_time');
         if (! $formattedResponseDeadline) {
             return response()->json([
                 'message' => 'Set an RSVP response deadline before sending reminders.',
@@ -406,6 +410,7 @@ class PartyController extends Controller
                 websiteUrl: $siteUrl,
                 rsvpUrl: $rsvpUrl,
                 responseDeadline: $formattedResponseDeadline,
+                eveningArrivalTime: InvitationTiming::eveningArrivalTimeForGuestType($party->guest_type, $eveningArrivalTime),
             ));
 
             RsvpEmailLog::query()->create([
@@ -429,6 +434,7 @@ class PartyController extends Controller
         $validated = $request->validate([
             'guest_type' => ['nullable', Rule::in(Party::guestTypes())],
             'response_deadline' => ['nullable', 'date'],
+            'evening_arrival_time' => ['nullable', 'date_format:H:i'],
         ]);
 
         return response()->json([
@@ -442,6 +448,7 @@ class PartyController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'guest_type' => ['nullable', Rule::in(Party::guestTypes())],
             'response_deadline' => ['nullable', 'date'],
+            'evening_arrival_time' => ['nullable', 'date_format:H:i'],
         ]);
 
         $recipient = trim((string) ($validated['email'] ?? ''));
@@ -465,6 +472,7 @@ class PartyController extends Controller
             websiteUrl: $emailData['websiteUrl'],
             rsvpUrl: $emailData['rsvpUrl'],
             responseDeadline: $emailData['responseDeadline'],
+            eveningArrivalTime: $emailData['eveningArrivalTime'],
         ));
 
         return response()->json([
@@ -557,6 +565,9 @@ class PartyController extends Controller
         $responseDeadline = array_key_exists('response_deadline', $overrides)
             ? (string) ($overrides['response_deadline'] ?? '')
             : (string) data_get($content, 'guest_list.responseDeadline', '');
+        $eveningArrivalTime = array_key_exists('evening_arrival_time', $overrides)
+            ? (string) ($overrides['evening_arrival_time'] ?? '')
+            : data_get($content, 'guest_list.evening_arrival_time');
         $websiteUrl = route('wedding.public', ['public_slug' => $site->public_slug]);
 
         return [
@@ -567,6 +578,7 @@ class PartyController extends Controller
             'websiteUrl' => $websiteUrl,
             'rsvpUrl' => $websiteUrl.'?code=DEMO',
             'responseDeadline' => $this->formatResponseDeadline($responseDeadline),
+            'eveningArrivalTime' => InvitationTiming::eveningArrivalTimeForGuestType($guestType, $eveningArrivalTime),
         ];
     }
 

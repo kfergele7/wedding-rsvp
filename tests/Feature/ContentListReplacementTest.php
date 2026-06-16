@@ -13,6 +13,13 @@ class ContentListReplacementTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        config(['app.marketing_coming_soon' => false]);
+
+        parent::tearDown();
+    }
+
     public function test_deleted_list_items_do_not_reappear_after_content_save(): void
     {
         [$user, $site] = $this->createTenant();
@@ -128,6 +135,39 @@ class ContentListReplacementTest extends TestCase
             ->assertOk()
             ->assertSee('"layout":"modern"', false)
             ->assertSee('#B9A3AA');
+    }
+
+    public function test_evening_arrival_time_can_be_saved_and_loaded(): void
+    {
+        [$user, $site] = $this->createTenant();
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->putJson('/app/admin/api/content', [
+                'content' => [
+                    'guest_list' => [
+                        'responseDeadline' => '2026-08-15',
+                        'evening_arrival_time' => '19:30',
+                    ],
+                ],
+                'rsvp_settings' => [],
+            ])
+            ->assertOk()
+            ->assertJsonPath('content.guest_list.evening_arrival_time', '19:30');
+
+        $this->actingAs($user)
+            ->withSession(['current_site_id' => $site->id])
+            ->getJson('/app/admin/api/content')
+            ->assertOk()
+            ->assertJsonPath('content.guest_list.evening_arrival_time', '19:30');
+
+        $savedContent = SiteSetting::query()
+            ->where('site_id', $site->id)
+            ->where('key', 'homepage_content')
+            ->firstOrFail()
+            ->value;
+
+        $this->assertSame('19:30', $savedContent['guest_list']['evening_arrival_time']);
     }
 
     public function test_demo_route_stays_available_while_marketing_is_coming_soon_and_includes_gallery(): void

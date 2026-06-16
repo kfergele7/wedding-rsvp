@@ -59,6 +59,14 @@
                     Code: <span class="font-medium uppercase">{{ party.code }}</span>
                     · Max Guests: {{ party.max_guests }}
                 </p>
+                <div
+                    v-if="eveningArrivalTimeLabel"
+                    class="mt-4 border border-soft bg-wedding-bg p-4"
+                >
+                    <p class="text-xs uppercase tracking-[0.18em] text-wedding-muted">Evening arrival</p>
+                    <p class="mt-2 font-heading text-2xl text-wedding-text">{{ eveningArrivalTimeLabel }}</p>
+                    <p v-if="eveningArrivalSentence" class="mt-2 text-sm text-wedding-muted">{{ eveningArrivalSentence }}</p>
+                </div>
 
                 <div class="mt-8 space-y-6">
                     <div>
@@ -255,6 +263,8 @@ const form = reactive({
 const availableCourseSections = computed(() => mealCourses.value.filter((course) => Array.isArray(course.items) && course.items.length > 0));
 const hasKidsMenu = computed(() => rsvpSettings.value.kids_menu_enabled && kidsMenuItems.value.length > 0);
 const isEveningGuest = computed(() => party.value?.guest_type === 'evening');
+const eveningArrivalTimeLabel = computed(() => isEveningGuest.value ? (party.value?.evening_arrival_time_label || '') : '');
+const eveningArrivalSentence = computed(() => isEveningGuest.value ? (party.value?.evening_arrival_sentence || '') : '');
 const showSetMenuNotice = computed(() => !effectiveMealChoicesEnabled.value && form.status === 'attending' && !isEveningGuest.value);
 const showEveningGuestNotice = computed(() => form.status === 'attending' && isEveningGuest.value);
 const selectedGuests = computed(() => {

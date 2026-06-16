@@ -56,7 +56,7 @@ class CustomerOnboardingTest extends TestCase
             ->withSession(['current_site_id' => $siteB->id])
             ->get('/app')
             ->assertOk()
-            ->assertSee($siteA->public_slug)
+            ->assertSee($userA->account->name)
             ->assertDontSee($siteB->public_slug)
             ->assertDontSee($userB->account->name);
     }

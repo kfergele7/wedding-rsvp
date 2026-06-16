@@ -1089,7 +1089,7 @@
                     <h3 class="font-heading text-2xl">RSVP Email Settings</h3>
                     <p class="mt-2 text-sm text-wedding-muted">Preview the email your guests receive and send yourself a test before contacting your guest list.</p>
                     <div v-if="content" class="mt-4 space-y-4">
-                        <div class="grid gap-3 lg:grid-cols-[1fr_220px_1fr]">
+                        <div class="grid gap-3 lg:grid-cols-[1fr_220px_220px_1fr]">
                             <div>
                                 <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
                                     RSVP Response Date Deadline
@@ -1100,6 +1100,19 @@
                                     type="date"
                                     class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
                                 >
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">
+                                    Evening guest arrival time
+                                </label>
+                                <input
+                                    v-model="content.guest_list.evening_arrival_time"
+                                    type="time"
+                                    class="w-full border border-soft bg-white px-4 py-3 normal-case tracking-normal text-wedding-text"
+                                >
+                                <p class="mt-2 text-xs normal-case tracking-normal text-wedding-muted">
+                                    This time will be shown on invitations and messages for guests invited to the evening celebration only.
+                                </p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-xs uppercase tracking-[0.12em] text-wedding-muted">Preview guest type</label>
@@ -3240,6 +3253,7 @@ function rsvpEmailPreviewPayload() {
     return {
         guest_type: rsvpEmailPreviewGuestType.value,
         response_deadline: content.value?.guest_list?.responseDeadline || null,
+        evening_arrival_time: content.value?.guest_list?.evening_arrival_time || null,
     };
 }
 
@@ -3613,10 +3627,35 @@ function responseDeadlineLabel() {
     return deadline ? formatDate(deadline) : '';
 }
 
+function formatTimeLabel(value) {
+    const [hours, minutes] = String(value || '').split(':').map((part) => Number.parseInt(part, 10));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+        return '';
+    }
+
+    const period = hours >= 12 ? 'pm' : 'am';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
+function eveningArrivalTimeLabel() {
+    return formatTimeLabel(content.value?.guest_list?.evening_arrival_time);
+}
+
+function eveningArrivalLine(partyItem) {
+    if ((partyItem?.guest_type || 'day') !== 'evening') {
+        return '';
+    }
+
+    const time = eveningArrivalTimeLabel();
+    return time ? `Please arrive from ${time} for the evening celebration.` : '';
+}
+
 function whatsappInviteMessage(partyItem) {
     const partyName = String(partyItem?.display_name || 'there').trim();
     const guestType = guestTypeMeta(partyItem).label;
     const deadline = responseDeadlineLabel();
+    const eveningArrival = eveningArrivalLine(partyItem);
     const rsvpUrl = partyRsvpUrl(partyItem);
     const weddingName = String(siteTitle.value || 'our wedding').trim();
     const lines = [
@@ -3630,6 +3669,10 @@ function whatsappInviteMessage(partyItem) {
         `Your RSVP code is: ${partyItem?.code || ''}`,
         `You are invited as an ${guestType}.`,
     ];
+
+    if (eveningArrival) {
+        lines.push(eveningArrival);
+    }
 
     if (deadline) {
         lines.push(`Please RSVP by ${deadline}.`);
@@ -4186,11 +4229,15 @@ function ensureImageFocusDefaults() {
     if (typeof content.value.guest_list !== 'object' || content.value.guest_list === null) {
         content.value.guest_list = {
             responseDeadline: '2026-08-15',
+            evening_arrival_time: '',
         };
     }
 
     if (!content.value.guest_list.responseDeadline) {
         content.value.guest_list.responseDeadline = '2026-08-15';
+    }
+    if (typeof content.value.guest_list.evening_arrival_time !== 'string') {
+        content.value.guest_list.evening_arrival_time = content.value.guest_list.evening_arrival_time || '';
     }
 
     content.value.gallery.items = content.value.gallery.items.slice(0, 8).map((item) => ({
@@ -5174,6 +5221,7 @@ function buildFieldHelp(labelText) {
     if (lower.includes('rsvp request button label')) return resolveFieldHelpText('rsvp.button_label', 'Example: Go to RSVP.');
     if (lower.includes('final rsvp request text')) return resolveFieldHelpText('rsvp.text', 'Example: Please RSVP using your invitation code.');
     if (lower.includes('website title')) return resolveFieldHelpText('site.website_title', 'Example: Kyle & Nicole\'s Wedding. This appears in account/site areas and identifies your wedding site.');
+    if (lower.includes('evening guest arrival time')) return resolveFieldHelpText('guest_list.evening_arrival_time', 'This time will be shown on invitations and messages for guests invited to the evening celebration only.');
     if (lower.includes('party name')) return resolveFieldHelpText('party.name', 'Example: The Kane Party. This is what you and guests will see.');
     if (lower === 'email' || lower.includes('email (only required if sending via email)') || lower.includes('email address')) {
         return resolveFieldHelpText('party.email', 'Optional. Add an email only if you plan to send digital RSVP invitations.');

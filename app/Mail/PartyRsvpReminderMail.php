@@ -21,6 +21,7 @@ class PartyRsvpReminderMail extends Mailable
         public string $websiteUrl,
         public string $rsvpUrl,
         public ?string $responseDeadline = null,
+        public ?string $eveningArrivalTime = null,
     ) {}
 
     public function envelope(): Envelope
