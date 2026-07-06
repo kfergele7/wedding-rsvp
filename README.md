@@ -1,5 +1,7 @@
 # Wedding RSVP Website (Laravel 11 + Vue 3)
 
+START
+
 Elegant wedding website with:
 - Public homepage (editable via CMS)
 - Guest RSVP by invitation code (no account required)
